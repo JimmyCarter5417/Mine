@@ -1,0 +1,38 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: Mine - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\YAOPEI~1\LOCALS~1\Temp\RSP331D.tmp" with contents
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR"Debug/" /Fp"Debug/Mine.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"M:\ISO\经典游戏程序设计\第2章 扫雷\Skyblue_Mine\MineWnd.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\YAOPEI~1\LOCALS~1\Temp\RSP331D.tmp" 
+Creating temporary file "C:\DOCUME~1\YAOPEI~1\LOCALS~1\Temp\RSP331E.tmp" with contents
+[
+winmm.lib /nologo /subsystem:windows /incremental:yes /pdb:"Debug/Mine.pdb" /debug /machine:I386 /out:"Debug/Mine.exe" /pdbtype:sept 
+".\Debug\DlgCustom.obj"
+".\Debug\DlgHero.obj"
+".\Debug\DlgNewRecord.obj"
+".\Debug\Mine.obj"
+".\Debug\MineWnd.obj"
+".\Debug\StdAfx.obj"
+".\Debug\Mine.res"
+]
+Creating command line "link.exe @C:\DOCUME~1\YAOPEI~1\LOCALS~1\Temp\RSP331E.tmp"
+<h3>Output Window</h3>
+Compiling...
+MineWnd.cpp
+Linking...
+
+
+
+<h3>Results</h3>
+Mine.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
