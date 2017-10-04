@@ -23,7 +23,7 @@ const CString className = _T("MineClass");
 /////////////////////////////////////////////////////////////////////////////
 BOOL CMineApp::InitInstance()
 {
-	SetRegistryKey("CSER_513_2");
+	SetRegistryKey(TEXT("CSER_513_2"));
 	m_uXMineNum = GetProfileInt(GAME_SETTING, CUSTOM_XNUM, PRIMARY_XNUM);
 	m_uYMineNum = GetProfileInt(GAME_SETTING, CUSTOM_YNUM, PRIMARY_YNUM);
 
@@ -42,7 +42,7 @@ BOOL CMineApp::InitInstance()
 	//注册窗口
 	if (!AfxRegisterClass(&wc)) 
 	{
-		AfxMessageBox("注册类失败！");
+		AfxMessageBox(TEXT("注册类失败！"));
 		return FALSE;
 	}
 
@@ -59,7 +59,7 @@ BOOL CMineApp::InitInstance()
 		uXPos, uYPos, uWidth, uHeight,
 		NULL, NULL) ) 
 	{
-		AfxMessageBox("创建主窗口失败！");
+		AfxMessageBox(TEXT("创建主窗口失败！"));
 		return FALSE;
 	}
 	// 绑定该窗口为主窗口

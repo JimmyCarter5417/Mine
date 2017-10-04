@@ -74,7 +74,7 @@ void CDlgHero::SetBHolder(CString holder)
 
 void CDlgHero::SetBRecord(UINT record)
 {
-	m_szBRecord.Format("%d취", record);
+	m_szBRecord.Format(TEXT("%d취"), record);
 }
 
 void CDlgHero::SetIHolder(CString holder)
@@ -84,7 +84,7 @@ void CDlgHero::SetIHolder(CString holder)
 
 void CDlgHero::SetIRecord(UINT record)
 {
-	m_szIRecord.Format("%d취", record);
+	m_szIRecord.Format(TEXT("%d취"), record);
 }
 
 void CDlgHero::SetEHolder(CString holder)
@@ -94,7 +94,7 @@ void CDlgHero::SetEHolder(CString holder)
 
 void CDlgHero::SetERecord(UINT record)
 {
-	m_szERecord.Format("%d취", record);
+	m_szERecord.Format(TEXT("%d취"), record);
 }
 
 void CDlgHero::OnReset() 
@@ -102,10 +102,10 @@ void CDlgHero::OnReset()
 	CMineWnd *pMine = (CMineWnd*)AfxGetMainWnd();
 	pMine->ResetRecord();
 	m_szBHolder = DEFAULT_HOLDER;
-	m_szBRecord.Format("%d취", DEFAULT_RECORD);
+	m_szBRecord.Format(TEXT("%d취"), DEFAULT_RECORD);
 	m_szIHolder = DEFAULT_HOLDER;
-	m_szIRecord.Format("%d취", DEFAULT_RECORD);
+	m_szIRecord.Format(TEXT("%d취"), DEFAULT_RECORD);
 	m_szEHolder = DEFAULT_HOLDER;
-	m_szERecord.Format("%d취", DEFAULT_RECORD);
+	m_szERecord.Format(TEXT("%d취"), DEFAULT_RECORD);
 	UpdateData(FALSE);
 }

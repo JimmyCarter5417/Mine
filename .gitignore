@@ -33,3 +33,10 @@
 
 # my definition
 *.ncb
+*.opensdf
+*.suo
+*.aps
+*.user
+*.sdf
+ipch
+Bin

@@ -37,8 +37,8 @@ CDlgNewRecord::CDlgNewRecord(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlgNewRecord::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CDlgNewRecord)
-	m_szName = _T("匿名");
-	m_szDesc = _T("");
+	m_szName = TEXT("匿名");
+	m_szDesc = TEXT("");
 	//}}AFX_DATA_INIT
 }
 
@@ -60,10 +60,10 @@ END_MESSAGE_MAP()
 void CDlgNewRecord::SetLevel(UINT level)
 {
 	CString szLevel;
-	if (level == LEVEL_PRIMARY) szLevel = "初级";
-	else if (level == LEVEL_SECONDRY) szLevel = "中级";
-	else if (level == LEVEL_ADVANCE) szLevel = "高级";
-	m_szDesc.Format("已破%s记录\n\r请留尊姓大名", szLevel);
+	if (level == LEVEL_PRIMARY) szLevel = TEXT("初级");
+	else if (level == LEVEL_SECONDRY) szLevel = TEXT("中级");
+	else if (level == LEVEL_ADVANCE) szLevel = TEXT("高级");
+	m_szDesc.Format(TEXT("已破%s记录\n\r请留尊姓大名"), szLevel);
 }
 
 CString CDlgNewRecord::GetName()
