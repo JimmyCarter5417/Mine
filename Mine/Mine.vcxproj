@@ -139,9 +139,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DlgCustom.cpp" />
-    <ClCompile Include="DlgHero.cpp" />
-    <ClCompile Include="DlgNewRecord.cpp" />
+    <ClCompile Include="CustomDlg.cpp" />
+    <ClCompile Include="HeroDlg.cpp" />
+    <ClCompile Include="NewRecordDlg.cpp" />
     <ClCompile Include="Mine.cpp" />
     <ClCompile Include="MineWnd.cpp" />
     <ClCompile Include="StdAfx.cpp" />
@@ -150,9 +150,9 @@
     <ResourceCompile Include="Mine.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DlgCustom.h" />
-    <ClInclude Include="DlgHero.h" />
-    <ClInclude Include="DlgNewRecord.h" />
+    <ClInclude Include="CustomDlg.h" />
+    <ClInclude Include="HeroDlg.h" />
+    <ClInclude Include="NewRecordDlg.h" />
     <ClInclude Include="Mine.h" />
     <ClInclude Include="MineDefs.h" />
     <ClInclude Include="MineWnd.h" />

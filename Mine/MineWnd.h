@@ -1,63 +1,34 @@
-/*++
+#ifndef __MINE_WND_H__
+#define __MINE_WND_H__
 
-Copyright (c) 2004-2005  Micro-soft
-
-Module Name:
-
-    MineWnd.h
-
-Abstract:
-
-       the mian Frame of the Mine-Game, we should do the most draw-work here,
-	surely,the size and style of the window should set here too. 
-
-Author:
-	Microsoft's Engineer - Unknown Name
-
-    improved by Weijian Luo (Arthur Luo)   15-Jun-2005
-
-	E-mail: skybluehacker@yahoo.com.cn
-
-Revision History:      1.0
-
---*/
-
-#if !defined(AFX_MAINWND_H__FB2594FD_B845_48A9_A9D0_FADC86BCE950__INCLUDED_)
-#define AFX_MAINWND_H__FB2594FD_B845_48A9_A9D0_FADC86BCE950__INCLUDED_
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
-typedef struct 
-{
-	UINT uRow;         //所在雷区二维数组的行
-	UINT uCol;         //所在雷区二位数组的列
-	UINT uState;       //当前状态
-	UINT uAttrib;      //方块属性
-	UINT uOldState;    //历史状态
-} MINEWND;	// 雷方块结构体
-
-/////////////////////////////////////////////////////////////////////////////
 class CMineWnd : public CWnd
 {
+	// 雷方块结构体
+	typedef struct
+	{
+		UINT uRow;         //所在雷区二维数组的行
+		UINT uCol;         //所在雷区二位数组的列
+		UINT uState;       //当前状态
+		UINT uAttrib;      //方块属性
+		UINT uOldState;    //历史状态
+	} MINEWND;	
+
 public:
 	CMineWnd();
-	virtual ~CMineWnd();
+	 ~CMineWnd();
+
 	void ResetRecord();
 	void SetCustom(UINT xNum, UINT yNum, UINT mNum);
-	//{{AFX_VIRTUAL(CMineWnd)
-	//}}AFX_VIRTUAL
-protected:
-	//{{AFX_MSG(CMineWnd)
+	
+protected:	
 	afx_msg void OnPaint();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnTimer(UINT nIDEvent);
-	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
-	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint pt);
+	afx_msg void OnRButtonUp(UINT nFlags, CPoint pt);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint pt);
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint pt);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint pt);
 	afx_msg void OnMemuStart();
 	afx_msg void OnMemuPrimary();
 	afx_msg void OnMemuSecond();
@@ -76,14 +47,16 @@ protected:
 	afx_msg void OnMemuClose();
 	afx_msg void OnMemuHero();
 	afx_msg void OnMemuCheat();
-	//}}AFX_MSG
+
 	DECLARE_MESSAGE_MAP()
-public:
+
+protected:
+	CString GetCfgPath();
 	// init and save functions
 	void LoadConfig();
 	void SaveConfig();
-	void LoadWaveSrc();
-	void FreeWaveSrc();
+	void LoadWave();
+	void FreeWave();
 	void InitGame();
 	void LoadBitmap();
 	void FreeMines();
@@ -118,12 +91,13 @@ public:
 	void OpenByCheat();
 
 	MINEWND* GetMine(long x, long y);
-protected :
+
+private:
 	UINT		m_uXNum;				// X方向小方块个数
 	UINT		m_uYNum;				// Y方向小方块个数
 	UINT		m_uMineNum;				// 总的雷个数
-	int 		m_nLeaveNum;			// 剩余的雷个数
-	UINT		m_uSpendTime;			// 游戏开始击到目前所花费的时间
+	int 		m_nLeftNum;			// 剩余的雷个数
+	UINT		m_uSpendTime;			// 游戏开始到目前所花费的时间
 	UINT		m_uGameState;			// 游戏状态
 	UINT		m_uTimer;				// 定时器标识
 	UINT		m_uNewState;			// 当前选中的小方块的状态
@@ -132,9 +106,9 @@ protected :
 	UINT		m_uPrimary;				// 初级记录
 	UINT		m_uSecond;				// 中级记录
 	UINT		m_uAdvance;				// 高级记录
-	CString		m_szPrimary;			// 初级记录保持者
-	CString		m_szSecond;				// 中级记录保持者
-	CString		m_szAdvance;			// 高级记录保持者
+	CString		m_strPrimary;			// 初级记录保持者
+	CString		m_strSecond;			// 中级记录保持者
+	CString		m_strAdvance;			// 高级记录保持者
 
 	BOOL		m_bLRBtnDown;			// 是否为左右键同时按下
 	BOOL		m_bClickBtn;			// 左键按下的时候鼠标是否位于按钮区域内
@@ -161,5 +135,5 @@ protected :
 	void*		m_pSndVictory;			// 胜利提示音
 	void*		m_pSndClock;			// 时钟提示音
 };
-//{{AFX_INSERT_LOCATION}}
-#endif // !defined(AFX_MAINWND_H__FB2594FD_B845_48A9_A9D0_FADC86BCE950__INCLUDED_)
+
+#endif//__MINE_WND_H__

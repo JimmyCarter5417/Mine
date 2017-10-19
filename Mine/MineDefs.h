@@ -1,36 +1,40 @@
 #ifndef _MINEDEF
 #define _MINEDEF
-// regedit defines
+
+
 #define DEFAULT_LEVEL		0// for first run the default level will be primary(0)
 #define DEFAULT_RECORD		999
-#define DEFAULT_HOLDER		_T("匿名")
+#define DEFAULT_HOLDER		TEXT("匿名")
 #define DEFAULT_MARKFUL		1
 #define DEFAULT_COLORFUL	1
 #define DEFAULT_SOUNDFUL	0
+
 #define	PRIMARY_XNUM		9
 #define PRIMARY_YNUM		9
 #define PRIMARY_MINENUM		10
+
 #define SECONDRY_XNUM		16
 #define SECONDRY_YNUM		16
 #define SECONDRY_MINENUM	40
+
 #define ADVANCE_XNUM		30
 #define ADVANCE_YNUM		16
 #define ADVANCE_MINENUM		99
 
-#define GAME_SETTING		_T("GameSetting")
-#define GAME_LEVEL			_T("CurrentLevel")	// 0:Primary1:Second2:Advance
-#define GAME_MARKFUL		_T("Markful")
-#define GAME_COLORFUL		_T("Colorful")
-#define GAME_SOUNDFUL		_T("Soundful")
-#define PRIMARY_RECORD		_T("PrimaryRecord")
-#define PRIMARY_HOLDER		_T("PrimaryHolder")
-#define SECOND_RECORD		_T("SecondRecord")
-#define SECOND_HOLDER		_T("SecondHolder")
-#define ADVANCE_RECORD		_T("AdvanceRecord")
-#define ADVANCE_HOLDER		_T("AdvanceHolder")
-#define CUSTOM_XNUM			_T("CustomXNum")	// X coordinate mine rect numbers
-#define CUSTOM_YNUM			_T("CustomYNum")	// Y coordinate mine rect numbers
-#define CUSTOM_MINENUM		_T("CustomMineNum")	// Custom total mine numbers (in default: Primary=10, Second=40, Advance=99)
+#define GAME_SETTING		TEXT("GameSetting")
+#define GAME_LEVEL			TEXT("CurrentLevel")	// 0:Primary1:Second2:Advance
+#define GAME_MARKFUL		TEXT("Markful")
+#define GAME_COLORFUL		TEXT("Colorful")
+#define GAME_SOUNDFUL		TEXT("Soundful")
+#define PRIMARY_RECORD		TEXT("PrimaryRecord")
+#define PRIMARY_HOLDER		TEXT("PrimaryHolder")
+#define SECOND_RECORD		TEXT("SecondRecord")
+#define SECOND_HOLDER		TEXT("SecondHolder")
+#define ADVANCE_RECORD		TEXT("AdvanceRecord")
+#define ADVANCE_HOLDER		TEXT("AdvanceHolder")
+#define CUSTOM_XNUM			TEXT("CustomXNum")	// X coordinate mine rect numbers
+#define CUSTOM_YNUM			TEXT("CustomYNum")	// Y coordinate mine rect numbers
+#define CUSTOM_MINENUM		TEXT("CustomMineNum")	// Custom total mine numbers (in default: Primary=10, Second=40, Advance=99)
 
 // 窗口宽度相关定义
 #define	DEFAULT_FRAME_X		6          //窗口X方向宽
@@ -48,7 +52,7 @@
 #define SHELL_L_START_X		9          //大外壳的x坐标始发点
 #define SHELL_L_START_Y		52         //大外壳的y坐标始发点
 
-#define MINEAREA_FRAME_X	12                 
+#define MINEAREA_FRAME_X	7                 
 #define MINEAREA_FRAME_Y	55
 
 // 雷方块定义

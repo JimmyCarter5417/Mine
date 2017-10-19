@@ -1,67 +1,41 @@
-/*++
-
-Copyright (c) 2004-2005  Micro-soft
-
-Module Name:
-
-MineWnd.cpp
-
-Abstract:
-
-the mian Frame of the Mine-Game, we should do the most draw-work here,
-surely,the size and style of the window should set here too.
-
-Author:
-Microsoft's Engineer - Unknown Name
-
-improved by Weijian Luo (Arthur Luo)   15-Jun-2005
-
-E-mail: skybluehacker@yahoo.com.cn
-
-Revision History:      1.0
-
---*/
 #include "stdafx.h"
+
 #include "Mine.h"
 #include "MineWnd.h"
 #include "MineDefs.h"
-#include "Mmsystem.h"
-#include "DlgNewRecord.h"
-#include "DlgHero.h"
-#include "DlgCustom.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
+#include "NewRecordDlg.h"
+#include "HeroDlg.h"
+#include "CustomDlg.h"
 
-extern CMineApp theApp;
+#include <Mmsystem.h>
+
 #define ID_TIMER_EVENT	WM_USER + 1
-/////////////////////////////////////////////////////////////////////////////
 
 CMineWnd::CMineWnd()
 {
-	m_pSndDead = NULL;
-	m_pSndVictory = NULL;
-	m_pSndClock = NULL;
+	m_pSndDead = nullptr;
+	m_pSndVictory = nullptr;
+	m_pSndClock = nullptr;
 	m_uTimer = 0;
 	m_brsBG.CreateSolidBrush(COLOR_GRAY);
 
 	LoadConfig();
-	if (m_bSoundful) LoadWaveSrc();
+
+	if (m_bSoundful) 
+		LoadWave();
+
 	InitGame();
 }
 
 CMineWnd::~CMineWnd()
 {
 	FreeMines();
-	FreeWaveSrc();
+	FreeWave();
 	SaveConfig();
 }
 
 BEGIN_MESSAGE_MAP(CMineWnd, CWnd)
-	//{{AFX_MSG_MAP(CMineWnd)
 	ON_WM_PAINT()
 	ON_WM_SHOWWINDOW()
 	ON_WM_TIMER()
@@ -70,6 +44,9 @@ BEGIN_MESSAGE_MAP(CMineWnd, CWnd)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
+	ON_WM_KEYDOWN()
+	ON_WM_INITMENU()
+	ON_WM_CLOSE()
 	ON_COMMAND(IDM_START, OnMemuStart)
 	ON_COMMAND(IDM_PRIMARY, OnMemuPrimary)
 	ON_COMMAND(IDM_SECOND, OnMemuSecond)
@@ -82,72 +59,66 @@ BEGIN_MESSAGE_MAP(CMineWnd, CWnd)
 	ON_COMMAND(IDM_HELP_LIST, OnMemuHelpList)
 	ON_COMMAND(IDM_HELP_FIND, OnMemuHelpFind)
 	ON_COMMAND(IDM_HELP_USE, OnMemuHelpUse)
-	ON_COMMAND(IDM_ABOUT, OnMemuAbout)
-	ON_WM_KEYDOWN()
-	ON_WM_INITMENU()
-	ON_WM_CLOSE()
+	ON_COMMAND(IDM_ABOUT, OnMemuAbout)	
 	ON_COMMAND(IDM_HERO, OnMemuHero)
 	ON_COMMAND(IDM_CHEAT, OnMemuCheat)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
-/////////////////////////////////////////////////////////////////////////////
 
-//
-//载入配置
-//
-void CMineWnd::LoadConfig()
+//获取配置文件路径
+CString CMineWnd::GetCfgPath()
 {
-	//----------获取本地目录-------------*/
-	TCHAR exeFullPath[MAX_PATH];
-	CString strPath;
-	GetModuleFileName(NULL, exeFullPath, MAX_PATH);
-	strPath = CString(exeFullPath);
-	strPath = strPath.Left(strPath.ReverseFind('\\'));
-	//-----------------------------------*/	
-	strPath += "\\config.ini";
+	static CString strCfgPath;
 
-	TCHAR strPrimary[80];
-	TCHAR strSecond[80];
-	TCHAR strAdvance[80];
+	if (strCfgPath.IsEmpty())
+	{
+		TCHAR strExePath[MAX_PATH];
+		GetModuleFileName(nullptr, strExePath, MAX_PATH);
 
-	m_uXNum = GetPrivateProfileInt(TEXT("WINDOW"), TEXT("XNum"), 10, strPath);
-	m_uYNum = GetPrivateProfileInt(TEXT("WINDOW"), TEXT("YNum"), 10, strPath);
+		strCfgPath = strExePath;
+		strCfgPath = strCfgPath.Left(strCfgPath.ReverseFind('\\'));
+		strCfgPath += "\\config.ini";
+	}	
 
-	m_uMineNum = GetPrivateProfileInt(TEXT("MINE"), TEXT("MineNum"), 10, strPath);
-	m_uLevel = GetPrivateProfileInt(TEXT("MINE"), TEXT("Level"), 0, strPath);
-
-	m_uPrimary = GetPrivateProfileInt(TEXT("SCORE"), TEXT("Primary"), 999, strPath);
-	m_uSecond = GetPrivateProfileInt(TEXT("SCORE"), TEXT("Second"), 999, strPath);
-	m_uAdvance = GetPrivateProfileInt(TEXT("SCORE"), TEXT("Advance"), 999, strPath);
-
-	GetPrivateProfileString(TEXT("HOLDER"), TEXT("PrimaryHolder"), TEXT("匿名"), strPrimary, 80, strPath);
-	GetPrivateProfileString(TEXT("HOLDER"), TEXT("SecondHolder"), TEXT("匿名"), strSecond, 80, strPath);
-	GetPrivateProfileString(TEXT("HOLDER"), TEXT("AdvanceHolder"), TEXT("匿名"), strAdvance, 80, strPath);
-
-	m_szPrimary = strPrimary;
-	m_szSecond = strSecond;
-	m_szAdvance = strAdvance;
-
-	m_bMarkful = GetPrivateProfileInt(TEXT("CONFIG"), TEXT("Markful"), 0, strPath);
-	m_bColorful = GetPrivateProfileInt(TEXT("CONFIG"), TEXT("Colorful"), 1, strPath);
-	m_bSoundful = GetPrivateProfileInt(TEXT("CONFIG"), TEXT("Soundful"), 1, strPath);
+	return strCfgPath;
 }
 
-//
-// 保存
-//
+
+//载入配置
+void CMineWnd::LoadConfig()
+{
+	CString strCfgPath = GetCfgPath();	
+
+	m_uXNum = GetPrivateProfileInt(TEXT("WINDOW"), TEXT("XNum"), 10, strCfgPath);
+	m_uYNum = GetPrivateProfileInt(TEXT("WINDOW"), TEXT("YNum"), 10, strCfgPath);
+
+	m_uMineNum = GetPrivateProfileInt(TEXT("MINE"), TEXT("MineNum"), 10, strCfgPath);
+	m_uLevel = GetPrivateProfileInt(TEXT("MINE"), TEXT("Level"), 0, strCfgPath);
+
+	m_uPrimary = GetPrivateProfileInt(TEXT("SCORE"), TEXT("Primary"), 999, strCfgPath);
+	m_uSecond = GetPrivateProfileInt(TEXT("SCORE"), TEXT("Second"), 999, strCfgPath);
+	m_uAdvance = GetPrivateProfileInt(TEXT("SCORE"), TEXT("Advance"), 999, strCfgPath);
+
+	TCHAR buf[128] = {0};
+	GetPrivateProfileString(TEXT("HOLDER"), TEXT("PrimaryHolder"), TEXT("匿名"), buf, 128, strCfgPath);
+	m_strPrimary = buf;
+
+	memset(buf, 0, sizeof buf);
+	GetPrivateProfileString(TEXT("HOLDER"), TEXT("SecondHolder"), TEXT("匿名"), buf, 128, strCfgPath);
+	m_strSecond = buf;
+
+	memset(buf, 0, sizeof buf);
+	GetPrivateProfileString(TEXT("HOLDER"), TEXT("AdvanceHolder"), TEXT("匿名"), buf, 128, strCfgPath);
+	m_strSecond = buf;
+	
+	m_bMarkful = GetPrivateProfileInt(TEXT("CONFIG"), TEXT("Markful"), 0, strCfgPath);
+	m_bColorful = GetPrivateProfileInt(TEXT("CONFIG"), TEXT("Colorful"), 1, strCfgPath);
+	m_bSoundful = GetPrivateProfileInt(TEXT("CONFIG"), TEXT("Soundful"), 1, strCfgPath);
+}
+
+// 保存配置
 void CMineWnd::SaveConfig()
 {
-
-	//----------获取本地目录-------------*/
-	TCHAR exeFullPath[MAX_PATH];
-	CString strPath;
-	GetModuleFileName(NULL, exeFullPath, MAX_PATH);
-	strPath = CString(exeFullPath);
-	strPath = strPath.Left(strPath.ReverseFind('\\'));
-	//-----------------------------------*/	
-	strPath += TEXT("\\config.ini");
-
+	CString strCfgPath = GetCfgPath();
 
 	//雷区行列数
 	CString strXNum, strYNum;
@@ -160,7 +131,6 @@ void CMineWnd::SaveConfig()
 	//其他配置
 	CString strMarkful, strColorful, strSoundful;
 
-
 	strXNum.Format(TEXT("%u"), m_uXNum);
 	strYNum.Format(TEXT("%u"), m_uYNum);
 
@@ -171,70 +141,64 @@ void CMineWnd::SaveConfig()
 	strSecond.Format(TEXT("%u"), m_uSecond);
 	strAdvance.Format(TEXT("%u"), m_uAdvance);
 
-	strPrimaryHolder.Format(TEXT("%s"), m_szPrimary);
-	strSecondHolder.Format(TEXT("%s"), m_szSecond);
-	strAdvanceHolder.Format(TEXT("%s"), m_szAdvance);
+	strPrimaryHolder.Format(TEXT("%s"), m_strPrimary);
+	strSecondHolder.Format(TEXT("%s"), m_strSecond);
+	strAdvanceHolder.Format(TEXT("%s"), m_strAdvance);
 
 	strMarkful.Format(TEXT("%d"), m_bMarkful);
 	strColorful.Format(TEXT("%d"), m_bColorful);
 	strSoundful.Format(TEXT("%d"), m_bSoundful);
 
+	WritePrivateProfileString(TEXT("WINDOW"), TEXT("XNum"), strXNum, strCfgPath);
+	WritePrivateProfileString(TEXT("WINDOW"), TEXT("YNum"), strYNum, strCfgPath);
 
-	WritePrivateProfileString(TEXT("WINDOW"), TEXT("XNum"), strXNum, strPath);
-	WritePrivateProfileString(TEXT("WINDOW"), TEXT("YNum"), strYNum, strPath);
+	WritePrivateProfileString(TEXT("MINE"), TEXT("MineNum"), strMineNum, strCfgPath);
+	WritePrivateProfileString(TEXT("MINE"), TEXT("Level"), strLevel, strCfgPath);
 
-	WritePrivateProfileString(TEXT("MINE"), TEXT("MineNum"), strMineNum, strPath);
-	WritePrivateProfileString(TEXT("MINE"), TEXT("Level"), strLevel, strPath);
+	WritePrivateProfileString(TEXT("SCORE"), TEXT("Primary"), strPrimary, strCfgPath);
+	WritePrivateProfileString(TEXT("SCORE"), TEXT("Second"), strSecond, strCfgPath);
+	WritePrivateProfileString(TEXT("SCORE"), TEXT("Advance"), strAdvance, strCfgPath);
 
-	WritePrivateProfileString(TEXT("SCORE"), TEXT("Primary"), strPrimary, strPath);
-	WritePrivateProfileString(TEXT("SCORE"), TEXT("Second"), strSecond, strPath);
-	WritePrivateProfileString(TEXT("SCORE"), TEXT("Advance"), strAdvance, strPath);
+	WritePrivateProfileString(TEXT("HOLDER"), TEXT("PrimaryHolder"), strPrimaryHolder, strCfgPath);
+	WritePrivateProfileString(TEXT("HOLDER"), TEXT("SecondHolder"), strSecondHolder, strCfgPath);
+	WritePrivateProfileString(TEXT("HOLDER"), TEXT("AdvanceHolder"), strAdvanceHolder, strCfgPath);
 
-	WritePrivateProfileString(TEXT("HOLDER"), TEXT("PrimaryHolder"), strPrimaryHolder, strPath);
-	WritePrivateProfileString(TEXT("HOLDER"), TEXT("SecondHolder"), strSecondHolder, strPath);
-	WritePrivateProfileString(TEXT("HOLDER"), TEXT("AdvanceHolder"), strAdvanceHolder, strPath);
-
-	WritePrivateProfileString(TEXT("CONFIG"), TEXT("Markful"), strMarkful, strPath);
-	WritePrivateProfileString(TEXT("CONFIG"), TEXT("Colorful"), strColorful, strPath);
-	WritePrivateProfileString(TEXT("CONFIG"), TEXT("Soundful"), strSoundful, strPath);
-
+	WritePrivateProfileString(TEXT("CONFIG"), TEXT("Markful"), strMarkful, strCfgPath);
+	WritePrivateProfileString(TEXT("CONFIG"), TEXT("Colorful"), strColorful, strCfgPath);
+	WritePrivateProfileString(TEXT("CONFIG"), TEXT("Soundful"), strSoundful, strCfgPath);
 }
 
-//
 //载入位图
-//
 void CMineWnd::LoadBitmap()
 {
+	m_bmpMine.DeleteObject();
+	m_bmpNumber.DeleteObject();
+	m_bmpButton.DeleteObject();
+
 	if (m_bColorful)
 	{
 		m_clrDark = COLOR_DARK_GRAY;
-		m_bmpMine.DeleteObject();
-		m_bmpMine.LoadBitmap(IDB_MINE_COLOR);
-		m_bmpNumber.DeleteObject();
-		m_bmpNumber.LoadBitmap(IDB_NUM_COLOR);
-		m_bmpButton.DeleteObject();
+		
+		m_bmpMine.LoadBitmap(IDB_MINE_COLOR);		
+		m_bmpNumber.LoadBitmap(IDB_NUM_COLOR);		
 		m_bmpButton.LoadBitmap(IDB_BTN_COLOR);
 	}
 	else
 	{
 		m_clrDark = COLOR_BLACK;
-		m_bmpMine.DeleteObject();
-		m_bmpMine.LoadBitmap(IDB_MINE_GRAY);
-		m_bmpNumber.DeleteObject();
-		m_bmpNumber.LoadBitmap(IDB_NUM_GRAY);
-		m_bmpButton.DeleteObject();
+		
+		m_bmpMine.LoadBitmap(IDB_MINE_GRAY);		
+		m_bmpNumber.LoadBitmap(IDB_NUM_GRAY);		
 		m_bmpButton.LoadBitmap(IDB_BTN_GRAY);
 	}
 }
 
-//
-//  游戏的初始化
-//
+//初始化
 void CMineWnd::InitGame()
-{
-	//位图的初始化
-	LoadBitmap();
-	m_nLeaveNum = m_uMineNum;
+{	
+	LoadBitmap();//初始化位图
+
+	m_nLeftNum = m_uMineNum;
 	m_uSpendTime = 0;
 	m_uBtnState = BUTTON_NORMAL;
 	m_uGameState = GS_WAIT;
@@ -244,8 +208,9 @@ void CMineWnd::InitGame()
 		KillTimer(ID_TIMER_EVENT);
 		m_uTimer = 0;
 	}
-	m_pNewMine = NULL;
-	m_pOldMine = NULL;
+
+	m_pNewMine = nullptr;
+	m_pOldMine = nullptr;
 
 	FreeMines();
 	//初始化地图
@@ -262,18 +227,16 @@ void CMineWnd::InitGame()
 	}
 }
 
-//
-// 布雷
-//
+//布雷
 void CMineWnd::LayMines(UINT row, UINT col)
 {
 	//埋下随机种子
-	srand((unsigned)time(NULL));
+	srand((unsigned)time(nullptr));
 	UINT i, j;
 
-	for (UINT index = 0; index < m_uMineNum;)
+	for (UINT index = 0; index < m_uMineNum;)//布m_uMineNum个雷
 	{
-		//取随即数
+		//取随机数
 		i = rand() % m_uYNum;
 		j = rand() % m_uXNum;
 
@@ -287,9 +250,7 @@ void CMineWnd::LayMines(UINT row, UINT col)
 	}
 }
 
-//
 //雷方块拓展(对于周围无雷的空白区域)
-//
 void CMineWnd::ExpandMines(UINT row, UINT col)
 {
 	UINT i, j;
@@ -326,10 +287,7 @@ void CMineWnd::ExpandMines(UINT row, UINT col)
 	}
 }
 
-
-//
 //  获取某个小方块区域相邻8个区域的雷个数
-//
 UINT CMineWnd::GetAroundNum(UINT row, UINT col)
 {
 	UINT i, j;
@@ -350,9 +308,7 @@ UINT CMineWnd::GetAroundNum(UINT row, UINT col)
 	return around;
 }
 
-//
-//  获取某个小方块区域相邻8个区域的已标志状态数
-//
+//获取某个小方块区域相邻8个区域的已标志状态数
 UINT CMineWnd::GetAroundFlags(UINT row, UINT col)
 {
 	UINT i, j;
@@ -370,11 +326,11 @@ UINT CMineWnd::GetAroundFlags(UINT row, UINT col)
 			if (m_pMines[i][j].uState == STATE_FLAG) flags++;
 		}
 	}
+
 	return flags;
 }
-//
+
 //判断是否为雷
-//
 BOOL CMineWnd::IsMine(UINT row, UINT col)
 {
 	return (m_pMines[row][col].uAttrib == ATTRIB_MINE);
@@ -386,9 +342,7 @@ BOOL CMineWnd::IsInMineArea(UINT row, UINT col)
 	return (row >= 0 && row < m_uYNum && col >= 0 && col < m_uXNum);
 }
 
-//
-//  失败处理
-//
+//失败处理
 void CMineWnd::Dead(UINT row, UINT col)
 {
 	//按钮所在的区域
@@ -451,9 +405,7 @@ void CMineWnd::Dead(UINT row, UINT col)
 	}
 }
 
-//
-//  胜利判断并处理
-//
+//胜利判断并处理
 BOOL CMineWnd::Victory()
 {
 	UINT i, j;
@@ -492,22 +444,22 @@ BOOL CMineWnd::Victory()
 	else if (m_uLevel == LEVEL_ADVANCE) uRecord = m_uAdvance;
 	if (uRecord > m_uSpendTime)
 	{
-		CDlgNewRecord dlg;
+		CNewRecordDlg dlg;
 		dlg.SetLevel(m_uLevel);
 		dlg.DoModal();
 		switch (m_uLevel)
 		{
 		case LEVEL_PRIMARY:
 			m_uPrimary = m_uSpendTime;
-			m_szPrimary = dlg.GetName();
+			m_strPrimary = dlg.GetName();
 			break;
 		case LEVEL_SECONDRY:
 			m_uSecond = m_uSpendTime;
-			m_szSecond = dlg.GetName();
+			m_strSecond = dlg.GetName();
 			break;
 		case LEVEL_ADVANCE:
 			m_uAdvance = m_uSpendTime;
-			m_szAdvance = dlg.GetName();
+			m_strAdvance = dlg.GetName();
 			break;
 		case LEVEL_CUSTOM:
 			return TRUE;
@@ -519,10 +471,8 @@ BOOL CMineWnd::Victory()
 
 	return TRUE;
 }
-//
-// 鼠标右键，根据原先不同的标记作状态循环修改
-// 以便用户可以修改其原先标志
-//
+
+//鼠标右键，根据原先不同的标记作状态循环修改，以便用户可以修改其原先标志
 void CMineWnd::OnLRBtnDown(UINT row, UINT col)
 {
 	UINT i, j;
@@ -576,7 +526,6 @@ void CMineWnd::OnLRBtnUp(UINT row, UINT col)
 	//	Invalidate();
 }
 
-
 //展开拓展周围8个方向
 void CMineWnd::OpenAround(UINT row, UINT col)
 {
@@ -621,7 +570,7 @@ void CMineWnd::OpenAround(UINT row, UINT col)
 				}
 			}
 		}
-		m_nLeaveNum = 0;
+		m_nLeftNum = 0;
 		Invalidate();
 	}
 }
@@ -673,7 +622,7 @@ void CMineWnd::FreeMines()
 {
 	//	if (m_pMines) {
 	//		delete[] m_pMines;
-	//		m_pMines = NULL;
+	//		m_pMines = nullptr;
 	//	}
 	//	for (UINT row = 0; row<m_uYNum; row++) {
 	//		if (m_pMines[row]) {
@@ -685,9 +634,9 @@ void CMineWnd::FreeMines()
 
 void CMineWnd::SizeWindow(void)
 {
-	UINT uWidth = DEFAULT_FRAME_X + m_uXNum * MINE_WIDTH +
+	UINT uWidth = DEFAULT_FRAME_X + m_uXNum * MINE_WIDTH + 4 +
 		LINE_WIDTH_0 * 3 + SIDE_WIDTH_0 + SIDE_WIDTH_1;
-	UINT uHeight = DEFAULT_FRAME_Y + m_uYNum * MINE_HEIGHT +
+	UINT uHeight = DEFAULT_FRAME_Y + m_uYNum * MINE_HEIGHT + 4 +
 		LINE_WIDTH_0 * 3 + SIDE_WIDTH_0 * 2 + SIDE_WIDTH_1 + SHELL_S_H;
 	SetWindowPos(&wndTopMost, 0, 0, uWidth, uHeight,
 		SWP_NOZORDER | SWP_NOMOVE | SWP_NOCOPYBITS);	// SWP_NOCOPYBITS does not do function？？？
@@ -707,83 +656,73 @@ void CMineWnd::SizeWindow(void)
 
 	// Shell Position
 	m_uShellRcX[0] = m_rcClient.right;					//
-	m_uShellRcX[1] = m_rcClient.right - 14;				// the width of the small(big) shell
+	m_uShellRcX[1] = m_rcClient.right - 10;				// the width of the small(big) shell
 
 	m_uShellRcY[0] = m_rcClient.bottom;					// 
-	m_uShellRcY[1] = m_rcClient.bottom - SHELL_L_START_Y - 5;		// the height of the big shell
+	m_uShellRcY[1] = m_rcClient.bottom - SHELL_L_START_Y - 3;		// the height of the big shell
 }
 
-//
-// 绘制笑脸按钮图
-//
+//绘制笑脸按钮图
 void CMineWnd::DrawButton(CPaintDC &dc)
 {
 	CDC cdc;
 	cdc.CreateCompatibleDC(&dc);
 	cdc.SelectObject(m_bmpButton);
 	dc.StretchBlt(m_uBtnRect[0], 16, 24, 24, &cdc, 0, 24 * m_uBtnState, 24, 24, SRCCOPY);
-
 	dc.Draw3dRect(m_uBtnRect[1], 15, 26, 26, m_clrDark, m_clrDark);
-
 }
 
-//
 // 绘制数字
-//
 void CMineWnd::DrawNumber(CPaintDC &dc)
 {
-	CDC dcMemory;
-	dcMemory.CreateCompatibleDC(&dc);
-	dcMemory.SelectObject(m_bmpNumber);
+	CDC cdc;
+	cdc.CreateCompatibleDC(&dc);
+	cdc.SelectObject(m_bmpNumber);
 
 	dc.Draw3dRect(16, 15, 41, 25, m_clrDark, COLOR_WHITE);
 	dc.Draw3dRect(m_uNumRect[0], 15, 41, 25, m_clrDark, COLOR_WHITE);
-	int num;
 
-	// draw remaining mine numbers
-	num = (m_nLeaveNum < 0) ? 11 : m_nLeaveNum / 100;
-	dc.StretchBlt(17, 16, 13, 23, &dcMemory, 0, 276 - 23 * (num + 1), 13, 23, SRCCOPY);
-	num = (m_nLeaveNum < 0) ? -(m_nLeaveNum - num * 100) / 10 : (m_nLeaveNum - num * 100) / 10;
-	dc.StretchBlt(30, 16, 13, 23, &dcMemory, 0, 276 - 23 * (num + 1), 13, 23, SRCCOPY);
-	num = (m_nLeaveNum < 0) ? -m_nLeaveNum % 10 : m_nLeaveNum % 10;
-	dc.StretchBlt(43, 16, 13, 23, &dcMemory, 0, 276 - 23 * (num + 1), 13, 23, SRCCOPY);
+	//数字位图尺寸：13 * 276，276 == 23 * 12
+	//绘制剩余雷数
+	int num = (m_nLeftNum < 0) ? 11 : m_nLeftNum / 100;
+	dc.StretchBlt(17, 16, 13, 23, &cdc, 0, 276 - 23 * (num + 1), 13, 23, SRCCOPY);
+	num = (m_nLeftNum < 0) ? -(m_nLeftNum - num * 100) / 10 : (m_nLeftNum - num * 100) / 10;
+	dc.StretchBlt(30, 16, 13, 23, &cdc, 0, 276 - 23 * (num + 1), 13, 23, SRCCOPY);
+	num = (m_nLeftNum < 0) ? -m_nLeftNum % 10 : m_nLeftNum % 10;
+	dc.StretchBlt(43, 16, 13, 23, &cdc, 0, 276 - 23 * (num + 1), 13, 23, SRCCOPY);
 
-	// draw take seconds
+	//绘制时间
 	num = m_uSpendTime / 100;
-	dc.StretchBlt(m_uNumRect[0], 16, 13, 23, &dcMemory, 0, 276 - 23 * (num + 1), 13, 23, SRCCOPY);
+	dc.StretchBlt(m_uNumRect[0], 16, 13, 23, &cdc, 0, 276 - 23 * (num + 1), 13, 23, SRCCOPY);
 	num = (m_uSpendTime - num * 100) / 10;
-	dc.StretchBlt(m_uNumRect[0] + 13, 16, 13, 23, &dcMemory, 0, 276 - 23 * (num + 1), 13, 23, SRCCOPY);
+	dc.StretchBlt(m_uNumRect[0] + 13, 16, 13, 23, &cdc, 0, 276 - 23 * (num + 1), 13, 23, SRCCOPY);
 	num = m_uSpendTime % 10;
-	dc.StretchBlt(m_uNumRect[0] + 26, 16, 13, 23, &dcMemory, 0, 276 - 23 * (num + 1), 13, 23, SRCCOPY);
+	dc.StretchBlt(m_uNumRect[0] + 26, 16, 13, 23, &cdc, 0, 276 - 23 * (num + 1), 13, 23, SRCCOPY);
 }
 
-//
-// 绘制外壳
-//
+//绘制外壳
 void CMineWnd::DrawShell(CPaintDC &dc)
 {
 	// 绘画2条白条
-	dc.FillSolidRect(0, 0, m_uShellRcX[0], LINE_WIDTH_0, COLOR_WHITE);
-	dc.FillSolidRect(0, 0, LINE_WIDTH_0, m_uShellRcY[0], COLOR_WHITE);
+	//dc.FillSolidRect(0, 0, m_uShellRcX[0], LINE_WIDTH_0, COLOR_WHITE);
+	//dc.FillSolidRect(0, 0, LINE_WIDTH_0, m_uShellRcY[0], COLOR_WHITE);
 
 	// 画小的外壳
-	dc.Draw3dRect(SHELL_S_START_X, SHELL_S_START_Y,
+	dc.Draw3dRect(/*SHELL_S_START_X, SHELL_S_START_Y,*/5, SHELL_S_START_Y,
 		m_uShellRcX[1], SHELL_S_H, m_clrDark, COLOR_WHITE);
-	dc.Draw3dRect(SHELL_S_START_X + 1, SHELL_S_START_Y + 1,
-		m_uShellRcX[1] - 2, SHELL_S_H - 2, m_clrDark, COLOR_WHITE);
+	/*dc.Draw3dRect(SHELL_S_START_X + 1, SHELL_S_START_Y + 1,
+		m_uShellRcX[1] - 2, SHELL_S_H - 2, m_clrDark, COLOR_WHITE);*/
 
 	// 画大的外壳
-	dc.Draw3dRect(SHELL_L_START_X, SHELL_L_START_Y,
+	dc.Draw3dRect(/*SHELL_L_START_X, SHELL_L_START_Y,*/5, SHELL_L_START_Y,
 		m_uShellRcX[1], m_uShellRcY[1], m_clrDark, COLOR_WHITE);
-	dc.Draw3dRect(SHELL_L_START_X + 1, SHELL_L_START_Y + 1,
+	/*dc.Draw3dRect(SHELL_L_START_X + 1, SHELL_L_START_Y + 1,
 		m_uShellRcX[1] - 2, m_uShellRcY[1] - 2, m_clrDark, COLOR_WHITE);
 	dc.Draw3dRect(SHELL_L_START_X + 2, SHELL_L_START_Y + 2,
-		m_uShellRcX[1] - 4, m_uShellRcY[1] - 4, m_clrDark, COLOR_WHITE);
+		m_uShellRcX[1] - 4, m_uShellRcY[1] - 4, m_clrDark, COLOR_WHITE);*/
 }
 
-//
-// 绘制雷区
-//
+//绘制雷区
 void CMineWnd::DrawMineArea(CPaintDC &dc)
 {
 	CDC dcMemory; //用作内存设备
@@ -800,9 +739,7 @@ void CMineWnd::DrawMineArea(CPaintDC &dc)
 	}
 }
 
-//
-// 绘制按下扫雷后的数字
-//
+//绘制按下扫雷后的数字
 void CMineWnd::DrawDownNum(MINEWND* mine, UINT num)
 {
 	mine->uState = 15 - num;
@@ -818,15 +755,13 @@ void CMineWnd::DrawSpecialMine(UINT row, UINT col)
 	InvalidateRect(rcMine);
 }
 
-//
-//  获取体图中(x,y)区域的雷信息
-//
-MINEWND* CMineWnd::GetMine(long x, long y)
+//获取体图中(x,y)区域的雷信息
+CMineWnd::MINEWND* CMineWnd::GetMine(long x, long y)
 {
 	//保证参数合格
 	if (x < MINEAREA_FRAME_X || y < MINEAREA_FRAME_Y)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	//根据坐标值算出该小方块所在地图的行和列
@@ -921,47 +856,49 @@ void CMineWnd::SetCheckedCheat()
 	}
 }
 
-void CMineWnd::LoadWaveSrc()
+void CMineWnd::LoadWave()
 {
-	HMODULE hMdl;
-	hMdl = AfxGetResourceHandle();
-	HRSRC hSrc;
+	HMODULE hMdl = AfxGetResourceHandle();
 
-	hSrc = FindResource(hMdl, MAKEINTRESOURCE(IDR_WAVE_DEAD), TEXT("WAVE"));
+	HRSRC hSrc = FindResource(hMdl, MAKEINTRESOURCE(IDR_WAVE_DEAD), TEXT("WAVE"));
 	m_pSndDead = LoadResource(hMdl, hSrc);
+
 	hSrc = FindResource(hMdl, MAKEINTRESOURCE(IDR_WAVE_VICTORY), TEXT("WAVE"));
 	m_pSndVictory = LoadResource(hMdl, hSrc);
+
 	hSrc = FindResource(hMdl, MAKEINTRESOURCE(IDR_WAVE_CLOCK), TEXT("WAVE"));
 	m_pSndClock = LoadResource(hMdl, hSrc);
 }
 
-void CMineWnd::FreeWaveSrc()
+void CMineWnd::FreeWave()
 {
 	if (m_pSndDead)
 	{
 		FreeResource(m_pSndDead);
-		m_pSndDead = NULL;
+		m_pSndDead = nullptr;
 	}
+
 	if (m_pSndVictory)
 	{
 		FreeResource(m_pSndVictory);
-		m_pSndVictory = NULL;
+		m_pSndVictory = nullptr;
 	}
+
 	if (m_pSndClock)
 	{
 		FreeResource(m_pSndClock);
-		m_pSndClock = NULL;
+		m_pSndClock = nullptr;
 	}
 }
 
 void CMineWnd::ResetRecord()
 {
 	m_uPrimary = DEFAULT_RECORD;
-	m_szPrimary = DEFAULT_HOLDER;
+	m_strPrimary = DEFAULT_HOLDER;
 	m_uSecond = DEFAULT_RECORD;
-	m_szSecond = DEFAULT_HOLDER;
+	m_strSecond = DEFAULT_HOLDER;
 	m_uAdvance = DEFAULT_RECORD;
-	m_szAdvance = DEFAULT_HOLDER;
+	m_strAdvance = DEFAULT_HOLDER;
 }
 
 void CMineWnd::SetCustom(UINT xNum, UINT yNum, UINT mNum)
@@ -973,7 +910,6 @@ void CMineWnd::SetCustom(UINT xNum, UINT yNum, UINT mNum)
 
 void CMineWnd::OnPaint()
 {
-
 	CPaintDC dc(this);    // 用以屏幕显示的设备
 	CDC dcMemory;  // 内存设备
 
@@ -981,7 +917,6 @@ void CMineWnd::OnPaint()
 
 	if (!dc.IsPrinting())
 	{
-
 		// 与dc设备兼容
 		if (dcMemory.CreateCompatibleDC(&dc))
 		{
@@ -1035,7 +970,7 @@ void CMineWnd::OnTimer(UINT nIDEvent)
 	CWnd::OnTimer(nIDEvent);
 }
 
-void CMineWnd::OnLButtonDown(UINT nFlags, CPoint point)
+void CMineWnd::OnLButtonDown(UINT nFlags, CPoint pt)
 {
 	//按钮所在的区域
 	CRect rcBtn(m_uBtnRect[1], 15, m_uBtnRect[2], 39);
@@ -1043,23 +978,24 @@ void CMineWnd::OnLButtonDown(UINT nFlags, CPoint point)
 	CRect rcMineArea(MINE_AREA_LEFT, MINE_AREA_TOP,
 		MINE_AREA_LEFT + m_uXNum * MINE_WIDTH, MINE_AREA_TOP + m_uYNum * MINE_HEIGHT);
 
-	SetCapture();			// capture the mouse cursor
+	SetCapture();//鼠标移出界面也捕获其消息
+
 	m_bClickBtn = FALSE;
 	m_bLRBtnDown = FALSE;
 
-	if (rcBtn.PtInRect(point))
+	if (rcBtn.PtInRect(pt))
 	{// click in the button area
 		m_bClickBtn = TRUE;
 		m_uBtnState = BUTTON_DOWN;
 		InvalidateRect(rcBtn);
 	}
-	else if (rcMineArea.PtInRect(point))
+	else if (rcMineArea.PtInRect(pt))
 	{// click in the mine area
 		// change mine state by gamestate
 		switch (m_uGameState)
 		{
 		case GS_WAIT: case GS_RUN:
-			m_pNewMine = GetMine(point.x, point.y);
+			m_pNewMine = GetMine(pt.x, pt.y);
 			if (!m_pNewMine) return;
 			if (m_pNewMine->uState == STATE_NORMAL)
 			{
@@ -1096,10 +1032,10 @@ void CMineWnd::OnLButtonDown(UINT nFlags, CPoint point)
 		}
 	}
 
-	CWnd::OnLButtonDown(nFlags, point);
+	CWnd::OnLButtonDown(nFlags, pt);
 }
 
-void CMineWnd::OnLButtonUp(UINT nFlags, CPoint point)
+void CMineWnd::OnLButtonUp(UINT nFlags, CPoint pt)
 {
 	//笑脸图按钮所在的区域
 	CRect rcBtn(m_uBtnRect[1], 15, m_uBtnRect[2], 39);
@@ -1108,13 +1044,12 @@ void CMineWnd::OnLButtonUp(UINT nFlags, CPoint point)
 		MINE_AREA_LEFT + m_uXNum * MINE_WIDTH,
 		MINE_AREA_TOP + m_uYNum * MINE_HEIGHT);
 
-	if (rcBtn.PtInRect(point))
+	if (rcBtn.PtInRect(pt))
 	{// 点击笑脸图
-
 		Invalidate();
 		InitGame();
 	}
-	else if (rcMineArea.PtInRect(point))
+	else if (rcMineArea.PtInRect(pt))
 	{//点击雷区域
 		CString value;
 		UINT around = 0;
@@ -1125,7 +1060,7 @@ void CMineWnd::OnLButtonUp(UINT nFlags, CPoint point)
 			//游戏进行状态
 		case GS_WAIT: case GS_RUN:
 			// first get the MINEWND which if pushing down
-			m_pOldMine = GetMine(point.x, point.y);
+			m_pOldMine = GetMine(pt.x, pt.y);
 			if (!m_pOldMine)
 			{
 				ReleaseCapture();
@@ -1180,7 +1115,7 @@ void CMineWnd::OnLButtonUp(UINT nFlags, CPoint point)
 						sndPlaySound((LPCTSTR)LockResource(m_pSndClock), SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
 					}
 					//启动定时器
-					m_uTimer = SetTimer(ID_TIMER_EVENT, 1000, NULL);
+					m_uTimer = SetTimer(ID_TIMER_EVENT, 1000, nullptr);
 					//布雷
 					LayMines(m_pOldMine->uRow, m_pOldMine->uCol);		// lay all the mines down 
 					//改变游戏状态为TEXT("运行/GS_RUN")
@@ -1239,10 +1174,10 @@ void CMineWnd::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 
 	ReleaseCapture();		// release the cursor
-	CWnd::OnLButtonUp(nFlags, point);
+	CWnd::OnLButtonUp(nFlags, pt);
 }
 
-void CMineWnd::OnRButtonDown(UINT nFlags, CPoint point)
+void CMineWnd::OnRButtonDown(UINT nFlags, CPoint pt)
 {
 	//笑脸图按钮所在的区域
 	CRect rcBtn(m_uBtnRect[1], 15, m_uBtnRect[2], 39);
@@ -1253,11 +1188,11 @@ void CMineWnd::OnRButtonDown(UINT nFlags, CPoint point)
 
 	m_bLRBtnDown = FALSE;
 
-	if (rcMineArea.PtInRect(point))
+	if (rcMineArea.PtInRect(pt))
 	{//点击雷区域			
 		if (m_uGameState == GS_WAIT || m_uGameState == GS_RUN)
 		{
-			m_pNewMine = GetMine(point.x, point.y);
+			m_pNewMine = GetMine(pt.x, pt.y);
 			if (!m_pNewMine) return;
 			// both of the left button and the right button are pushing down 
 			if (nFlags == (MK_LBUTTON | MK_RBUTTON))
@@ -1272,12 +1207,12 @@ void CMineWnd::OnRButtonDown(UINT nFlags, CPoint point)
 				case STATE_NORMAL:
 					m_pNewMine->uState = STATE_FLAG;
 					m_pNewMine->uOldState = STATE_FLAG;
-					m_nLeaveNum--;
+					m_nLeftNum--;
 					break;
 				case STATE_FLAG:
 					m_pNewMine->uState = STATE_DICEY;
 					m_pNewMine->uOldState = STATE_DICEY;
-					m_nLeaveNum++;
+					m_nLeftNum++;
 					break;
 				case STATE_DICEY:
 					m_pNewMine->uState = STATE_NORMAL;
@@ -1292,16 +1227,16 @@ void CMineWnd::OnRButtonDown(UINT nFlags, CPoint point)
 		}
 	}
 
-	CWnd::OnRButtonDown(nFlags, point);
+	CWnd::OnRButtonDown(nFlags, pt);
 }
 
-void CMineWnd::OnRButtonUp(UINT nFlags, CPoint point)
+void CMineWnd::OnRButtonUp(UINT nFlags, CPoint pt)
 {
 	CRect rcBtn(m_uBtnRect[1], 15, m_uBtnRect[2], 39);
 	CRect rcMineArea(MINE_AREA_LEFT, MINE_AREA_TOP,
 		MINE_AREA_LEFT + m_uXNum * MINE_WIDTH, MINE_AREA_TOP + m_uYNum * MINE_HEIGHT);
 
-	m_pOldMine = GetMine(point.x, point.y);
+	m_pOldMine = GetMine(pt.x, pt.y);
 	if (!m_pOldMine) return;
 	// judge whether the lr button are both pushed down
 	if (m_bLRBtnDown)
@@ -1332,10 +1267,10 @@ void CMineWnd::OnRButtonUp(UINT nFlags, CPoint point)
 		Victory();
 	}
 
-	CWnd::OnRButtonUp(nFlags, point);
+	CWnd::OnRButtonUp(nFlags, pt);
 }
 
-void CMineWnd::OnMouseMove(UINT nFlags, CPoint point)
+void CMineWnd::OnMouseMove(UINT nFlags, CPoint pt)
 {
 	if (nFlags == MK_LBUTTON || nFlags == (MK_LBUTTON | MK_RBUTTON))
 	{
@@ -1343,8 +1278,8 @@ void CMineWnd::OnMouseMove(UINT nFlags, CPoint point)
 		CRect rcMineArea(MINE_AREA_LEFT, MINE_AREA_TOP,
 			MINE_AREA_LEFT + m_uXNum * MINE_WIDTH, MINE_AREA_TOP + m_uYNum * MINE_HEIGHT);
 
-		if (rcBtn.PtInRect(point))
-		{				// point in button area
+		if (rcBtn.PtInRect(pt))
+		{				// pt in button area
 			switch (m_uGameState)
 			{
 			case GS_RUN:
@@ -1358,12 +1293,12 @@ void CMineWnd::OnMouseMove(UINT nFlags, CPoint point)
 			}
 			InvalidateRect(rcBtn);
 		}
-		else if (rcMineArea.PtInRect(point))
-		{		// point in mine area
+		else if (rcMineArea.PtInRect(pt))
+		{		// pt in mine area
 			switch (m_uGameState)
 			{
 			case GS_RUN:
-				m_pNewMine = GetMine(point.x, point.y);
+				m_pNewMine = GetMine(pt.x, pt.y);
 				if (!m_pNewMine || !m_pOldMine) return;
 				if (m_pNewMine->uCol != m_pOldMine->uCol ||
 					m_pNewMine->uRow != m_pOldMine->uRow)
@@ -1407,7 +1342,7 @@ void CMineWnd::OnMouseMove(UINT nFlags, CPoint point)
 			}
 		}
 		else
-		{										// point in other area
+		{										// pt in other area
 			switch (m_uGameState)
 			{
 			case GS_RUN:
@@ -1437,7 +1372,7 @@ void CMineWnd::OnMouseMove(UINT nFlags, CPoint point)
 		}
 	}
 
-	CWnd::OnMouseMove(nFlags, point);
+	CWnd::OnMouseMove(nFlags, pt);
 }
 
 void CMineWnd::OnMemuStart()
@@ -1489,7 +1424,7 @@ void CMineWnd::OnMemuCustom()
 {
 	m_uLevel = LEVEL_CUSTOM;
 	SetCheckedLevel();
-	CDlgCustom dlg;
+	CCustomDlg dlg;
 	dlg.InitData(m_uXNum, m_uYNum, m_uMineNum);
 	dlg.DoModal();
 
@@ -1509,14 +1444,16 @@ void CMineWnd::OnMemuMark()
 {
 	m_bMarkful = !m_bMarkful;
 	SetCheckedMark();
+
 	Invalidate();
 }
 
 void CMineWnd::OnMemuColor()
 {
 	m_bColorful = !m_bColorful;
-	LoadBitmap();
 	SetCheckedColor();
+
+	LoadBitmap();
 	Invalidate();
 }
 
@@ -1524,25 +1461,27 @@ void CMineWnd::OnMemuSound()
 {
 	m_bSoundful = !m_bSoundful;
 	SetCheckedSound();
+
 	if (m_bSoundful)
 	{
-		LoadWaveSrc();
+		LoadWave();
 	}
 	else
 	{
-		FreeWaveSrc();
+		FreeWave();
 	}
 }
 
 void CMineWnd::OnMemuHero()
 {
-	CDlgHero dlg;
+	CHeroDlg dlg;
 	dlg.SetBRecord(m_uPrimary);
-	dlg.SetBHolder(m_szPrimary);
+	dlg.SetBHolder(m_strPrimary);
 	dlg.SetIRecord(m_uSecond);
-	dlg.SetIHolder(m_szSecond);
+	dlg.SetIHolder(m_strSecond);
 	dlg.SetERecord(m_uAdvance);
-	dlg.SetEHolder(m_szAdvance);
+	dlg.SetEHolder(m_strAdvance);
+
 	dlg.DoModal();
 }
 
@@ -1569,7 +1508,7 @@ void CMineWnd::OnMemuHelpUse()
 
 void CMineWnd::OnMemuAbout()
 {
-	ShellAbout(this->m_hWnd, TEXT("扫雷"), TEXT("skybluehacker@yahoo.com.cn"), NULL);
+	ShellAbout(this->m_hWnd, TEXT("扫雷"), TEXT("my mine game"), nullptr);
 }
 
 void CMineWnd::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)

@@ -26,10 +26,7 @@ public:
 
 	//{{AFX_MSG(CMineApp)
 	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-private:
-	UINT m_uXMineNum;		
-	UINT m_uYMineNum;		
+	DECLARE_MESSAGE_MAP()	
 };
 //{{AFX_INSERT_LOCATION}}
 #endif // !defined(AFX_MINE_H__009533F8_ACB7_4BD3_A0BA_A8D5925D624D__INCLUDED_)
