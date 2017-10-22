@@ -8,7 +8,7 @@ public:
 
 	enum { IDD = IDD_DLG_CUSTOM };
 	
-	void InitData(UINT xNum, UINT yNum, UINT mNum);	
+	void InitData(uint xNum, uint yNum, uint mNum);	
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -17,9 +17,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	
 private:
-	UINT	m_uHeight;
-	UINT	m_uNumber;
-	UINT	m_uWidth;
+	uint	m_uHeight;
+	uint	m_uNumber;
+	uint	m_uWidth;
 };
 
 #endif//__CUSTOM_DLG_H__

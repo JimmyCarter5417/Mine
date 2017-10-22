@@ -9,11 +9,11 @@ public:
 	enum { IDD = IDD_DLG_HERO };
 	
 	void SetBHolder(CString holder);
-	void SetBRecord(UINT record);
+	void SetBRecord(uint record);
 	void SetIHolder(CString holder);
-	void SetIRecord(UINT record);
+	void SetIRecord(uint record);
 	void SetEHolder(CString holder);
-	void SetERecord(UINT record);
+	void SetERecord(uint record);
 	
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);

@@ -31,8 +31,8 @@
 #define IDC_NUMBER                      1011
 #define IDM_START                       32771
 #define IDM_PRIMARY                     32772
-#define IDM_SECOND                      32773
-#define IDM_ADVANCE                     32774
+#define IDM_MEDIUM                      32773
+#define IDM_ADVANCED                    32774
 #define IDM_CUSTOM                      32775
 #define IDM_MARK                        32776
 #define IDM_COLOR                       32777

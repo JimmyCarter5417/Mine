@@ -2,7 +2,7 @@
 #include "mine.h"
 #include "HeroDlg.h"
 #include "MineWnd.h"
-#include "MineDefs.h"
+#include "Def.h"
 
 CHeroDlg::CHeroDlg(CWnd* pParent /*=nullptr*/)
 	: CDialog(CHeroDlg::IDD, pParent)
@@ -36,7 +36,7 @@ void CHeroDlg::SetBHolder(CString holder)
 	m_strBHolder = holder;
 }
 
-void CHeroDlg::SetBRecord(UINT record)
+void CHeroDlg::SetBRecord(uint record)
 {
 	m_strBRecord.Format(TEXT("%d취"), record);
 }
@@ -46,7 +46,7 @@ void CHeroDlg::SetIHolder(CString holder)
 	m_strIHolder = holder;
 }
 
-void CHeroDlg::SetIRecord(UINT record)
+void CHeroDlg::SetIRecord(uint record)
 {
 	m_strIRecord.Format(TEXT("%d취"), record);
 }
@@ -56,7 +56,7 @@ void CHeroDlg::SetEHolder(CString holder)
 	m_strEHolder = holder;
 }
 
-void CHeroDlg::SetERecord(UINT record)
+void CHeroDlg::SetERecord(uint record)
 {
 	m_strERecord.Format(TEXT("%d취"), record);
 }
@@ -65,11 +65,15 @@ void CHeroDlg::OnReset()
 {
 	CMineWnd *pMine = (CMineWnd*)AfxGetMainWnd();
 	pMine->ResetRecord();
-	m_strBHolder = DEFAULT_HOLDER;
-	m_strBRecord.Format(TEXT("%d취"), DEFAULT_RECORD);
-	m_strIHolder = DEFAULT_HOLDER;
-	m_strIRecord.Format(TEXT("%d취"), DEFAULT_RECORD);
-	m_strEHolder = DEFAULT_HOLDER;
-	m_strERecord.Format(TEXT("%d취"), DEFAULT_RECORD);
+
+	m_strBHolder = def::g_strDefHolder;
+	m_strBRecord.Format(TEXT("%d취"), def::g_nDefRecord);
+
+	m_strIHolder = def::g_strDefHolder;
+	m_strIRecord.Format(TEXT("%d취"), def::g_nDefRecord);
+
+	m_strEHolder = def::g_strDefHolder;
+	m_strERecord.Format(TEXT("%d취"), def::g_nDefRecord);
+
 	UpdateData(FALSE);
 }

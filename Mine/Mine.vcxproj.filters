@@ -43,9 +43,6 @@
     <ClInclude Include="Mine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MineDefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MineWnd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -62,6 +59,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NewRecordDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Def.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

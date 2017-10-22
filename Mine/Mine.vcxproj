@@ -154,7 +154,7 @@
     <ClInclude Include="HeroDlg.h" />
     <ClInclude Include="NewRecordDlg.h" />
     <ClInclude Include="Mine.h" />
-    <ClInclude Include="MineDefs.h" />
+    <ClInclude Include="Def.h" />
     <ClInclude Include="MineWnd.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />

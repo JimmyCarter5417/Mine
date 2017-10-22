@@ -1,8 +1,7 @@
 #include "stdafx.h"
 #include "Mine.h"
 #include "NewRecordDlg.h"
-#include "MineDefs.h"
-
+#include "Def.h"
 
 CNewRecordDlg::CNewRecordDlg(CWnd* pParent /*=nullptr*/)
 	: CDialog(CNewRecordDlg::IDD, pParent)
@@ -23,12 +22,12 @@ BEGIN_MESSAGE_MAP(CNewRecordDlg, CDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-void CNewRecordDlg::SetLevel(UINT level)
+void CNewRecordDlg::SetLevel(uint level)
 {
 	CString strLevel;
-	if (level == LEVEL_PRIMARY) strLevel = TEXT("初级");
-	else if (level == LEVEL_SECONDRY) strLevel = TEXT("中级");
-	else if (level == LEVEL_ADVANCE) strLevel = TEXT("高级");
+	if (level == def::ELevel_Primary) strLevel = TEXT("初级");
+	else if (level == def::ELevel_Medium) strLevel = TEXT("中级");
+	else if (level == def::ELevel_Advanced) strLevel = TEXT("高级");
 	m_strDesc.Format(TEXT("已破%s记录\n\r请留尊姓大名"), strLevel);
 }
 

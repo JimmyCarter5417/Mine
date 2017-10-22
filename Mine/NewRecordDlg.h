@@ -8,7 +8,7 @@ public:
 	
 	enum { IDD = IDD_DLG_NEWRECORD };
 	
-	void SetLevel(UINT level);
+	void SetLevel(uint level);
 	CString GetName();
 
 protected:

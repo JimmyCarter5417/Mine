@@ -49,7 +49,7 @@ void CCustomDlg::OnOK()
 	CDialog::OnOK();
 }
 
-void CCustomDlg::InitData(UINT xNum, UINT yNum, UINT mNum)
+void CCustomDlg::InitData(uint xNum, uint yNum, uint mNum)
 {
 	m_uWidth = xNum;
 	m_uHeight = yNum;
