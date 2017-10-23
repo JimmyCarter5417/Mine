@@ -117,17 +117,17 @@ namespace def
 	static uint    g_nDefSoundful = 0;
 
 	//各等级默认参数
-	static uint g_nDefPrimaryXNum = 10;
-	static uint g_nDefPrimaryYNum = 10;
-	static uint g_nDefPrimaryMineNum = 10;
+	static uint g_nDefPrimaryXNum = 15;
+	static uint g_nDefPrimaryYNum = 15;
+	static uint g_nDefPrimaryMineNum = 30;
 
-	static uint g_nDefMediumXNum = 16;
-	static uint g_nDefMediumYNum = 16;
-	static uint g_nDefMediumMineNum = 40;
+	static uint g_nDefMediumXNum = 30;
+	static uint g_nDefMediumYNum = 30;
+	static uint g_nDefMediumMineNum = 120;
 
-	static uint g_nDefAdvancedXNum = 30;
-	static uint g_nDefAdvancedYNum = 30;
-	static uint g_nDefAdvancedMineNum = 99;
+	static uint g_nDefAdvancedXNum = 45;
+	static uint g_nDefAdvancedYNum = 45;
+	static uint g_nDefAdvancedMineNum = 480;
 
 	//颜色定义
 	static COLORREF g_clrBlack = RGB(0, 0, 0);

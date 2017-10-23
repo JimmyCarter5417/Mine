@@ -14,7 +14,7 @@
 using namespace def;
 using namespace std;
 
-#define ID_TIMER_EVENT	WM_USER + 1
+#define TIMER_ID 1234
 
 CMineWnd::CMineWnd()
 {
@@ -29,7 +29,7 @@ CMineWnd::CMineWnd()
 	if (m_bSoundful) 
 		LoadWave();
 
-	InitGame();
+	InitGame();	
 }
 
 CMineWnd::~CMineWnd()
@@ -47,7 +47,7 @@ BEGIN_MESSAGE_MAP(CMineWnd, CWnd)
 	ON_WM_RBUTTONUP()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
-	ON_WM_MOUSEMOVE()
+	//ON_WM_MOUSEMOVE()
 	ON_WM_KEYDOWN()
 	ON_WM_INITMENU()
 	ON_WM_CLOSE()
@@ -74,10 +74,10 @@ CString CMineWnd::GetCfgPath()
 
 	if (strCfgPath.IsEmpty())
 	{
-		TCHAR strExePath[MAX_PATH];
-		GetModuleFileName(nullptr, strExePath, MAX_PATH);
+		TCHAR szExePath[MAX_PATH];
+		GetModuleFileName(nullptr, szExePath, MAX_PATH);
 
-		strCfgPath = strExePath;
+		strCfgPath = szExePath;
 		strCfgPath = strCfgPath.Left(strCfgPath.ReverseFind('\\') + 1);
 		strCfgPath += g_strCfgName;
 	}	
@@ -175,12 +175,12 @@ void CMineWnd::InitGame()
 
 	if (m_uTimer)
 	{
-		KillTimer(ID_TIMER_EVENT);
+		KillTimer(TIMER_ID);
 		m_uTimer = 0;
 	}
 
-	m_pNewMine = nullptr;
-	m_pOldMine = nullptr;
+	m_pCurBlock = nullptr;
+	m_pPreBlock = nullptr;
 
 	FreeMines();
 	//初始化地图
@@ -218,64 +218,75 @@ void CMineWnd::LayMines(uint row, uint col)
 	}
 }
 
-//雷方块拓展(对于周围无雷的空白区域)
+//拓展
 void CMineWnd::ExpandMines(uint row, uint col)
 {
 	uint around = GetAroundMines(row, col);
 	m_pMines[row][col].uState = EBS_Empty - around;
 	m_pMines[row][col].uOldState = EBS_Empty - around;
 
-	// “打开”该区域，重绘
-	DrawSpecialMine(row, col);
+	//打开该方块
+	DrawOneBlock(row, col);
 
-	//对周围一个雷都没有的空白区域
+	//扩展周围无雷的空白方块
 	if (around == 0)
 	{
-		for (uint i = (row == 0 ? 0 : row - 1); i < row + 2; i++)
+		for (uint i = row - 1; i <= row + 1; i++)
 		{
-			for (uint j = (col == 0 ? 0 : col - 1); j < col + 2; j++)
+			for (uint j = col - 1; j <= col + 1; j++)
 			{
-				//对于周围可以拓展的区域进行的规拓展			
-				if (!(i == row && j == col) &&
-					m_pMines[i][j].uState == EBS_Normal	&& 
-					m_pMines[i][j].uAttrib != EBA_Mine)
+				if (IsInBlockArea(i, j))
 				{
-					if (IsInMineArea(i, j))
+					if (!(i == row && j == col) &&
+						m_pMines[i][j].uState == EBS_Normal	&&
+						m_pMines[i][j].uAttrib != EBA_Mine)
+					{
 						ExpandMines(i, j);
+					}
 				}
 			}
 		}
 	}
 }
 
-//获取某个小方块区域相邻8个区域的雷个数
+//获取相邻8个区域的雷个数
 uint CMineWnd::GetAroundMines(uint row, uint col)
 {
 	uint res = 0;
 
-	for (uint i = (row == 0 ? 0 : row - 1); i < row + 2; i++)
+	for (uint i = row - 1; i <= row + 1; i++)
 	{
-		for (uint j = (col == 0 ? 0 : col - 1); j < col + 2; j++)
+		for (uint j = col - 1; j <= col + 1; j++)
 		{
-			if (IsInMineArea(i, j) && m_pMines[i][j].uAttrib == EBA_Mine)
-				res++;
+			if (IsInBlockArea(i, j))
+			{
+				if (m_pMines[i][j].uAttrib == EBA_Mine)
+				{
+					res++;
+				}
+			}
 		}
 	}
 
 	return res;
 }
 
-//获取某个小方块区域相邻8个区域的已标志状态数
+//获取相邻8个区域的已标志个数
 uint CMineWnd::GetAroundFlags(uint row, uint col)
 {
 	uint res = 0;
 
-	for (uint i = (row == 0 ? 0 : row - 1); i < row + 2; i++)
+	for (uint i = row - 1; i <= row + 1; i++)
 	{
-		for (uint j = (col == 0 ? 0 : col - 1); j < col + 2; j++)
+		for (uint j = col - 1; j <= col + 1; j++)
 		{
-			if (IsInMineArea(i, j) && m_pMines[i][j].uState == EBS_Flag)
-				res++;
+			if (IsInBlockArea(i, j))
+			{
+				if (m_pMines[i][j].uState == EBS_Flag)
+				{
+					res++;
+				}
+			}
 		}
 	}
 
@@ -288,8 +299,8 @@ BOOL CMineWnd::IsMine(uint row, uint col)
 	return m_pMines[row][col].uAttrib == EBA_Mine;
 }
 
-//判断是否在雷区域
-BOOL CMineWnd::IsInMineArea(uint row, uint col)
+//判断是否在有效区域内
+BOOL CMineWnd::IsInBlockArea(uint row, uint col)
 {
 	return row >= 0 && row < m_uYNum && col >= 0 && col < m_uXNum;
 }
@@ -313,8 +324,8 @@ void CMineWnd::Dead(uint row, uint col)
 	{
 		for (uint j = 0; j < m_uXNum; j++)
 		{
-			if (m_pMines[i][j].uAttrib == EBA_Mine &&
-				m_pMines[i][j].uState != EBS_Flag)
+			if (m_pMines[i][j].uAttrib == EBA_Mine /*&&
+				m_pMines[i][j].uState != EBS_Flag*/)
 			{
 				m_pMines[i][j].uState = EBS_Mine;
 				m_pMines[i][j].uOldState = EBS_Mine;
@@ -333,7 +344,7 @@ void CMineWnd::Dead(uint row, uint col)
 
 	if (m_uTimer != 0)//将定时器去激活
 	{
-		KillTimer(ID_TIMER_EVENT);
+		KillTimer(TIMER_ID);
 		m_uTimer = 0;
 	}
 
@@ -346,9 +357,6 @@ void CMineWnd::Dead(uint row, uint col)
 //胜利判断并处理
 BOOL CMineWnd::Victory()
 {
-	//CRect rcBtn(m_uBtnRect[1], 15, m_uBtnRect[2], 39);
-
-	// 检测是否胜利
 	for (uint i = 0; i < m_uYNum; i++)
 	{
 		for (uint j = 0; j < m_uXNum; j++)
@@ -369,7 +377,7 @@ BOOL CMineWnd::Victory()
 	//删除timer
 	if (m_uTimer != 0)
 	{
-		KillTimer(ID_TIMER_EVENT);
+		KillTimer(TIMER_ID);
 		m_uTimer = 0;
 	}
 	//胜利声音
@@ -430,11 +438,11 @@ BOOL CMineWnd::Victory()
 //鼠标右键，根据原先不同的标记作状态循环修改，以便用户可以修改其原先标志
 void CMineWnd::OnLRBtnDown(uint row, uint col)
 {
-	for (uint i = (row == 0 ? 0 : row - 1); i < row + 2; i++)
+	for (uint i = row - 1; i <= row + 1; i++)
 	{
-		for (uint j = (col == 0 ? 0 : col - 1); j < col + 2; j++)
+		for (uint j = col - 1; j <= col + 1; j++)
 		{
-			if (IsInMineArea(i, j))
+			if (IsInBlockArea(i, j))
 			{
 				if (m_pMines[i][j].uState == EBS_Normal)
 				{
@@ -451,11 +459,11 @@ void CMineWnd::OnLRBtnDown(uint row, uint col)
 
 void CMineWnd::OnLRBtnUp(uint row, uint col)
 {
-	for (uint i = (row == 0 ? 0 : row - 1); i < row + 2; i++)
+	for (uint i = row - 1; i <= row + 1; i++)
 	{
-		for (uint j = (col == 0 ? 0 : col - 1); j < col + 2; j++)
+		for (uint j = col - 1; j <= col + 1; j++)
 		{
-			if (IsInMineArea(i, j))
+			if (IsInBlockArea(i, j))
 			{
 				if (m_pMines[i][j].uOldState == EBS_Normal)
 				{
@@ -468,7 +476,6 @@ void CMineWnd::OnLRBtnUp(uint row, uint col)
 			}
 		}
 	}
-	//	Invalidate();
 }
 
 //展开拓展周围8个方向
@@ -478,11 +485,11 @@ void CMineWnd::OpenAround(uint row, uint col)
 	if (GetAroundFlags(row, col) != GetAroundMines(row, col))
 		return;
 
-	for (uint i = (row == 0 ? 0 : row - 1); i < row + 2; i++)
+	for (uint i = row - 1; i <= row + 1; i++)
 	{
-		for (uint j = (col == 0 ? 0 : col - 1); j < col + 2; j++)
+		for (uint j = col - 1; j <= col + 1; j++)
 		{
-			if (IsInMineArea(i, j))
+			if (IsInBlockArea(i, j))
 			{
 				//如果该区域为正常区域，拓展该雷区
 				if (m_pMines[i][j].uState == EBS_Normal)
@@ -517,27 +524,25 @@ void CMineWnd::OpenAround(uint row, uint col)
 	}
 }
 
-BOOL CMineWnd::ErrorAroundFlag(uint row, uint col)
+//检测是否正确标记了周围所有的雷
+BOOL CMineWnd::HasCorrectFlags(uint row, uint col)
 {
-	//如果周围相邻的标志雷数 != 周围相邻的雷数 则返回
-	if (GetAroundFlags(row, col) != GetAroundMines(row, col)) 
-		return FALSE;
-
-	for (uint i = (row == 0 ? 0 : row - 1); i < row + 2; i++)
+	for (uint i = row - 1; i <= row + 1; i++)
 	{
-		for (uint j = (col == 0 ? 0 : col - 1); j < col + 2; j++)
+		for (uint j = col - 1; j <= col + 1; j++)
 		{
-			if (IsInMineArea(i, j) &&
-				m_pMines[i][j].uState == EBS_Flag &&
-				m_pMines[i][j].uAttrib != EBA_Mine)
-				{
-					Dead(i, j);
-					return TRUE;
+			if (IsInBlockArea(i, j))
+			{
+				if ((m_pMines[i][j].uState != EBS_Flag && m_pMines[i][j].uAttrib == EBA_Mine) ||//未标记雷
+					(m_pMines[i][j].uState == EBS_Flag && m_pMines[i][j].uAttrib == EBA_Empty))//错误标记空方块
+				{					
+					return FALSE;
 				}
+			}
 		}
 	}
 
-	return FALSE;
+	return TRUE;
 }
 
 void CMineWnd::OpenByCheat()
@@ -566,6 +571,7 @@ void CMineWnd::FreeMines()
 	//	}
 }
 
+//设定各项尺寸
 void CMineWnd::SizeWindow()
 {
 	//见图片
@@ -651,7 +657,7 @@ void CMineWnd::DrawNumber(CPaintDC &dc)
 		0, g_nNumHeight * (ENum_End - 1 - num), g_nNumWidth, g_nNumHeight, SRCCOPY);
 }
 
-//绘制外壳
+//绘制控制面板和方块区域
 void CMineWnd::DrawShell(CPaintDC &dc)
 {
 	dc.Draw3dRect(m_rectPanel.left, m_rectPanel.top, m_rectPanel.right - m_rectPanel.left, m_rectPanel.bottom - m_rectPanel.top, m_clrDark, g_clrWhite);
@@ -659,7 +665,7 @@ void CMineWnd::DrawShell(CPaintDC &dc)
 }
 
 //绘制雷区
-void CMineWnd::DrawMineArea(CPaintDC &dc)
+void CMineWnd::DrawBlockArea(CPaintDC &dc)
 {
 	CDC dcMemory; //用作内存设备
 	dcMemory.CreateCompatibleDC(&dc); //使得这个设备与dc兼容
@@ -668,31 +674,31 @@ void CMineWnd::DrawMineArea(CPaintDC &dc)
 	for (uint i = 0; i < m_uYNum; i++)
 	{
 		for (uint j = 0; j < m_uXNum; j++)
-		{//根据[i][j]区域的雷方块状态拷贝相应的图像到[i][j]雷区的特定区域
+		{//根据[i][j]区域的方块状态拷贝相应的图像到[i][j]区域
 			dc.StretchBlt(m_rectBlockArea.left + g_nBlockWidth * j, m_rectBlockArea.top + g_nBlockHeight * i, g_nBlockWidth, g_nBlockHeight, &dcMemory, 
 				0, g_nBlockHeight * m_pMines[i][j].uState, g_nBlockWidth, g_nBlockHeight, SRCCOPY);
 		}
 	}
 }
 
-//绘制按下扫雷后的数字
+//绘制不可扩展方块对应的数字
 void CMineWnd::DrawDownNum(MINEWND* mine, uint num)
 {
-	mine->uState = EBS_End - 1 - num;
-	mine->uOldState = EBS_End - 1 - num;
-	CRect rcMine(mine->uCol * g_nBlockWidth, mine->uRow * g_nBlockHeight, (mine->uCol + 1) * g_nBlockWidth, (mine->uRow + 1) * g_nBlockHeight);
-	InvalidateRect(rcMine);
+	mine->uState = EBS_Empty - num;
+	mine->uOldState = EBS_Empty - num;
+
+	DrawOneBlock(mine->uRow, mine->uCol);
 }
 
-//重新绘制雷区域的某个方块
-void CMineWnd::DrawSpecialMine(uint row, uint col)
+//重新绘制某个方块
+void CMineWnd::DrawOneBlock(uint row, uint col)
 {
 	CRect rcMine(col * g_nBlockWidth, row * g_nBlockHeight, (col + 1) * g_nBlockWidth, (row + 1) * g_nBlockHeight);
 	InvalidateRect(rcMine);
 }
 
-//获取体图中(x,y)区域的雷信息
-CMineWnd::MINEWND* CMineWnd::GetMine(long x, long y)
+//获取坐标(x,y)对应的方块
+CMineWnd::MINEWND* CMineWnd::GetBlock(long x, long y)
 {
 	//保证参数合格
 	if (x < m_rectBlockArea.left  || 
@@ -846,17 +852,14 @@ void CMineWnd::OnPaint()
 		{
 			// 使得bitmap与实际显示的设备兼容
 			if (bitmap.CreateCompatibleBitmap(&dc, m_rectClient.right, m_rectClient.bottom))
-			{
-				// 内存设备选择物件－位图
-				dcMemory.SelectObject(&bitmap);
-				//绘制背景框
-				dcMemory.FillRect(&m_rectClient, &m_brsBG);
+			{				
+				dcMemory.SelectObject(&bitmap);//选择位图				
+				dcMemory.FillRect(&m_rectClient, &m_brsBG);//绘制背景框
 
-				DrawButton((CPaintDC&)dcMemory);//笑脸按钮绘图
-				DrawNumber((CPaintDC&)dcMemory);//文字绘图(计时器文字和剩余雷数文字)
-				DrawShell((CPaintDC&)dcMemory);//3D效果外壳绘图
-				DrawMineArea((CPaintDC&)dcMemory);//雷区绘图
-
+				DrawButton((CPaintDC&)dcMemory);
+				DrawNumber((CPaintDC&)dcMemory);
+				DrawShell((CPaintDC&)dcMemory);
+				DrawBlockArea((CPaintDC&)dcMemory);
 
 				// 将内存设备的内容拷贝到实际屏幕显示的设备
 				dc.BitBlt(m_rectClient.left, m_rectClient.top, m_rectClient.right, m_rectClient.bottom, &dcMemory, 0, 0, SRCCOPY);
@@ -869,26 +872,28 @@ void CMineWnd::OnPaint()
 void CMineWnd::OnShowWindow(BOOL bShow, uint nStatus)
 {
 	SizeWindow();
+
 	CWnd::OnShowWindow(bShow, nStatus);
 }
 
 void CMineWnd::OnTimer(uint nIDEvent)
 {
-	if (nIDEvent == ID_TIMER_EVENT)
-	{
-		if (m_bSoundful)
+	if (nIDEvent == TIMER_ID)
+	{		
+		if (m_bSoundful)//播放声音
 		{
 			sndPlaySound((LPCTSTR)LockResource(m_pSndClock), SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
 		}
-		m_uSpendTime++;
-		//CRect rcNum(m_uNumRect[0], 15, m_uNumRect[1], 39);
-		//	InvalidateRect(rcNum);
+
+		m_uSpendTime++;//增加计时		
 		Invalidate();
 		if (m_uSpendTime >= g_nDefRecord)//最大999
 		{
-			KillTimer(ID_TIMER_EVENT);
+			KillTimer(TIMER_ID);
 			m_uTimer = 0;
 		}
+
+		InvalidateRect(CRect(m_rectSpendTime));//重绘时间
 	}
 
 	CWnd::OnTimer(nIDEvent);
@@ -904,32 +909,31 @@ void CMineWnd::OnLButtonDown(uint nFlags, CPoint pt)
 	m_bClickBtn = FALSE;
 	m_bLRBtnDown = FALSE;
 
-	if (rectBtn.PtInRect(pt))
-	{// click in the button area
+	if (rectBtn.PtInRect(pt))//点击按钮
+	{
 		m_bClickBtn = TRUE;
-		m_uBtnState = EBtnS_Down;
-		InvalidateRect(rectBtn);
+		m_uBtnState = EBtnS_Down;//修改按钮状态
+		InvalidateRect(rectBtn);//重绘按钮
 	}
-	else if (rectBlockArea.PtInRect(pt))
-	{// click in the mine area
-		// change mine state by gamestate
-		switch (m_uGameState)
+	else if (rectBlockArea.PtInRect(pt))//点击方块
+	{		
+		switch (m_uGameState)//根据游戏状态修改方块状态
 		{
 		case EGS_Wait: 
 		case EGS_Run:
-			if (m_pNewMine = GetMine(pt.x, pt.y))
+			if (m_pCurBlock = GetBlock(pt.x, pt.y))
 			{
-				if (m_pNewMine->uState == EBS_Normal)
+				if (m_pCurBlock->uState == EBS_Normal)
 				{
-					m_pNewMine->uState = EBS_Empty;
+					m_pCurBlock->uState = EBS_Empty;
 				}
 
-				if (m_pNewMine->uState == EBS_Dicey)
+				if (m_pCurBlock->uState == EBS_Dicey)
 				{
-					m_pNewMine->uState = EBS_DiceyDown;
+					m_pCurBlock->uState = EBS_DiceyDown;
 				}
 
-				m_pOldMine = m_pNewMine;
+				m_pPreBlock = m_pCurBlock;//
 			}
 			break;
 		case EGS_Dead: 
@@ -939,24 +943,24 @@ void CMineWnd::OnLButtonDown(uint nFlags, CPoint pt)
 		default:
 			break;
 		}
-		m_uBtnState = EBtnS_Click;
-		InvalidateRect(rectBtn);
 
-		//左右键同时按下
-		if (nFlags == (MK_LBUTTON | MK_RBUTTON))
+		m_uBtnState = EBtnS_Click;//修改按钮状态
+		InvalidateRect(rectBtn);//重绘按钮
+		
+		if (nFlags == (MK_LBUTTON | MK_RBUTTON))//左右键同时按下
 		{
 			m_bLRBtnDown = TRUE;
-			OnLRBtnDown(m_pOldMine->uRow, m_pOldMine->uCol);
+			OnLRBtnDown(m_pPreBlock->uRow, m_pPreBlock->uCol);
 		}
 
-		InvalidateRect(rectBlockArea);
+		InvalidateRect(rectBlockArea);//重绘方块区域
 	}
-	else// click in other area
+	else//非交互区域
 	{
 		if (m_uGameState == EGS_Wait || m_uGameState == EGS_Run)
 		{
 			m_uBtnState = EBtnS_Click;
-			InvalidateRect(rectBtn);
+			InvalidateRect(rectBtn);//重绘按钮
 		}
 	}
 
@@ -965,116 +969,120 @@ void CMineWnd::OnLButtonDown(uint nFlags, CPoint pt)
 
 void CMineWnd::OnLButtonUp(uint nFlags, CPoint pt)
 {
-	CRect rectBtn(m_rectButton);//按钮区域	
-	CRect rectBlockArea(m_rectBlockArea);//雷区
-
-	if (rectBtn.PtInRect(pt))// 点击笑脸
+	class CAutoReleaseCapture
 	{
-		Invalidate();
+	public:
+		CAutoReleaseCapture(){}
+		~CAutoReleaseCapture()
+		{
+			ReleaseCapture();
+		}
+
+		CAutoReleaseCapture(const CAutoReleaseCapture&) = delete;
+		CAutoReleaseCapture& operator=(const CAutoReleaseCapture&) = delete;
+	};
+
+	CAutoReleaseCapture obj;//自动释放
+
+	CRect rectBtn(m_rectButton);//按钮区域	
+	CRect rectBlockArea(m_rectBlockArea);//方块区域
+
+	if (rectBtn.PtInRect(pt))//重新开始
+	{		
 		InitGame();
+		Invalidate();
 	}
 	else if (rectBlockArea.PtInRect(pt))//点击雷区
 	{		
-		//根据不同的游戏状态作处理
-		switch (m_uGameState)
+		switch (m_uGameState)//根据游戏状态作处理
 		{
 		//游戏进行状态
 		case EGS_Wait: 
 		case EGS_Run:
 		{
-						// first get the MINEWND which if pushing down
-						m_pOldMine = GetMine(pt.x, pt.y);
-						if (!m_pOldMine)
+						m_pPreBlock = GetBlock(pt.x, pt.y);
+						if (!m_pPreBlock)
 						{
-							ReleaseCapture();
 							return;
 						}
-						// do normal process
-						//检测判断当前状态是否为左右鼠标同时按下
-						if (m_bLRBtnDown)
+
+						if (m_bLRBtnDown)//左右鼠标同时按下
 						{
 							m_bLRBtnDown = FALSE;
-							OnLRBtnUp(m_pOldMine->uRow, m_pOldMine->uCol);
+							OnLRBtnUp(m_pPreBlock->uRow, m_pPreBlock->uCol);
 
 							if (m_uGameState == EGS_Wait)
 							{
 								m_uBtnState = EBS_Normal;
 								Invalidate();
-								ReleaseCapture();
+
 								return;
 							}
 
-							//假若周围已经标识的雷＝周围真正的雷数，拓展
-							if (m_pOldMine->uState != EBS_Flag)
+							if (!HasCorrectFlags(m_pPreBlock->uRow, m_pPreBlock->uCol))//标记不准确
 							{
-								OpenAround(m_pOldMine->uRow, m_pOldMine->uCol);
-							}
+								Dead(m_pPreBlock->uRow, m_pPreBlock->uCol);
 
-							// check whether the MINEWND around the special MINEWND is a mine, if it is then dead.
-							if (ErrorAroundFlag(m_pOldMine->uRow, m_pOldMine->uCol))
-							{
-								Dead(m_pOldMine->uRow, m_pOldMine->uCol);
-								ReleaseCapture();
 								return;
 							}
+
+							if (m_pPreBlock->uState != EBS_Flag)//非标记状态即可扩展
+							{
+								OpenAround(m_pPreBlock->uRow, m_pPreBlock->uCol);//flag与mine个数相同即可打开扩展
+							}					
 						}
-						else
-						{
-							//如果游戏尚未开始，点击左键启动游戏
-							if (m_uGameState == EGS_Wait)
+						else//仅单击左键
+						{							
+							if (m_uGameState == EGS_Wait)//启动游戏
 							{
 								if (m_uTimer)
 								{
-									KillTimer(ID_TIMER_EVENT);
+									KillTimer(TIMER_ID);
 									m_uTimer = 0;
 								}
-								// the following five lines refresh the remining mine num rect immediately 
-								// when click in the mine area at the first time
+
 								m_uSpendTime = 1;
-								Invalidate();
+								Invalidate();//重绘界面
+
 								if (m_bSoundful)
 								{
 									sndPlaySound((LPCTSTR)LockResource(m_pSndClock), SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
 								}
-								//启动定时器
-								m_uTimer = SetTimer(ID_TIMER_EVENT, 1000, nullptr);
-								//布雷
-								LayMines(m_pOldMine->uRow, m_pOldMine->uCol);		// lay all the mines down 
-								//改变游戏状态
-								m_uGameState = EGS_Run;
-
+								
+								m_uTimer = SetTimer(TIMER_ID, 1000, nullptr);//启动定时器								
+								LayMines(m_pPreBlock->uRow, m_pPreBlock->uCol);//布雷								
+								m_uGameState = EGS_Run;//改变游戏状态
 							}
 
-							if (m_pOldMine->uOldState == EBS_Normal)
+							if (m_pPreBlock->uOldState == EBS_Normal)//该方块未作任何标记
 							{
-								//当该雷区域为正常未作标记才打开								
-								//如果该区域为雷，则死亡
-								if (IsMine(m_pOldMine->uRow, m_pOldMine->uCol))
+								if (IsMine(m_pPreBlock->uRow, m_pPreBlock->uCol))//若为雷，直接gg
 								{
-									Dead(m_pOldMine->uRow, m_pOldMine->uCol);
-									ReleaseCapture();
+									Dead(m_pPreBlock->uRow, m_pPreBlock->uCol);
+									
 									return;
 								}
+								else
+								{
+									uint around = GetAroundMines(m_pPreBlock->uRow, m_pPreBlock->uCol);
 
-								//不是雷的时候，获取其周围的雷数目
-								//如果为空白区域，拓展，否则打开该区域（显示周围有多少雷数）
-								uint around = GetAroundMines(m_pOldMine->uRow, m_pOldMine->uCol);
-
-								if (around == 0) 
-									ExpandMines(m_pOldMine->uRow, m_pOldMine->uCol);
-								else 
-									DrawDownNum(m_pOldMine, around);
+									if (around == 0)//周围无雷，展开
+										ExpandMines(m_pPreBlock->uRow, m_pPreBlock->uCol);
+									else//周围有雷，显示数字
+										DrawDownNum(m_pPreBlock, around);
+								}
+								
 							}
-							else if (m_pOldMine->uOldState == EBS_Dicey)
-							{//标志为“？”问号的时候
-								m_pOldMine->uState = EBS_Dicey;
+							else if (m_pPreBlock->uOldState == EBS_Dicey)//该方块标记为问号
+							{
+								m_pPreBlock->uState = EBS_Dicey;
 							}
 
 							//判断是否为胜利
 							if (Victory())
 							{
 								Invalidate();
-								ReleaseCapture();
+								
 								return;
 							}
 						}
@@ -1082,7 +1090,6 @@ void CMineWnd::OnLButtonUp(uint nFlags, CPoint pt)
 			break;
 		case EGS_Victory:
 		case EGS_Dead:
-			ReleaseCapture();		// release the cursor
 			return;
 		default:
 			break;
@@ -1100,46 +1107,44 @@ void CMineWnd::OnLButtonUp(uint nFlags, CPoint pt)
 		}
 	}
 
-	ReleaseCapture();		// release the cursor
 	CWnd::OnLButtonUp(nFlags, pt);
 }
 
 void CMineWnd::OnRButtonDown(uint nFlags, CPoint pt)
 {
-	CRect rectBtn(m_rectButton);//按钮区域	
-	CRect rectBlockArea(m_rectBlockArea);//雷区
+	CRect rectBtn(m_rectButton);
+	CRect rectBlockArea(m_rectBlockArea);
 
 	m_bLRBtnDown = FALSE;
 
-	if (rectBlockArea.PtInRect(pt))//点击雷区域	
+	if (rectBlockArea.PtInRect(pt))//点击方块区域	
 	{		
 		if (m_uGameState == EGS_Wait || m_uGameState == EGS_Run)
 		{
-			if (m_pNewMine = GetMine(pt.x, pt.y))
+			if (m_pCurBlock = GetBlock(pt.x, pt.y))
 			{
-				// both of the left button and the right button are pushing down 
-				if (nFlags == (MK_LBUTTON | MK_RBUTTON))
+				if (nFlags == (MK_LBUTTON | MK_RBUTTON))//左右键同时按下
 				{
 					m_bLRBtnDown = TRUE;
-					OnLRBtnDown(m_pNewMine->uRow, m_pNewMine->uCol);
+					OnLRBtnDown(m_pCurBlock->uRow, m_pCurBlock->uCol);
 				}
 				else
 				{
-					switch (m_pNewMine->uState)
+					switch (m_pCurBlock->uState)
 					{
 					case EBS_Normal:
-						m_pNewMine->uState = EBS_Flag;
-						m_pNewMine->uOldState = EBS_Flag;
+						m_pCurBlock->uState = EBS_Flag;
+						m_pCurBlock->uOldState = EBS_Flag;
 						m_nLeftNum--;
 						break;
 					case EBS_Flag:
-						m_pNewMine->uState = EBS_Dicey;
-						m_pNewMine->uOldState = EBS_Dicey;
+						m_pCurBlock->uState = EBS_Dicey;
+						m_pCurBlock->uOldState = EBS_Dicey;
 						m_nLeftNum++;
 						break;
 					case EBS_Dicey:
-						m_pNewMine->uState = EBS_Normal;
-						m_pNewMine->uOldState = EBS_Normal;
+						m_pCurBlock->uState = EBS_Normal;
+						m_pCurBlock->uOldState = EBS_Normal;
 						break;
 					default:
 						break;
@@ -1156,18 +1161,15 @@ void CMineWnd::OnRButtonDown(uint nFlags, CPoint pt)
 
 void CMineWnd::OnRButtonUp(uint nFlags, CPoint pt)
 {
-	CRect rectBtn(m_rectButton);//按钮区域	
-	CRect rectBlockArea(m_rectBlockArea);//雷区
-
-	m_pOldMine = GetMine(pt.x, pt.y);
-	if (!m_pOldMine) 
+	m_pPreBlock = GetBlock(pt.x, pt.y);
+	if (!m_pPreBlock) 
 		return;
 
-	// judge whether the lr button are both pushed down
-	if (m_bLRBtnDown)
+	if (m_bLRBtnDown)//左右键同时按下
 	{
 		m_bLRBtnDown = FALSE;
-		OnLRBtnUp(m_pOldMine->uRow, m_pOldMine->uCol);
+		OnLRBtnUp(m_pPreBlock->uRow, m_pPreBlock->uCol);
+
 		if (m_uGameState == EGS_Wait)
 		{
 			m_uBtnState = EBtnS_Normal;
@@ -1175,21 +1177,21 @@ void CMineWnd::OnRButtonUp(uint nFlags, CPoint pt)
 			return;
 		}
 		// if the around flags number equal to the around mines number, expand.
-		if (m_pOldMine->uState != EBS_Flag)
+		else if (m_pPreBlock->uState != EBS_Flag)
 		{
-			OpenAround(m_pOldMine->uRow, m_pOldMine->uCol);
+			OpenAround(m_pPreBlock->uRow, m_pPreBlock->uCol);
 		}
 		// check whether the MINEWND around the special MINEWND is a mine, if it is then dead.
-		if (ErrorAroundFlag(m_pOldMine->uRow, m_pOldMine->uCol))
+		if (!HasCorrectFlags(m_pPreBlock->uRow, m_pPreBlock->uCol))
 		{
-			//			Dead(m_pOldMine->uRow, m_pOldMine->uCol);
+			//			Dead(m_pPreBlock->uRow, m_pPreBlock->uCol);
 			//			ReleaseCapture();
 			return;
 		}
 	}
 	else
 	{
-		Victory();
+		//Victory();
 	}
 
 	CWnd::OnRButtonUp(nFlags, pt);
@@ -1199,15 +1201,15 @@ void CMineWnd::OnMouseMove(uint nFlags, CPoint pt)
 {
 	if (nFlags == MK_LBUTTON || nFlags == (MK_LBUTTON | MK_RBUTTON))
 	{
-		CRect rectBtn(m_rectButton);//按钮区域	
-		CRect rectBlockArea(m_rectBlockArea);//雷区		
+		CRect rectBtn(m_rectButton);	
+		CRect rectBlockArea(m_rectBlockArea);
 
-		if (rectBtn.PtInRect(pt))
-		{				// pt in button area
+		if (rectBtn.PtInRect(pt))//按钮区域
+		{
 			switch (m_uGameState)
 			{
 			case EGS_Run:
-				m_uBtnState = (m_bClickBtn) ? EBtnS_Down : EBtnS_Click;
+				m_uBtnState = m_bClickBtn ? EBtnS_Down : EBtnS_Click;
 				break;
 			case EGS_Dead: 
 			case EGS_Victory:
@@ -1220,36 +1222,36 @@ void CMineWnd::OnMouseMove(uint nFlags, CPoint pt)
 
 			InvalidateRect(rectBtn);
 		}
-		else if (rectBlockArea.PtInRect(pt))
-		{		// pt in mine area
+		else if (rectBlockArea.PtInRect(pt))//方块区域
+		{
 			switch (m_uGameState)
 			{
 			case EGS_Run:
-				m_pNewMine = GetMine(pt.x, pt.y);
-				if (!m_pNewMine || !m_pOldMine) 
+				m_pCurBlock = GetBlock(pt.x, pt.y);
+				if (!m_pCurBlock || !m_pPreBlock) 
 					return;
 				
-				if (m_pNewMine->uCol != m_pOldMine->uCol ||
-					m_pNewMine->uRow != m_pOldMine->uRow)
+				if (m_pCurBlock->uCol != m_pPreBlock->uCol ||
+					m_pCurBlock->uRow != m_pPreBlock->uRow)
 				{
 					// change the new mine rect state
-					switch (m_pNewMine->uState)
+					switch (m_pCurBlock->uState)
 					{
 					case EBS_Normal:
-						m_pNewMine->uState = EBS_Empty;
+						m_pCurBlock->uState = EBS_Empty;
 						break;
 					case EBS_Dicey:
-						m_pNewMine->uState = EBS_DiceyDown;
+						m_pCurBlock->uState = EBS_DiceyDown;
 						break;
 					}
 					// resume the old mine rect state
-					switch (m_pOldMine->uOldState)
+					switch (m_pPreBlock->uOldState)
 					{
 					case EBS_Normal:
-						m_pOldMine->uState = EBS_Normal;
+						m_pPreBlock->uState = EBS_Normal;
 						break;
 					case EBS_Dicey:
-						m_pOldMine->uState = EBS_Dicey;
+						m_pPreBlock->uState = EBS_Dicey;
 						break;
 					default:
 						break;
@@ -1257,11 +1259,11 @@ void CMineWnd::OnMouseMove(uint nFlags, CPoint pt)
 					// judge whether the lr button are pushed down
 					if (m_bLRBtnDown)
 					{
-						OnLRBtnUp(m_pOldMine->uRow, m_pOldMine->uCol);
-						OnLRBtnDown(m_pNewMine->uRow, m_pNewMine->uCol);
+						OnLRBtnUp(m_pPreBlock->uRow, m_pPreBlock->uCol);
+						OnLRBtnDown(m_pCurBlock->uRow, m_pCurBlock->uCol);
 					}
 
-					m_pOldMine = m_pNewMine;
+					m_pPreBlock = m_pCurBlock;
 				}
 
 				InvalidateRect(rectBlockArea);
@@ -1273,21 +1275,21 @@ void CMineWnd::OnMouseMove(uint nFlags, CPoint pt)
 				break;
 			}
 		}
-		else// pt in other area
+		else//非交互区域
 		{		
 			switch (m_uGameState)
 			{
 			case EGS_Run:
 				m_uBtnState = (m_bClickBtn) ? EBtnS_Normal: EBtnS_Click;
-				if (m_pNewMine)
+				if (m_pCurBlock)
 				{
-					if (m_pNewMine->uOldState == EBS_Normal)
+					if (m_pCurBlock->uOldState == EBS_Normal)
 					{
-						m_pNewMine->uState = EBS_Normal;
+						m_pCurBlock->uState = EBS_Normal;
 					}
-					else if (m_pNewMine->uOldState == EBS_Dicey)
+					else if (m_pCurBlock->uOldState == EBS_Dicey)
 					{
-						m_pNewMine->uState = EBS_Dicey;
+						m_pCurBlock->uState = EBS_Dicey;
 					}
 				}
 				break;
@@ -1472,7 +1474,7 @@ void CMineWnd::OnInitMenu(CMenu* pMenu)
 void CMineWnd::OnMemuClose()
 {
 	SaveConfig();
-	KillTimer(ID_TIMER_EVENT);
+	KillTimer(TIMER_ID);
 
 	CWnd::OnClose();
 }

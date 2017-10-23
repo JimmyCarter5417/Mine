@@ -69,9 +69,9 @@ protected:
 	void DrawShell(CPaintDC &dc);
 	void DrawButton(CPaintDC &dc);
 	void DrawNumber(CPaintDC &dc);
-	void DrawMineArea(CPaintDC &dc);
+	void DrawBlockArea(CPaintDC &dc);
 	void DrawDownNum(MINEWND* mine, uint num);
-	void DrawSpecialMine(uint row, uint col);
+	void DrawOneBlock(uint row, uint col);
 	// change menu check state funtions
 	void SetCheckedSound();
 	void SetCheckedColor();
@@ -79,7 +79,7 @@ protected:
 	void SetCheckedCheat();
 	// other functions
 	void ExpandMines(uint row, uint col);
-	BOOL IsInMineArea(uint row, uint col);
+	BOOL IsInBlockArea(uint row, uint col);
 	BOOL IsMine(uint row, uint col);
 	uint GetAroundMines(uint row, uint col);
 	uint GetAroundFlags(uint row, uint col);
@@ -89,10 +89,10 @@ protected:
 	void OnLRBtnDown(uint row, uint col);
 	void OnLRBtnUp(uint row, uint col);
 	void OpenAround(uint row, uint col);
-	BOOL ErrorAroundFlag(uint row, uint col/*, uint &errorRow, uint &errorCol*/);
+	BOOL HasCorrectFlags(uint row, uint col/*, uint &errorRow, uint &errorCol*/);
 	void OpenByCheat();
 
-	MINEWND* GetMine(long x, long y);
+	MINEWND* GetBlock(long x, long y);
 
 private:
 	uint		m_uXNum;				// X方向小方块个数
@@ -133,8 +133,8 @@ private:
 	uint		m_uBtnState;			// 按钮状态
 	
 	MINEWND		m_pMines[100][100];		// 表示雷区内的所有小方块的二维数组
-	MINEWND*	m_pNewMine;				// 当前选中的小方块
-	MINEWND*	m_pOldMine;				// 上次选中的小方块
+	MINEWND*	m_pCurBlock;				// 当前选中的小方块
+	MINEWND*	m_pPreBlock;				// 上次选中的小方块
 	void*		m_pSndDead;				// 失败提示音
 	void*		m_pSndVictory;			// 胜利提示音
 	void*		m_pSndClock;			// 时钟提示音

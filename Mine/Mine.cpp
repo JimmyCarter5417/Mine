@@ -39,13 +39,16 @@ BOOL CMineApp::InitInstance()
 	//创建窗口
 	m_pMineWnd = new CMineWnd();
 	if (nullptr == m_pMineWnd || 
-		!m_pMineWnd->CreateEx(0, className, TEXT("扫雷"), WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX, 
+		!m_pMineWnd->CreateEx(0, className, TEXT("扫雷"), WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX,
 			GetSystemMetrics(SM_CXSCREEN) / 2, GetSystemMetrics(SM_CYSCREEN) / 2, 0, 0, nullptr, nullptr))
 			//实际窗口大小在CMineWnd内部设置
 	{
 		AfxMessageBox(TEXT("创建主窗口失败！"));
 		return FALSE;
 	}
+
+	//SetWindowLong(m_pMineWnd->m_hWnd, GWL_STYLE, GetWindowLong(m_pMineWnd->m_hWnd, GWL_STYLE) & ~WS_MAXIMIZEBOX);
+
 	//绑定为主窗口
 	m_pMainWnd = m_pMineWnd;
 	m_pMineWnd->ShowWindow(SW_NORMAL);
