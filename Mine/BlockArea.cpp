@@ -273,3 +273,99 @@ def::EBlockAttr CBlockArea::GetAttr(uint x, uint y)
 
 	return m_vBlockArea[x][y].attr;
 }
+
+//左右键同时按下
+bool CBlockArea::LRBtnDown(uint x, uint y)
+{
+	if (!IsValidPos(x, y))
+		return false;
+
+	for (uint i = x - 1; i <= x + 1; i++)
+	{
+		for (uint j = y - 1; j <= y + 1; j++)
+		{
+			if (IsValidPos(i, j))
+			{
+				//仅修改普通和未知状态
+				if (m_vBlockArea[i][j].cur_state == def::EBS_Normal)
+				{
+					m_vBlockArea[i][j].cur_state = def::EBS_Empty;
+				}
+				else if (m_vBlockArea[i][j].cur_state == def::EBS_Dicey)
+				{
+					m_vBlockArea[i][j].cur_state = def::EBS_DiceyDown;
+				}
+			}
+		}
+	}
+}
+
+//左右键同时松开
+bool CBlockArea::LRBtnUp(uint x, uint y)
+{
+	if (!IsValidPos(x, y))
+		return false;
+
+	for (uint i = x - 1; i <= x + 1; i++)
+	{
+		for (uint j = y - 1; j <= y + 1; j++)
+		{
+			if (IsValidPos(i, j))
+			{
+				//仅恢复老的普通和未知状态
+				if (m_vBlockArea[i][j].old_state == def::EBS_Normal ||
+					m_vBlockArea[i][j].old_state == def::EBS_Dicey)
+				{
+					m_vBlockArea[i][j].cur_state = m_vBlockArea[i][j].old_state;
+				}				
+			}
+		}
+	}
+}
+
+bool CBlockArea::LBtnDown(uint x, uint y)
+{
+	if (!IsValidPos(x, y))
+		return false;
+
+	//仅修改普通和未知状态
+	if (m_vBlockArea[x][y].cur_state == def::EBS_Normal)
+	{
+		m_vBlockArea[x][y].cur_state = def::EBS_Empty;
+	}
+	else if (m_vBlockArea[x][y].cur_state == def::EBS_Dicey)
+	{
+		m_vBlockArea[x][y].cur_state = def::EBS_DiceyDown;
+	}
+}
+
+bool CBlockArea::LBtnUp(uint x, uint y)
+{
+	if (!IsValidPos(x, y))
+		return false;
+
+}
+
+//是否正确标记周围所有的雷
+bool CBlockArea::HasCorrentFlags(uint x, uint y)
+{
+	if (!IsValidPos(x, y))
+		return true;
+
+	for (uint i = x - 1; i <= x + 1; i++)
+	{
+		for (uint j = y - 1; j <= y + 1; j++)
+		{
+			if (IsValidPos(i, j))
+			{
+				if ((m_vBlockArea[i][j].cur_state == def::EBS_Flag && m_vBlockArea[i][j].attr != def::EBA_Mine) ||//非雷标记为雷
+					(m_vBlockArea[i][j].cur_state != def::EBS_Flag && m_vBlockArea[i][j].attr == def::EBA_Mine))//雷未标记出来
+				{
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+}

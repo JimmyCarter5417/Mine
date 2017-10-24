@@ -68,10 +68,10 @@ protected:
 
 	void InitGame();	
 
-	void SizeWindow();
+	void CalcWindowSize();
 	
 	// draw functions
-	void DrawShell(CPaintDC &dc);
+	void DrawFrame(CPaintDC &dc);
 	void DrawButton(CPaintDC &dc);
 	void DrawNumber(CPaintDC &dc);
 	void DrawBlockArea(CPaintDC &dc);
@@ -97,7 +97,10 @@ protected:
 	BOOL HasCorrectFlags(uint row, uint col/*, uint &errorRow, uint &errorCol*/);
 	void OpenByCheat();
 
-	pair<uint, uint> GetBlock(long x, long y);
+	bool GetBlock(long x, long y, pair<uint, uint>& pos);
+	
+	bool IsInBtn(CPoint pt);
+	bool IsInBlockArea(CPoint pt);
 
 private:
 	uint		m_uRowNum;				// X方向小方块个数
@@ -118,6 +121,7 @@ private:
 
 	BOOL		m_bLRBtnDown;			// 是否为左右键同时按下
 	BOOL		m_bClickBtn;			// 左键按下的时候鼠标是否位于按钮区域内
+
 	BOOL		m_bColorful;			// 是否彩色显示
 	BOOL		m_bSoundful;			// 是否有声音
 	CMenu*		m_pSubMenu;				// 子菜单
@@ -136,8 +140,9 @@ private:
 
 	uint		m_uBtnState;			// 按钮状态
 	
-	pair<uint, uint>	m_coCurBlock;				// 当前选中的小方块
-	pair<uint, uint>	m_coPreBlock;				// 上次选中的小方块
+	pair<uint, uint>	m_posCurBlock;				// 当前选中的小方块
+	pair<uint, uint>	m_posOldBlock;				// 上次选中的小方块
+
 	void*		m_pSndDead;				// 失败提示音
 	void*		m_pSndVictory;			// 胜利提示音
 	void*		m_pSndClock;			// 时钟提示音

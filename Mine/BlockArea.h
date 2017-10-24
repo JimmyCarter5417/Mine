@@ -29,6 +29,12 @@ public:
 	bool Open(uint x, uint y);
 	bool IsVictory();
 	bool DeadAt(uint x, uint y);
+	bool HasCorrentFlags(uint x, uint y);
+
+	bool LBtnDown(uint x, uint y);
+	bool LBtnUp(uint x, uint y);
+	bool LRBtnDown(uint x, uint y);
+	bool LRBtnUp(uint x, uint y);
 	
 	def::EBlockState GetCurState(uint x, uint y);
 	bool SetCurState(uint x, uint y, def::EBlockState state);
