@@ -3,6 +3,7 @@
 #include "Mine.h"
 #include "MineWnd.h"
 #include "Def.h"
+#include "BlockArea.h"
 
 #include "NewRecordDlg.h"
 #include "HeroDlg.h"
@@ -17,26 +18,15 @@ using namespace std;
 #define TIMER_ID 1234
 
 CMineWnd::CMineWnd()
+: m_pBlockArea(CBlockArea::GetInstance())
 {
-	m_pSndDead = nullptr;
-	m_pSndVictory = nullptr;
-	m_pSndClock = nullptr;
-	m_uTimer = 0;
-	m_brsBG.CreateSolidBrush(g_clrGray);
-
-	LoadConfig();
-
-	if (m_bSoundful) 
-		LoadWave();
-
 	InitGame();	
 }
 
 CMineWnd::~CMineWnd()
 {
-	FreeMines();
-	FreeWave();
 	SaveConfig();
+	FreeWave();	
 }
 
 BEGIN_MESSAGE_MAP(CMineWnd, CWnd)
@@ -47,7 +37,7 @@ BEGIN_MESSAGE_MAP(CMineWnd, CWnd)
 	ON_WM_RBUTTONUP()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
-	//ON_WM_MOUSEMOVE()
+	ON_WM_MOUSEMOVE()
 	ON_WM_KEYDOWN()
 	ON_WM_INITMENU()
 	ON_WM_CLOSE()
@@ -59,12 +49,9 @@ BEGIN_MESSAGE_MAP(CMineWnd, CWnd)
 	ON_COMMAND(IDM_COLOR, OnMemuColor)
 	ON_COMMAND(IDM_SOUND, OnMemuSound)
 	ON_COMMAND(IDM_EXIT, OnMemuExit)
-	ON_COMMAND(IDM_HELP_LIST, OnMemuHelpList)
-	ON_COMMAND(IDM_HELP_FIND, OnMemuHelpFind)
 	ON_COMMAND(IDM_HELP_USE, OnMemuHelpUse)
 	ON_COMMAND(IDM_ABOUT, OnMemuAbout)	
 	ON_COMMAND(IDM_HERO, OnMemuHero)
-	ON_COMMAND(IDM_CHEAT, OnMemuCheat)
 END_MESSAGE_MAP()
 
 //获取配置文件路径
@@ -91,8 +78,8 @@ void CMineWnd::LoadConfig()
 {
 	CString strCfgPath = GetCfgPath();	
 
-	m_uXNum    = GetPrivateProfileInt(g_strMine, g_strXNum,    g_nDefPrimaryXNum,    strCfgPath);
-	m_uYNum    = GetPrivateProfileInt(g_strMine, g_strYNum,    g_nDefPrimaryYNum,    strCfgPath);
+	m_uRowNum    = GetPrivateProfileInt(g_strMine, g_strXNum,    g_nDefPrimaryXNum,    strCfgPath);
+	m_uColNum    = GetPrivateProfileInt(g_strMine, g_strYNum,    g_nDefPrimaryYNum,    strCfgPath);
 	m_uMineNum = GetPrivateProfileInt(g_strMine, g_strMineNum, g_nDefPrimaryMineNum, strCfgPath);
 	m_uLevel   = GetPrivateProfileInt(g_strMine, g_strLevel,   g_DefLevel,           strCfgPath);
 
@@ -121,8 +108,8 @@ void CMineWnd::SaveConfig()
 {
 	CString strCfgPath = GetCfgPath();
 
-	WritePrivateProfileString(g_strMine, g_strXNum,    to_wstring(m_uXNum).c_str(),    strCfgPath);
-	WritePrivateProfileString(g_strMine, g_strYNum,    to_wstring(m_uYNum).c_str(),    strCfgPath);
+	WritePrivateProfileString(g_strMine, g_strXNum,    to_wstring(m_uRowNum).c_str(),    strCfgPath);
+	WritePrivateProfileString(g_strMine, g_strYNum,    to_wstring(m_uColNum).c_str(),    strCfgPath);
 	WritePrivateProfileString(g_strMine, g_strMineNum, to_wstring(m_uMineNum).c_str(), strCfgPath);
 	WritePrivateProfileString(g_strMine, g_strLevel,   to_wstring(m_uLevel).c_str(),   strCfgPath);
 
@@ -166,12 +153,16 @@ void CMineWnd::LoadBitmap()
 //初始化
 void CMineWnd::InitGame()
 {	
-	LoadBitmap();//初始化位图
+	LoadConfig();
+	LoadWave();
+	LoadBitmap();
+	
+	m_brsBG.CreateSolidBrush(g_clrGray);	
 
 	m_nLeftNum = m_uMineNum;
 	m_uSpendTime = 0;
 	m_uBtnState = EBtnS_Normal;
-	m_uGameState = EGS_Wait;
+	m_uGameState = EGS_Wait;	
 
 	if (m_uTimer)
 	{
@@ -179,159 +170,16 @@ void CMineWnd::InitGame()
 		m_uTimer = 0;
 	}
 
-	m_pCurBlock = nullptr;
-	m_pPreBlock = nullptr;
+	m_coCurBlock = {0,0};
+	m_coPreBlock = { 0, 0 };
 
-	FreeMines();
-	//初始化地图
-	for (uint i = 0; i < m_uYNum; i++)
-	{
-		for (uint j = 0; j < m_uXNum; j++)
-		{
-			m_pMines[i][j].uRow = i;
-			m_pMines[i][j].uCol = j;
-			m_pMines[i][j].uState = EBS_Normal;
-			m_pMines[i][j].uAttrib = EBA_Empty;
-			m_pMines[i][j].uOldState = EBS_Normal;
-		}
-	}
-}
-
-//布雷
-void CMineWnd::LayMines(uint row, uint col)
-{
-	srand((uint)time(nullptr));
-
-	uint nLeftMineNum = m_uMineNum;
-	while (nLeftMineNum > 0)//布m_uMineNum个雷
-	{
-		//取随机数
-		uint i = rand() % m_uYNum;
-		uint j = rand() % m_uXNum;
-
-		if (!(i == row && j == col) && 
-			m_pMines[i][j].uAttrib != EBA_Mine)
-		{			
-			m_pMines[i][j].uAttrib = EBA_Mine;//修改属性为雷
-			nLeftMineNum--;//雷增加一			
-		}
-	}
-}
-
-//拓展
-void CMineWnd::ExpandMines(uint row, uint col)
-{
-	uint around = GetAroundMines(row, col);
-	m_pMines[row][col].uState = EBS_Empty - around;
-	m_pMines[row][col].uOldState = EBS_Empty - around;
-
-	//打开该方块
-	DrawOneBlock(row, col);
-
-	//扩展周围无雷的空白方块
-	if (around == 0)
-	{
-		for (uint i = row - 1; i <= row + 1; i++)
-		{
-			for (uint j = col - 1; j <= col + 1; j++)
-			{
-				if (IsInBlockArea(i, j))
-				{
-					if (!(i == row && j == col) &&
-						m_pMines[i][j].uState == EBS_Normal	&&
-						m_pMines[i][j].uAttrib != EBA_Mine)
-					{
-						ExpandMines(i, j);
-					}
-				}
-			}
-		}
-	}
-}
-
-//获取相邻8个区域的雷个数
-uint CMineWnd::GetAroundMines(uint row, uint col)
-{
-	uint res = 0;
-
-	for (uint i = row - 1; i <= row + 1; i++)
-	{
-		for (uint j = col - 1; j <= col + 1; j++)
-		{
-			if (IsInBlockArea(i, j))
-			{
-				if (m_pMines[i][j].uAttrib == EBA_Mine)
-				{
-					res++;
-				}
-			}
-		}
-	}
-
-	return res;
-}
-
-//获取相邻8个区域的已标志个数
-uint CMineWnd::GetAroundFlags(uint row, uint col)
-{
-	uint res = 0;
-
-	for (uint i = row - 1; i <= row + 1; i++)
-	{
-		for (uint j = col - 1; j <= col + 1; j++)
-		{
-			if (IsInBlockArea(i, j))
-			{
-				if (m_pMines[i][j].uState == EBS_Flag)
-				{
-					res++;
-				}
-			}
-		}
-	}
-
-	return res;
-}
-
-//判断是否为雷
-BOOL CMineWnd::IsMine(uint row, uint col)
-{
-	return m_pMines[row][col].uAttrib == EBA_Mine;
-}
-
-//判断是否在有效区域内
-BOOL CMineWnd::IsInBlockArea(uint row, uint col)
-{
-	return row >= 0 && row < m_uYNum && col >= 0 && col < m_uXNum;
+	m_pBlockArea->Init(m_uRowNum, m_uColNum, m_uMineNum);//初始化地图	
 }
 
 //失败处理
 void CMineWnd::Dead(uint row, uint col)
-{	
-	if (m_pMines[row][col].uAttrib == EBA_Mine)//点中雷
-	{
-		m_pMines[row][col].uState = EBS_Blast;
-		m_pMines[row][col].uOldState = EBS_Blast;
-		
-	}
-	else//错误雷
-	{
-		m_pMines[row][col].uState = EBS_Error;
-		m_pMines[row][col].uOldState = EBS_Error;		
-	}
-
-	for (uint i = 0; i < m_uYNum; i++)
-	{
-		for (uint j = 0; j < m_uXNum; j++)
-		{
-			if (m_pMines[i][j].uAttrib == EBA_Mine /*&&
-				m_pMines[i][j].uState != EBS_Flag*/)
-			{
-				m_pMines[i][j].uState = EBS_Mine;
-				m_pMines[i][j].uOldState = EBS_Mine;
-			}
-		}
-	}
+{
+	m_pBlockArea->DeadAt(row, col);
 
 	CRect rectBtn(m_rectButton);//按钮区域	
 	CRect rectBlockArea(m_rectBlockArea);//雷区
@@ -357,17 +205,8 @@ void CMineWnd::Dead(uint row, uint col)
 //胜利判断并处理
 BOOL CMineWnd::Victory()
 {
-	for (uint i = 0; i < m_uYNum; i++)
-	{
-		for (uint j = 0; j < m_uXNum; j++)
-		{
-			if (m_pMines[i][j].uState == EBS_Normal || 
-				m_pMines[i][j].uState == EBS_Dicey)
-			{
-				return FALSE;
-			}
-		}
-	}
+	if (!m_pBlockArea->IsVictory())
+		return FALSE;
 
 	//修改状态
 	m_uBtnState = EBtnS_Victory;
@@ -478,105 +317,12 @@ void CMineWnd::OnLRBtnUp(uint row, uint col)
 	}
 }
 
-//展开拓展周围8个方向
-void CMineWnd::OpenAround(uint row, uint col)
-{
-	//如果周围相邻的标志雷数 != 周围相邻的雷数 则返回
-	if (GetAroundFlags(row, col) != GetAroundMines(row, col))
-		return;
-
-	for (uint i = row - 1; i <= row + 1; i++)
-	{
-		for (uint j = col - 1; j <= col + 1; j++)
-		{
-			if (IsInBlockArea(i, j))
-			{
-				//如果该区域为正常区域，拓展该雷区
-				if (m_pMines[i][j].uState == EBS_Normal)
-				{					
-					ExpandMines(i, j);
-
-					uint around = GetAroundMines(i, j);
-					m_pMines[i][j].uState = EBS_Empty - around;//设置周围雷数目
-					m_pMines[i][j].uOldState = EBS_Empty - around;
-				}
-			}
-		}
-	}
-
-	//胜利则将所有雷标识出来
-	if (Victory())
-	{
-		for (uint i = 0; i < m_uYNum; i++)
-		{
-			for (uint j = 0; j < m_uXNum; j++)
-			{
-				if (m_pMines[i][j].uAttrib == EBA_Mine)
-				{
-					m_pMines[i][j].uState = EBS_Flag;
-					m_pMines[i][j].uOldState = EBS_Flag;
-				}
-			}
-		}
-
-		m_nLeftNum = 0;
-		Invalidate();
-	}
-}
-
-//检测是否正确标记了周围所有的雷
-BOOL CMineWnd::HasCorrectFlags(uint row, uint col)
-{
-	for (uint i = row - 1; i <= row + 1; i++)
-	{
-		for (uint j = col - 1; j <= col + 1; j++)
-		{
-			if (IsInBlockArea(i, j))
-			{
-				if ((m_pMines[i][j].uState != EBS_Flag && m_pMines[i][j].uAttrib == EBA_Mine) ||//未标记雷
-					(m_pMines[i][j].uState == EBS_Flag && m_pMines[i][j].uAttrib == EBA_Empty))//错误标记空方块
-				{					
-					return FALSE;
-				}
-			}
-		}
-	}
-
-	return TRUE;
-}
-
-void CMineWnd::OpenByCheat()
-{
-	for (uint i = 0; i < m_uYNum; i++)
-	{
-		for (uint j = 0; j < m_uXNum; j++)
-		{
-			if (m_pMines[i][j].uState != EBS_Flag)
-				OpenAround(i, j);
-		}
-	}
-}
-
-void CMineWnd::FreeMines()
-{
-	//	if (m_pMines) {
-	//		delete[] m_pMines;
-	//		m_pMines = nullptr;
-	//	}
-	//	for (uint row = 0; row<m_uYNum; row++) {
-	//		if (m_pMines[row]) {
-	//			delete []m_pMines[m_uXNum];
-	//			delete m_pMines[row];
-	//		}
-	//	}
-}
-
 //设定各项尺寸
 void CMineWnd::SizeWindow()
 {
 	//见图片
-	uint uWidth = g_nXOffset * 2 + m_uXNum * g_nBlockWidth + 18;
-	uint uHeight = g_nYOffset * 2 + m_uYNum * g_nBlockHeight + g_nInnerYOffset * 2 + g_nNumHeight + g_nGap + 60;
+	uint uWidth = g_nXOffset * 2 + m_uRowNum * g_nBlockWidth + 18;
+	uint uHeight = g_nYOffset * 2 + m_uColNum * g_nBlockHeight + g_nInnerYOffset * 2 + g_nNumHeight + g_nGap + 60;
 	SetWindowPos(&wndTopMost, 0, 0, uWidth, uHeight, SWP_NOZORDER | SWP_NOMOVE | SWP_NOCOPYBITS);
 	//客户区域
 	GetClientRect(&m_rectClient);
@@ -671,9 +417,9 @@ void CMineWnd::DrawBlockArea(CPaintDC &dc)
 	dcMemory.CreateCompatibleDC(&dc); //使得这个设备与dc兼容
 	dcMemory.SelectObject(m_bmpMine); //将内存设备与位图资源关联
 
-	for (uint i = 0; i < m_uYNum; i++)
+	for (uint i = 0; i < m_uColNum; i++)
 	{
-		for (uint j = 0; j < m_uXNum; j++)
+		for (uint j = 0; j < m_uRowNum; j++)
 		{//根据[i][j]区域的方块状态拷贝相应的图像到[i][j]区域
 			dc.StretchBlt(m_rectBlockArea.left + g_nBlockWidth * j, m_rectBlockArea.top + g_nBlockHeight * i, g_nBlockWidth, g_nBlockHeight, &dcMemory, 
 				0, g_nBlockHeight * m_pMines[i][j].uState, g_nBlockWidth, g_nBlockHeight, SRCCOPY);
@@ -698,7 +444,7 @@ void CMineWnd::DrawOneBlock(uint row, uint col)
 }
 
 //获取坐标(x,y)对应的方块
-CMineWnd::MINEWND* CMineWnd::GetBlock(long x, long y)
+pair<uint, uint> CMineWnd::GetBlock(long x, long y)
 {
 	//保证参数合格
 	if (x < m_rectBlockArea.left  || 
@@ -706,14 +452,11 @@ CMineWnd::MINEWND* CMineWnd::GetBlock(long x, long y)
 		y < m_rectBlockArea.top   ||
 		y > m_rectBlockArea.bottom)
 	{
-		return nullptr;
+		return{0, 0};
 	}
-
-	//根据坐标值算出该小方块所在地图的行和列
-	uint uCol = (uint)(x - m_rectBlockArea.left) / g_nBlockWidth;
-	uint uRow = (uint)(y - m_rectBlockArea.top) / g_nBlockHeight;
-	//返回该区域的雷信息
-	return &m_pMines[uRow][uCol];
+	
+	return { (uint)(x - m_rectBlockArea.left) / g_nBlockWidth,
+			 (uint)(y - m_rectBlockArea.top) / g_nBlockHeight };
 }
 
 void CMineWnd::SetCheckedLevel()
@@ -774,21 +517,6 @@ void CMineWnd::SetCheckedSound()
 	}
 }
 
-void CMineWnd::SetCheckedCheat()
-{
-	if (m_pSubMenu)
-	{
-		//		if (m_bCheat) 
-		//		{
-		//			m_pSubMenu->CheckMenuItem(IDM_CHEAT, MF_CHECKED | MF_BYCOMMAND);
-		//		}
-		//	else 
-		//		{
-		m_pSubMenu->CheckMenuItem(IDM_CHEAT, MF_UNCHECKED | MF_BYCOMMAND);
-		//		}
-	}
-}
-
 void CMineWnd::LoadWave()
 {
 	HMODULE hResource = AfxGetResourceHandle();
@@ -833,8 +561,8 @@ void CMineWnd::ResetRecord()
 
 void CMineWnd::SetCustom(uint xNum, uint yNum, uint mNum)
 {
-	m_uXNum = xNum;
-	m_uYNum = yNum;
+	m_uRowNum = xNum;
+	m_uColNum = yNum;
 	m_uMineNum = mNum;
 }
 
@@ -1318,8 +1046,8 @@ void CMineWnd::OnMemuStart()
 void CMineWnd::OnMemuPrimary()
 {
 	m_uLevel = ELevel_Primary;
-	m_uXNum = g_nDefPrimaryXNum;
-	m_uYNum = g_nDefPrimaryYNum;
+	m_uRowNum = g_nDefPrimaryXNum;
+	m_uColNum = g_nDefPrimaryYNum;
 	m_uMineNum = g_nDefPrimaryMineNum;
 
 	SetCheckedLevel();
@@ -1331,8 +1059,8 @@ void CMineWnd::OnMemuPrimary()
 void CMineWnd::OnMemuMedium()
 {
 	m_uLevel = ELevel_Medium;
-	m_uXNum = g_nDefMediumXNum;
-	m_uYNum = g_nDefMediumYNum;
+	m_uRowNum = g_nDefMediumXNum;
+	m_uColNum = g_nDefMediumYNum;
 	m_uMineNum = g_nDefMediumMineNum;
 
 	SetCheckedLevel();
@@ -1344,8 +1072,8 @@ void CMineWnd::OnMemuMedium()
 void CMineWnd::OnMemuAdvanced()
 {
 	m_uLevel = ELevel_Advanced;
-	m_uXNum = g_nDefAdvancedXNum;
-	m_uYNum = g_nDefAdvancedYNum;
+	m_uRowNum = g_nDefAdvancedXNum;
+	m_uColNum = g_nDefAdvancedYNum;
 	m_uMineNum = g_nDefAdvancedMineNum;
 
 	SetCheckedLevel();
@@ -1359,19 +1087,12 @@ void CMineWnd::OnMemuCustom()
 	m_uLevel = ELevel_Custom;
 	SetCheckedLevel();
 	CCustomDlg dlg;
-	dlg.InitData(m_uXNum, m_uYNum, m_uMineNum);
+	dlg.InitData(m_uRowNum, m_uColNum, m_uMineNum);
 	dlg.DoModal();
 
 	InitGame();
 	Invalidate();
 	SizeWindow();
-}
-
-void CMineWnd::OnMemuCheat()
-{
-	//	m_bCheat = !m_bCheat;
-	//	SetCheckedCheat();
-	//	Invalidate();
 }
 
 void CMineWnd::OnMemuColor()
@@ -1414,17 +1135,6 @@ void CMineWnd::OnMemuHero()
 void CMineWnd::OnMemuExit()
 {
 	PostQuitMessage(0);
-}
-
-void CMineWnd::OnMemuHelpList()
-{
-	::WinExec("HH	WINMINE.CHM", SW_SHOW);
-	//system("HH	WINMINE.CHM");
-}
-
-void CMineWnd::OnMemuHelpFind()
-{
-	::WinExec("HH	WINMINE.CHM", SW_SHOW);
 }
 
 void CMineWnd::OnMemuHelpUse()

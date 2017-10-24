@@ -29,7 +29,9 @@ namespace def
 	enum EBlockAttr
 	{
 		EBA_Empty,
-		EBA_Mine
+		EBA_Mine,
+
+		EBA_End
 	};
 
 	//·½¿é×´Ì¬

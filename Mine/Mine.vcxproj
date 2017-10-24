@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BlockArea.cpp" />
     <ClCompile Include="CustomDlg.cpp" />
     <ClCompile Include="HeroDlg.cpp" />
     <ClCompile Include="NewRecordDlg.cpp" />
@@ -150,6 +151,7 @@
     <ResourceCompile Include="Mine.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BlockArea.h" />
     <ClInclude Include="CustomDlg.h" />
     <ClInclude Include="HeroDlg.h" />
     <ClInclude Include="NewRecordDlg.h" />

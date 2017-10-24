@@ -5,6 +5,8 @@
 
 using def::uint;
 
+class CBlockArea;
+
 class CMineWnd : public CWnd
 {
 	// 雷方块结构体
@@ -55,16 +57,19 @@ protected:
 
 protected:
 	CString GetCfgPath();
-	// init and save functions
+	
 	void LoadConfig();
 	void SaveConfig();
-	void LoadWave();
+
+	void LoadWave();	
 	void FreeWave();
-	void InitGame();
+	
 	void LoadBitmap();
-	void FreeMines();
+
+	void InitGame();	
+
 	void SizeWindow();
-	void LayMines(uint row, uint col);
+	
 	// draw functions
 	void DrawShell(CPaintDC &dc);
 	void DrawButton(CPaintDC &dc);
@@ -92,22 +97,21 @@ protected:
 	BOOL HasCorrectFlags(uint row, uint col/*, uint &errorRow, uint &errorCol*/);
 	void OpenByCheat();
 
-	MINEWND* GetBlock(long x, long y);
+	pair<uint, uint> GetBlock(long x, long y);
 
 private:
-	uint		m_uXNum;				// X方向小方块个数
-	uint		m_uYNum;				// Y方向小方块个数
+	uint		m_uRowNum;				// X方向小方块个数
+	uint		m_uColNum;				// Y方向小方块个数
+	uint		m_uLevel;				// 当前游戏等级
 	uint		m_uMineNum;				// 总的雷个数
-	int 		m_nLeftNum;			// 剩余的雷个数
+	int 		m_nLeftNum;			    // 剩余的雷个数
 	uint		m_uSpendTime;			// 游戏开始到目前所花费的时间
 	uint		m_uGameState;			// 游戏状态
 	uint		m_uTimer;				// 定时器标识
-	uint		m_uNewState;			// 当前选中的小方块的状态
-
-	uint		m_uLevel;				// 当前游戏等级
+	
 	uint		m_uPrimary;				// 初级记录
 	uint		m_uMedium;				// 中级记录
-	uint		m_uAdvanced;				// 高级记录
+	uint		m_uAdvanced;			// 高级记录
 	CString		m_strPrimary;			// 初级记录保持者
 	CString		m_strMedium;			// 中级记录保持者
 	CString		m_strAdvanced;			// 高级记录保持者
@@ -132,12 +136,13 @@ private:
 
 	uint		m_uBtnState;			// 按钮状态
 	
-	MINEWND		m_pMines[100][100];		// 表示雷区内的所有小方块的二维数组
-	MINEWND*	m_pCurBlock;				// 当前选中的小方块
-	MINEWND*	m_pPreBlock;				// 上次选中的小方块
+	pair<uint, uint>	m_coCurBlock;				// 当前选中的小方块
+	pair<uint, uint>	m_coPreBlock;				// 上次选中的小方块
 	void*		m_pSndDead;				// 失败提示音
 	void*		m_pSndVictory;			// 胜利提示音
 	void*		m_pSndClock;			// 时钟提示音
+
+	CBlockArea* m_pBlockArea;
 };
 
 #endif//__MINE_WND_H__
