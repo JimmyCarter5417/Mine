@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
-// Used by Mine.rc
+// Microsoft Visual C++ 生成的包含文件。
+// 供 Mine.rc 使用
 //
 #define IDD_MINE_DIALOG                 102
 #define IDR_MAINFRAME                   128
@@ -14,9 +14,10 @@
 #define IDR_WAVE_DEAD                   139
 #define IDR_WAVE_CLOCK                  140
 #define IDR_WAVE_VICTORY                141
-#define IDD_DLG_NEWRECORD               142
-#define IDD_DLG_HERO                    143
-#define IDD_DLG_CUSTOM                  144
+#define IDD_DIALOG_NEWRECORD            142
+#define IDD_DIALOG_HERO                 143
+#define IDD_DIALOG_CUSTOM               144
+#define IDD_DIALOG_HELP                 146
 #define IDC_EDIT_NAME                   1000
 #define IDC_RESET                       1001
 #define IDC_B_R                         1002
@@ -28,6 +29,7 @@
 #define IDC_DESCRIBE                    1008
 #define IDC_HEIGHT                      1009
 #define IDC_WIDTH                       1010
+#define IDC_LIST1                       1010
 #define IDC_NUMBER                      1011
 #define IDM_START                       32771
 #define IDM_PRIMARY                     32772
@@ -49,9 +51,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        146
+#define _APS_NEXT_RESOURCE_VALUE        147
 #define _APS_NEXT_COMMAND_VALUE         32786
-#define _APS_NEXT_CONTROL_VALUE         1010
+#define _APS_NEXT_CONTROL_VALUE         1011
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

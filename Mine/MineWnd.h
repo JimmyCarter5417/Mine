@@ -2,6 +2,7 @@
 #define __MINE_WND_H__
 
 #include "def.h"
+#include "BlockArea.h"
 
 using def::uint;
 
@@ -43,8 +44,7 @@ protected:
 	afx_msg void OnMemuColor();
 	afx_msg void OnMemuSound();
 	afx_msg void OnMemuExit();
-	afx_msg void OnMemuHelpList();
-	afx_msg void OnMemuHelpFind();
+
 	afx_msg void OnMemuHelpUse();
 	afx_msg void OnMemuAbout();
 	afx_msg void OnKeyDown(uint nChar, uint nRepCnt, uint nFlags);
@@ -82,25 +82,16 @@ protected:
 	void SetCheckedColor();
 	void SetCheckedLevel();
 	void SetCheckedCheat();
-	// other functions
-	void ExpandMines(uint row, uint col);
-	BOOL IsInBlockArea(uint row, uint col);
-	BOOL IsMine(uint row, uint col);
-	uint GetAroundMines(uint row, uint col);
-	uint GetAroundFlags(uint row, uint col);
-	void Dead(uint row, uint col);
-	BOOL Victory();
-	// both button click fuctions
-	void OnLRBtnDown(uint row, uint col);
-	void OnLRBtnUp(uint row, uint col);
-	void OpenAround(uint row, uint col);
-	BOOL HasCorrectFlags(uint row, uint col/*, uint &errorRow, uint &errorCol*/);
-	void OpenByCheat();
 
-	bool GetBlock(long x, long y, pair<uint, uint>& pos);
+	bool GetBlock(long x, long y, TPos& pos);
 	
 	bool IsInBtn(CPoint pt);
 	bool IsInBlockArea(CPoint pt);
+
+	void Victory();
+	void Dead();
+
+	void GodView();
 
 private:
 	uint		m_uRowNum;				// X方向小方块个数
@@ -140,8 +131,8 @@ private:
 
 	uint		m_uBtnState;			// 按钮状态
 	
-	pair<uint, uint>	m_posCurBlock;				// 当前选中的小方块
-	pair<uint, uint>	m_posOldBlock;				// 上次选中的小方块
+	TPos	m_posCurBlock;				// 当前选中的小方块
+	TPos	m_posOldBlock;				// 上次选中的小方块
 
 	void*		m_pSndDead;				// 失败提示音
 	void*		m_pSndVictory;			// 胜利提示音

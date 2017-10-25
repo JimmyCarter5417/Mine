@@ -6,7 +6,7 @@ class CNewRecordDlg : public CDialog
 public:
 	CNewRecordDlg(CWnd* pParent = nullptr);  
 	
-	enum { IDD = IDD_DLG_NEWRECORD };
+	enum { IDD = IDD_DIALOG_NEWRECORD };
 	
 	void SetLevel(uint level);
 	CString GetName();

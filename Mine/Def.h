@@ -119,16 +119,16 @@ namespace def
 	static uint    g_nDefSoundful = 0;
 
 	//各等级默认参数
-	static uint g_nDefPrimaryXNum = 15;
-	static uint g_nDefPrimaryYNum = 15;
+	static uint g_nDefPrimaryRowNum = 10;
+	static uint g_nDefPrimaryColNum = 15;
 	static uint g_nDefPrimaryMineNum = 30;
 
-	static uint g_nDefMediumXNum = 30;
-	static uint g_nDefMediumYNum = 30;
+	static uint g_nDefMediumRowNum = 20;
+	static uint g_nDefMediumColNum = 30;
 	static uint g_nDefMediumMineNum = 120;
 
-	static uint g_nDefAdvancedXNum = 45;
-	static uint g_nDefAdvancedYNum = 45;
+	static uint g_nDefAdvancedRowNum = 30;
+	static uint g_nDefAdvancedColNum = 45;
 	static uint g_nDefAdvancedMineNum = 480;
 
 	//颜色定义

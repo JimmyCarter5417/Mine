@@ -1,3 +1,4 @@
+#include "StdAfx.h"
 #include "BlockArea.h"
 #include <time.h>
 
@@ -23,12 +24,12 @@ bool CBlockArea::Init(uint rows, uint cols, uint mines)
 	m_uMineNum = mines;
 	m_vBlockArea.assign(rows, vector<TBlock>(cols));
 
-	for (uint i = 0; i < rows; ++i)
+	for (int i = 0; i < rows; ++i)
 	{
-		for (uint j = 0; j < cols; ++j)
+		for (int j = 0; j < cols; ++j)
 		{
-			m_vBlockArea[i][j].x = i;
-			m_vBlockArea[i][j].y = j;
+			m_vBlockArea[i][j].pos.x = i;
+			m_vBlockArea[i][j].pos.y = j;
 			m_vBlockArea[i][j].attr = def::EBA_Empty;
 			m_vBlockArea[i][j].cur_state = def::EBS_Normal;
 			m_vBlockArea[i][j].old_state = def::EBS_Normal;
@@ -39,9 +40,9 @@ bool CBlockArea::Init(uint rows, uint cols, uint mines)
 }
 
 //以x,y为中心布雷
-bool CBlockArea::LayMines(uint x, uint y)
+bool CBlockArea::LayMines(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return false;
 
 	srand((uint)time(nullptr));
@@ -57,32 +58,34 @@ bool CBlockArea::LayMines(uint x, uint y)
 		uint i = rand() % rows;
 		uint j = rand() % cols;
 
-		if (!(i == rows && j == cols) && m_vBlockArea[i][j].attr != def::EBA_Mine)
+		if (!(i == pos.x && j == pos.y) && m_vBlockArea[i][j].attr != def::EBA_Mine)
 		{
-			m_vBlockArea[i][j].attr != def::EBA_Mine;//修改属性为雷
+			m_vBlockArea[i][j].attr = def::EBA_Mine;//修改属性为雷
 			left--;//待布的雷减一		
 		}
 	}	
+
+	return true;
 }
 
-bool CBlockArea::IsValidPos(uint x, uint y)
+bool CBlockArea::IsValidPos(TPos pos)
 {
-	return x >= 0 && x < m_vBlockArea.size() && y >= 0 && y < m_vBlockArea.front().size();
+	return pos.x >= 0 && pos.x < m_vBlockArea.size() && pos.y >= 0 && pos.y < m_vBlockArea.front().size();
 }
 
 //计算周围的雷数
-int CBlockArea::GetAroundMineNum(uint x, uint y)
+int CBlockArea::GetAroundMineNum(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return -1;
 
 	int res = 0;
 
-	for (uint i = x - 1; i <= x + 1; i++)
+	for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
 	{
-		for (uint j = y - 1; j <= y + 1; j++)
+		for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
 		{
-			if (!(i == x && j == y) && IsValidPos(i, j))
+			if (!(i == pos.x && j == pos.y) && IsValidPos({ i, j }))
 			{
 				if (m_vBlockArea[i][j].attr == def::EBA_Mine)
 				{
@@ -96,18 +99,18 @@ int CBlockArea::GetAroundMineNum(uint x, uint y)
 }
 
 //计算周围的flag数
-int CBlockArea::GetAroundFlagNum(uint x, uint y)
+int CBlockArea::GetAroundFlagNum(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return -1;
 
 	int res = 0;
 
-	for (uint i = x - 1; i <= x + 1; i++)
+	for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
 	{
-		for (uint j = y - 1; j <= y + 1; j++)
+		for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
 		{
-			if (!(i == x && j == y) && IsValidPos(i, j))
+			if (!(i == pos.x && j == pos.y) && IsValidPos({ i, j }))
 			{
 				if (m_vBlockArea[i][j].cur_state == def::EBS_Flag)
 				{
@@ -120,66 +123,70 @@ int CBlockArea::GetAroundFlagNum(uint x, uint y)
 	return res;
 }
 
-bool CBlockArea::IsMine(uint x, uint y)
+bool CBlockArea::IsMine(TPos pos)
 {
-	return m_vBlockArea[x][y].attr == def::EBA_Mine;
+	return m_vBlockArea[pos.x][pos.y].attr == def::EBA_Mine;
 }
 
 //打开周围区域
-bool CBlockArea::OpenAround(uint x, uint y)
+bool CBlockArea::OpenAround(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return false;
 
 	//标记的雷数不等于周围的雷数，不打开
-	if (!GetAroundFlagNum(x, y) != GetAroundMineNum(x, y))
+	if (GetAroundFlagNum(pos) != GetAroundMineNum(pos))
 		return true;
 
-	for (uint i = x - 1; i <= x + 1; i++)
+	for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
 	{
-		for (uint j = y - 1; j <= y + 1; j++)
+		for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
 		{
-			if (IsValidPos(i, j))
+			if (IsValidPos({ i, j }))
 			{				
 				if (m_vBlockArea[i][j].cur_state == def::EBS_Normal)//正常区域
 				{
-					Open(i, j);//打开该方块并尝试扩展其周围区域				
+					Open({ i, j });//打开该方块并尝试扩展其周围区域				
 				}
 			}
 		}
 	}
+
+	return true;
 }
 
 //打开该方块并尝试扩展其周围区域，dfs
-bool CBlockArea::Open(uint x, uint y)
+bool CBlockArea::Open(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return false;
 
 	//先打开该方块
-	uint mines = GetAroundMineNum(x, y);
-	m_vBlockArea[x][y].cur_state = (def::EBlockState)(def::EBS_Empty - mines);//设置该方块状态
-	m_vBlockArea[x][y].old_state = m_vBlockArea[x][y].cur_state;
+	uint mines = GetAroundMineNum(pos);
+	m_vBlockArea[pos.x][pos.y].cur_state = (def::EBlockState)(def::EBS_Empty - mines);//设置该方块状态
+	m_vBlockArea[pos.x][pos.y].old_state = m_vBlockArea[pos.x][pos.y].cur_state;
 
 	//周围无雷即可扩展
 	if (mines == 0)
 	{
-		for (uint i = x - 1; i <= x + 1; i++)
+		for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
 		{
-			for (uint j = y - 1; j <= y + 1; j++)
+			for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
 			{
-				if (!IsValidPos(i, j))
+				if (IsValidPos({ i, j }))
 				{
-					if (!(i == x && j == y) &&
+					if (!(i == pos.x && j == pos.y) &&
 						m_vBlockArea[i][j].attr != def::EBA_Mine &&
 						m_vBlockArea[i][j].cur_state == def::EBS_Normal) 
 					{
-						Open(i, j);//递归
+						Open({ i, j });//递归
 					}
 				}
 			}
 		}
 	}
+
+	return true;
 }
 
 //点开所有非雷方块即胜利
@@ -188,12 +195,12 @@ bool CBlockArea::IsVictory()
 	uint rows = m_vBlockArea.size();
 	uint cols = m_vBlockArea.front().size();
 
-	for (uint i = 0; i < rows; ++i)
+	for (int i = 0; i < rows; ++i)
 	{
-		for (uint j = 0; j < cols; ++j)
+		for (int j = 0; j < cols; ++j)
 		{
-			if (m_vBlockArea[i][j].attr == def::EBA_Empty &&
-				m_vBlockArea[i][j].cur_state != def::EBS_Empty)
+			if (m_vBlockArea[i][j].attr == def::EBA_Empty &&//空格
+				m_vBlockArea[i][j].cur_state < def::EBS_Num8)//未打开
 				return false;
 		}
 	}
@@ -202,28 +209,16 @@ bool CBlockArea::IsVictory()
 }
 
 //在某位置失败
-bool CBlockArea::DeadAt(uint x, uint y)
+bool CBlockArea::DeadAt(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return false;
-
-	if (m_vBlockArea[x][y].attr == def::EBA_Mine)//点中雷
-	{
-		m_vBlockArea[x][y].cur_state = def::EBS_Blast;//爆炸图标
-		m_vBlockArea[x][y].old_state = m_vBlockArea[x][y].cur_state;
-
-	}
-	else//同时点击左右键展开导致失败
-	{
-		m_vBlockArea[x][y].cur_state = def::EBS_Error;//错误图标
-		m_vBlockArea[x][y].old_state = m_vBlockArea[x][y].cur_state;
-	}
 
 	uint rows = m_vBlockArea.size();
 	uint cols = m_vBlockArea.front().size();
-	for (uint i = 0; i < rows; i++)
+	for (int i = 0; i < rows; i++)
 	{
-		for (uint j = 0; j < cols; j++)
+		for (int j = 0; j < cols; j++)
 		{
 			if (m_vBlockArea[i][j].attr == def::EBA_Mine)//显示所有雷
 			{
@@ -232,59 +227,73 @@ bool CBlockArea::DeadAt(uint x, uint y)
 			}
 		}
 	}
+
+	if (m_vBlockArea[pos.x][pos.y].attr == def::EBA_Mine)//点中雷
+	{
+		m_vBlockArea[pos.x][pos.y].cur_state = def::EBS_Blast;//爆炸图标
+		m_vBlockArea[pos.x][pos.y].old_state = m_vBlockArea[pos.x][pos.y].cur_state;
+
+	}
+	else//同时点击左右键展开导致失败
+	{
+		m_vBlockArea[pos.x][pos.y].cur_state = def::EBS_Error;//错误图标
+		m_vBlockArea[pos.x][pos.y].old_state = m_vBlockArea[pos.x][pos.y].cur_state;
+	}
+
+	return true;
 }
 
-def::EBlockState CBlockArea::GetCurState(uint x, uint y)
+def::EBlockState CBlockArea::GetCurState(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return def::EBS_End;
 
-	return m_vBlockArea[x][y].cur_state;
+	return m_vBlockArea[pos.x][pos.y].cur_state;
 }
 
-bool CBlockArea::SetCurState(uint x, uint y, def::EBlockState state)
+bool CBlockArea::SetCurState(TPos pos, def::EBlockState state)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return false;
 
-	return m_vBlockArea[x][y].cur_state = state;
+	return m_vBlockArea[pos.x][pos.y].cur_state = state;
 }
 
-def::EBlockState CBlockArea::GetOldState(uint x, uint y)
+def::EBlockState CBlockArea::GetOldState(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return def::EBS_End;
 
-	return m_vBlockArea[x][y].old_state;
+	return m_vBlockArea[pos.x][pos.y].old_state;
 }
 
-bool CBlockArea::SetOldState(uint x, uint y, def::EBlockState state)
+bool CBlockArea::SetOldState(TPos pos, def::EBlockState state)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return false;
 
-	return m_vBlockArea[x][y].old_state = state;
+	return m_vBlockArea[pos.x][pos.y].old_state = state;
 }
 
-def::EBlockAttr CBlockArea::GetAttr(uint x, uint y)
+def::EBlockAttr CBlockArea::GetAttr(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return def::EBA_End;
 
-	return m_vBlockArea[x][y].attr;
+	return m_vBlockArea[pos.x][pos.y].attr;
 }
 
 //左右键同时按下
-bool CBlockArea::LRBtnDown(uint x, uint y)
+bool CBlockArea::LRBtnDown(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return false;
 
-	for (uint i = x - 1; i <= x + 1; i++)
+	for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
 	{
-		for (uint j = y - 1; j <= y + 1; j++)
+		for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
 		{
-			if (IsValidPos(i, j))
+			if (IsValidPos({ i, j }))
 			{
 				//仅修改普通和未知状态
 				if (m_vBlockArea[i][j].cur_state == def::EBS_Normal)
@@ -298,19 +307,21 @@ bool CBlockArea::LRBtnDown(uint x, uint y)
 			}
 		}
 	}
+
+	return true;
 }
 
 //左右键同时松开
-bool CBlockArea::LRBtnUp(uint x, uint y)
+bool CBlockArea::LRBtnUp(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return false;
 
-	for (uint i = x - 1; i <= x + 1; i++)
+	for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
 	{
-		for (uint j = y - 1; j <= y + 1; j++)
+		for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
 		{
-			if (IsValidPos(i, j))
+			if (IsValidPos({ i, j }))
 			{
 				//仅恢复老的普通和未知状态
 				if (m_vBlockArea[i][j].old_state == def::EBS_Normal ||
@@ -321,47 +332,85 @@ bool CBlockArea::LRBtnUp(uint x, uint y)
 			}
 		}
 	}
+
+	return true;
 }
 
-bool CBlockArea::LBtnDown(uint x, uint y)
+bool CBlockArea::LBtnDown(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return false;
 
 	//仅修改普通和未知状态
-	if (m_vBlockArea[x][y].cur_state == def::EBS_Normal)
+	if (m_vBlockArea[pos.x][pos.y].cur_state == def::EBS_Normal)
 	{
-		m_vBlockArea[x][y].cur_state = def::EBS_Empty;
+		m_vBlockArea[pos.x][pos.y].cur_state = def::EBS_Empty;
 	}
-	else if (m_vBlockArea[x][y].cur_state == def::EBS_Dicey)
+	else if (m_vBlockArea[pos.x][pos.y].cur_state == def::EBS_Dicey)
 	{
-		m_vBlockArea[x][y].cur_state = def::EBS_DiceyDown;
+		m_vBlockArea[pos.x][pos.y].cur_state = def::EBS_DiceyDown;
 	}
+
+	return true;
 }
 
-bool CBlockArea::LBtnUp(uint x, uint y)
+bool CBlockArea::LBtnUp(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return false;
 
+	//仅恢复老的普通和未知状态
+	if (m_vBlockArea[pos.x][pos.y].old_state == def::EBS_Normal ||
+		m_vBlockArea[pos.x][pos.y].old_state == def::EBS_Dicey)
+	{
+		m_vBlockArea[pos.x][pos.y].cur_state = m_vBlockArea[pos.x][pos.y].old_state;
+	}
+
+	return true;
 }
 
 //是否正确标记周围所有的雷
-bool CBlockArea::HasCorrentFlags(uint x, uint y)
+bool CBlockArea::HasCorrectFlags(TPos pos)
 {
-	if (!IsValidPos(x, y))
+	if (!IsValidPos(pos))
 		return true;
 
-	for (uint i = x - 1; i <= x + 1; i++)
+	for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
 	{
-		for (uint j = y - 1; j <= y + 1; j++)
+		for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
 		{
-			if (IsValidPos(i, j))
+			if (IsValidPos({ i, j }))
 			{
 				if ((m_vBlockArea[i][j].cur_state == def::EBS_Flag && m_vBlockArea[i][j].attr != def::EBA_Mine) ||//非雷标记为雷
 					(m_vBlockArea[i][j].cur_state != def::EBS_Flag && m_vBlockArea[i][j].attr == def::EBA_Mine))//雷未标记出来
 				{
 					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+bool CBlockArea::ShowMines(bool show)
+{
+	uint rows = m_vBlockArea.size();
+	uint cols = m_vBlockArea.front().size();
+	for (int i = 0; i < rows; i++)
+	{
+		for (int j = 0; j < cols; j++)
+		{
+			if (m_vBlockArea[i][j].attr == def::EBA_Mine)
+			{
+				if (show)//显示
+				{
+					m_vBlockArea[i][j].cur_state = def::EBS_Mine;
+					//m_vBlockArea[i][j].old_state = m_vBlockArea[i][j].cur_state;
+				}
+				else//还原
+				{
+					m_vBlockArea[i][j].cur_state = m_vBlockArea[i][j].old_state;
 				}
 			}
 		}

@@ -28,23 +28,11 @@ void CCustomDlg::OnOK()
 {
 	UpdateData();
 
-	if (m_uWidth < 9) 
-		m_uWidth = 9;
-	if (m_uWidth > 30) 
-		m_uWidth = 30;
-
-	if (m_uHeight < 9) 
-		m_uHeight = 9;
-	if (m_uHeight > 24) 
-		m_uHeight = 24;
-
-	if (m_uNumber < 10) 
-		m_uNumber = 10;
 	if (m_uNumber > m_uWidth * m_uHeight) 
 		m_uNumber = m_uWidth * m_uHeight - 1;
 
 	if (CMineWnd *pMine = (CMineWnd*)AfxGetMainWnd())
-		pMine->SetCustom(m_uWidth, m_uHeight, m_uNumber);
+		pMine->SetCustom(m_uHeight, m_uWidth, m_uNumber);
 	
 	CDialog::OnOK();
 }

@@ -162,7 +162,7 @@ IDR_WAVE_VICTORY        WAVE                    "res\\WAV2.WAV"
 // Dialog
 //
 
-IDD_DLG_NEWRECORD DIALOG 0, 0, 155, 114
+IDD_DIALOG_NEWRECORD DIALOG 0, 0, 155, 114
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP
 FONT 9, "宋体"
 BEGIN
@@ -171,7 +171,7 @@ BEGIN
     CTEXT           "Static",IDC_DESCRIBE,19,15,118,35
 END
 
-IDD_DLG_HERO DIALOG 0, 0, 188, 98
+IDD_DIALOG_HERO DIALOG 0, 0, 188, 98
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "扫雷英雄榜"
 FONT 9, "宋体"
@@ -189,7 +189,7 @@ BEGIN
     CTEXT           "Static",IDC_E_H,125,56,25,8
 END
 
-IDD_DLG_CUSTOM DIALOG 0, 0, 179, 90
+IDD_DIALOG_CUSTOM DIALOG 0, 0, 179, 90
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "自定义雷区"
 FONT 9, "宋体"
@@ -213,7 +213,7 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO
 BEGIN
-    IDD_DLG_NEWRECORD, DIALOG
+    IDD_DIALOG_NEWRECORD, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 148
@@ -221,7 +221,7 @@ BEGIN
         BOTTOMMARGIN, 107
     END
 
-    IDD_DLG_HERO, DIALOG
+    IDD_DIALOG_HERO, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 181
@@ -229,7 +229,7 @@ BEGIN
         BOTTOMMARGIN, 91
     END
 
-    IDD_DLG_CUSTOM, DIALOG
+    IDD_DIALOG_CUSTOM, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 172
@@ -240,6 +240,49 @@ END
 #endif    // APSTUDIO_INVOKED
 
 #endif    // 中文(简体，中国) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// 英语(美国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG_HELP DIALOGEX 0, 0, 117, 74
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Help"
+FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    LISTBOX         IDC_LIST1,7,7,103,60,LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_NOSEL | WS_DISABLED | WS_VSCROLL,WS_EX_CLIENTEDGE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DIALOG_HELP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 110
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 67
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // 英语(美国) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="BlockArea.cpp" />
     <ClCompile Include="CustomDlg.cpp" />
+    <ClCompile Include="HelpDlg.cpp" />
     <ClCompile Include="HeroDlg.cpp" />
     <ClCompile Include="NewRecordDlg.cpp" />
     <ClCompile Include="Mine.cpp" />
@@ -153,6 +154,7 @@
   <ItemGroup>
     <ClInclude Include="BlockArea.h" />
     <ClInclude Include="CustomDlg.h" />
+    <ClInclude Include="HelpDlg.h" />
     <ClInclude Include="HeroDlg.h" />
     <ClInclude Include="NewRecordDlg.h" />
     <ClInclude Include="Mine.h" />
@@ -185,4 +187,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="Mine.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

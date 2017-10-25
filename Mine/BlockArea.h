@@ -7,10 +7,15 @@
 using def::uint;
 using std::vector;
 
-struct TBlock
+struct TPos
 {
 	uint x;//行
 	uint y;//列
+};
+
+struct TBlock
+{
+	TPos pos;
 	def::EBlockAttr  attr;//雷、空
 	def::EBlockState cur_state;//当前状态
 	def::EBlockState old_state;//用以恢复以前的状态
@@ -22,30 +27,31 @@ public:
 	static CBlockArea* GetInstance();
 
 	bool Init(uint rows, uint cols, uint mines);
-	bool LayMines(uint x, uint y);
-	bool IsValidPos(uint x, uint y);
-	bool IsMine(uint x, uint y);
-	bool OpenAround(uint x, uint y);
-	bool Open(uint x, uint y);
+	bool LayMines(TPos pos);
+	bool IsValidPos(TPos pos);
+	bool IsMine(TPos pos);
+	bool OpenAround(TPos pos);
+	bool Open(TPos pos);
 	bool IsVictory();
-	bool DeadAt(uint x, uint y);
-	bool HasCorrentFlags(uint x, uint y);
+	bool DeadAt(TPos pos);
+	bool HasCorrectFlags(TPos pos);
+	bool ShowMines(bool show);
 
-	bool LBtnDown(uint x, uint y);
-	bool LBtnUp(uint x, uint y);
-	bool LRBtnDown(uint x, uint y);
-	bool LRBtnUp(uint x, uint y);
+	bool LBtnDown(TPos pos);
+	bool LBtnUp(TPos pos);
+	bool LRBtnDown(TPos pos);
+	bool LRBtnUp(TPos pos);
 	
-	def::EBlockState GetCurState(uint x, uint y);
-	bool SetCurState(uint x, uint y, def::EBlockState state);
+	def::EBlockState GetCurState(TPos pos);
+	bool SetCurState(TPos pos, def::EBlockState state);
 	
-	def::EBlockState GetOldState(uint x, uint y);
-	bool SetOldState(uint x, uint y, def::EBlockState state);
+	def::EBlockState GetOldState(TPos pos);
+	bool SetOldState(TPos pos, def::EBlockState state);
 
-	def::EBlockAttr GetAttr(uint x, uint y);
+	def::EBlockAttr GetAttr(TPos pos);
 
-	int GetAroundMineNum(uint x, uint y);
-	int GetAroundFlagNum(uint x, uint y);
+	int GetAroundMineNum(TPos pos);
+	int GetAroundFlagNum(TPos pos);
 
 private:
 	CBlockArea();

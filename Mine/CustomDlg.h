@@ -6,7 +6,7 @@ class CCustomDlg : public CDialog
 public:	
 	CCustomDlg(CWnd* pParent = nullptr);  	
 
-	enum { IDD = IDD_DLG_CUSTOM };
+	enum { IDD = IDD_DIALOG_CUSTOM };
 	
 	void InitData(uint xNum, uint yNum, uint mNum);	
 

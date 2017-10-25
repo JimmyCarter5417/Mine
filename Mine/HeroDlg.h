@@ -6,7 +6,7 @@ class CHeroDlg : public CDialog
 public:	
 	CHeroDlg(CWnd* pParent = nullptr); 
 
-	enum { IDD = IDD_DLG_HERO };
+	enum { IDD = IDD_DIALOG_HERO };
 	
 	void SetBHolder(CString holder);
 	void SetBRecord(uint record);
