@@ -1,25 +1,29 @@
 #ifndef __CUSTOM_DLG_H__
 #define __CUSTOM_DLG_H__
 
+#include "Def.h"
+
+using def::uint;
+
 class CCustomDlg : public CDialog
 {
 public:	
 	CCustomDlg(CWnd* pParent = nullptr);  	
 
 	enum { IDD = IDD_DIALOG_CUSTOM };
-	
-	void InitData(uint xNum, uint yNum, uint mNum);	
+
+public:
+	afx_msg void OnBnClickedOk();
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	virtual void OnOK();
 
 	DECLARE_MESSAGE_MAP()
 	
 private:
-	uint	m_uHeight;
-	uint	m_uNumber;
-	uint	m_uWidth;
+	uint m_uRowNum;
+	uint m_uColNum;
+	uint m_uMineNum;
 };
 
 #endif//__CUSTOM_DLG_H__

@@ -7,28 +7,22 @@ public:
 	CHeroDlg(CWnd* pParent = nullptr); 
 
 	enum { IDD = IDD_DIALOG_HERO };
-	
-	void SetBHolder(CString holder);
-	void SetBRecord(uint record);
-	void SetIHolder(CString holder);
-	void SetIRecord(uint record);
-	void SetEHolder(CString holder);
-	void SetERecord(uint record);
-	
+		
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog();
 
 	afx_msg void OnReset();
 
 	DECLARE_MESSAGE_MAP()
 
-private:
-	CString	m_strBHolder;
-	CString	m_strEHolder;
-	CString	m_strBRecord;
-	CString	m_strERecord;
-	CString	m_strIHolder;
-	CString	m_strIRecord;
+public:
+	CString m_strPrimaryHolder;
+	CString m_strMediumHolder;
+	CString m_strAdvancedHolder;
+	int     m_nPrimaryRecord;
+	int     m_nMediumRecord;
+	int     m_nAdvancedRecord;
 };
 
 #endif//__HERO_DLG_H__

@@ -112,7 +112,7 @@ namespace def
 	static uint g_nPanelHeight = g_nInnerYOffset * 2 + g_nNumHeight;
 
 	//配置文件默认配置
-	static ELevel  g_DefLevel     = ELevel_Primary;
+	static ELevel  g_uDefLevel     = ELevel_Primary;
 	static CString g_strDefHolder = TEXT("匿名");
 	static uint    g_nDefRecord   = 999;
 	static uint    g_nDefColorful = 1;
@@ -140,9 +140,9 @@ namespace def
 	//配置文件名字
 	static CString g_strCfgName = TEXT("Config.ini");
 	//配置文件section、key
-	static CString g_strMine = TEXT("MINE");
-	static CString g_strXNum = TEXT("XNum");
-	static CString g_strYNum = TEXT("YNum");
+	static CString g_strMine = TEXT("Mine");
+	static CString g_strRowNum = TEXT("RowNum");
+	static CString g_strColNum = TEXT("ColNum");
 	static CString g_strMineNum = TEXT("MineNum");
 	static CString g_strLevel = TEXT("Level");
 	

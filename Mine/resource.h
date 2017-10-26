@@ -19,18 +19,18 @@
 #define IDD_DIALOG_CUSTOM               144
 #define IDD_DIALOG_HELP                 146
 #define IDC_EDIT_NAME                   1000
-#define IDC_RESET                       1001
-#define IDC_B_R                         1002
-#define IDC_B_H                         1003
-#define IDC_I_R                         1004
-#define IDC_I_H                         1005
-#define IDC_E_R                         1006
-#define IDC_E_H                         1007
-#define IDC_DESCRIBE                    1008
-#define IDC_HEIGHT                      1009
-#define IDC_WIDTH                       1010
+#define IDC_BUTTON_RESET                1001
+#define IDC_STATIC_PRIMARY_HOLDER       1002
+#define IDC_STATIC_PRIMARY_RECORD       1003
+#define IDC_STATIC_MEDIUM_HOLDER        1004
+#define IDC_STATIC_MEDIUM_RECORD        1005
+#define IDC_STATIC_ADVANCED_HOLDER      1006
+#define IDC_STATIC_ADVANCED_RECORD      1007
+#define IDC_STATIC_DESC                 1008
+#define IDC_EDIT_ROW_NUM                1009
 #define IDC_LIST1                       1010
-#define IDC_NUMBER                      1011
+#define IDC_EDIT_COL_NUM                1010
+#define IDC_EDIT_MINE_NUM               1012
 #define IDM_START                       32771
 #define IDM_PRIMARY                     32772
 #define IDM_MEDIUM                      32773
@@ -41,19 +41,17 @@
 #define IDM_SOUND                       32778
 #define IDM_HERO                        32779
 #define IDM_EXIT                        32780
-#define IDM_HELP_LIST                   32781
-#define IDM_HELP_FIND                   32782
-#define IDM_HELP_USE                    32783
 #define IDM_ABOUT                       32784
 #define IDM_CHEAT                       32785
+#define IDM_HELP                        32786
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        147
-#define _APS_NEXT_COMMAND_VALUE         32786
-#define _APS_NEXT_CONTROL_VALUE         1011
+#define _APS_NEXT_RESOURCE_VALUE        148
+#define _APS_NEXT_COMMAND_VALUE         32787
+#define _APS_NEXT_CONTROL_VALUE         1013
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

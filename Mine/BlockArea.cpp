@@ -8,7 +8,6 @@ CBlockArea::CBlockArea()
 
 }
 
-
 CBlockArea* CBlockArea::GetInstance()
 {
 	static CBlockArea obj;
@@ -256,7 +255,9 @@ bool CBlockArea::SetCurState(TPos pos, def::EBlockState state)
 	if (!IsValidPos(pos))
 		return false;
 
-	return m_vBlockArea[pos.x][pos.y].cur_state = state;
+	m_vBlockArea[pos.x][pos.y].cur_state = state;
+
+	return true;
 }
 
 def::EBlockState CBlockArea::GetOldState(TPos pos)
@@ -272,7 +273,9 @@ bool CBlockArea::SetOldState(TPos pos, def::EBlockState state)
 	if (!IsValidPos(pos))
 		return false;
 
-	return m_vBlockArea[pos.x][pos.y].old_state = state;
+	m_vBlockArea[pos.x][pos.y].old_state = state;
+
+	return true;
 }
 
 def::EBlockAttr CBlockArea::GetAttr(TPos pos)

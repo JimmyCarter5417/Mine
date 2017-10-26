@@ -3,6 +3,7 @@
 
 #include "def.h"
 #include "BlockArea.h"
+#include "CfgMgr.h"
 
 using def::uint;
 
@@ -10,61 +11,44 @@ class CBlockArea;
 
 class CMineWnd : public CWnd
 {
-	// 雷方块结构体
-	typedef struct
-	{
-		uint uRow;         //所在雷区二维数组的行
-		uint uCol;         //所在雷区二位数组的列
-		uint uState;       //当前状态
-		uint uAttrib;      //方块属性
-		uint uOldState;    //历史状态
-	} MINEWND;	
-
 public:
 	CMineWnd();
 	 ~CMineWnd();
-
-	void ResetRecord();
-	void SetCustom(uint xNum, uint yNum, uint mNum);
 	
 protected:	
+	afx_msg void OnInitMenu(CMenu* pMenu);
+
 	afx_msg void OnPaint();
 	afx_msg void OnShowWindow(BOOL bShow, uint nStatus);
 	afx_msg void OnTimer(uint nIDEvent);
+
 	afx_msg void OnLButtonUp(uint nFlags, CPoint pt);
 	afx_msg void OnRButtonUp(uint nFlags, CPoint pt);
 	afx_msg void OnLButtonDown(uint nFlags, CPoint pt);
 	afx_msg void OnRButtonDown(uint nFlags, CPoint pt);
-	afx_msg void OnMouseMove(uint nFlags, CPoint pt);
-	afx_msg void OnMemuStart();
-	afx_msg void OnMemuPrimary();
-	afx_msg void OnMemuMedium();
-	afx_msg void OnMemuAdvanced();
-	afx_msg void OnMemuCustom();
-	afx_msg void OnMemuColor();
-	afx_msg void OnMemuSound();
-	afx_msg void OnMemuExit();
-
-	afx_msg void OnMemuHelpUse();
-	afx_msg void OnMemuAbout();
+	afx_msg void OnMouseMove(uint nFlags, CPoint pt);	
 	afx_msg void OnKeyDown(uint nChar, uint nRepCnt, uint nFlags);
-	afx_msg void OnInitMenu(CMenu* pMenu);
-	afx_msg void OnMemuClose();
-	afx_msg void OnMemuHero();
-	afx_msg void OnMemuCheat();
+
+	afx_msg void OnMenuStart();
+	afx_msg void OnMenuHero();
+	afx_msg void OnMenuPrimary();
+	afx_msg void OnMenuMedium();
+	afx_msg void OnMenuAdvanced();
+	afx_msg void OnMenuCustom();
+	afx_msg void OnMenuColor();
+	afx_msg void OnMenuSound();
+	afx_msg void OnMenuExit();
+
+	afx_msg void OnMenuHelp();
+	afx_msg void OnMenuAbout();
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	CString GetCfgPath();
-	
 	void LoadConfig();
-	void SaveConfig();
-
-	void LoadWave();	
-	void FreeWave();
-	
 	void LoadBitmap();
+	void LoadWave();	
+	void FreeWave();	
 
 	void InitGame();	
 
@@ -75,8 +59,7 @@ protected:
 	void DrawButton(CPaintDC &dc);
 	void DrawNumber(CPaintDC &dc);
 	void DrawBlockArea(CPaintDC &dc);
-	void DrawDownNum(MINEWND* mine, uint num);
-	void DrawOneBlock(uint row, uint col);
+
 	// change menu check state funtions
 	void SetCheckedSound();
 	void SetCheckedColor();
@@ -94,51 +77,49 @@ protected:
 	void GodView();
 
 private:
-	uint		m_uRowNum;				// X方向小方块个数
-	uint		m_uColNum;				// Y方向小方块个数
-	uint		m_uLevel;				// 当前游戏等级
-	uint		m_uMineNum;				// 总的雷个数
-	int 		m_nLeftNum;			    // 剩余的雷个数
-	uint		m_uSpendTime;			// 游戏开始到目前所花费的时间
-	uint		m_uGameState;			// 游戏状态
-	uint		m_uTimer;				// 定时器标识
+	def::ELevel m_uLevel;
+	uint m_uRowNum;
+	uint m_uColNum;	
+	uint m_uMineNum;
+
+	int  m_nLeftNum;//剩余的雷个数
+	uint m_uSpendTime;//游戏开始到目前所花费的时间
 	
-	uint		m_uPrimary;				// 初级记录
-	uint		m_uMedium;				// 中级记录
-	uint		m_uAdvanced;			// 高级记录
-	CString		m_strPrimary;			// 初级记录保持者
-	CString		m_strMedium;			// 中级记录保持者
-	CString		m_strAdvanced;			// 高级记录保持者
-
-	BOOL		m_bLRBtnDown;			// 是否为左右键同时按下
-	BOOL		m_bClickBtn;			// 左键按下的时候鼠标是否位于按钮区域内
-
-	BOOL		m_bColorful;			// 是否彩色显示
-	BOOL		m_bSoundful;			// 是否有声音
-	CMenu*		m_pSubMenu;				// 子菜单
-	CBitmap		m_bmpMine;				// 雷区背景图像
-	CBitmap		m_bmpNumber;			// 数字背景图像
-	CBitmap		m_bmpButton;			// 笑脸按钮背景图像
-	CBrush		m_brsBG;				// 背景画刷对象
-	COLORREF	m_clrDark;				// 各按钮的深色调
-
-	RECT m_rectClient;				// 客户区域
-	RECT m_rectPanel;
-	RECT m_rectBlockArea;
-	RECT m_rectLeftMines;
-	RECT m_rectSpendTime;
-	RECT m_rectButton;
-
-	uint		m_uBtnState;			// 按钮状态
+	uint m_uTimer;//定时器
 	
-	TPos	m_posCurBlock;				// 当前选中的小方块
-	TPos	m_posOldBlock;				// 上次选中的小方块
+	CMenu* m_pSubMenu;
 
-	void*		m_pSndDead;				// 失败提示音
-	void*		m_pSndVictory;			// 胜利提示音
-	void*		m_pSndClock;			// 时钟提示音
+	CBitmap	m_bmpMine;
+	CBitmap	m_bmpNumber;
+	CBitmap	m_bmpButton;
 
-	CBlockArea* m_pBlockArea;
+	CBrush	 m_brsBG;//client区域画刷
+	COLORREF m_clrBg;//各控件背景颜色
+
+	RECT m_rectClient;//整个客户区域
+	RECT m_rectPanel;//上部面板区域
+	RECT m_rectBlockArea;//下部方块区域
+	RECT m_rectLeftMines;//面板左侧剩余雷数
+	RECT m_rectSpendTime;//面板右侧时间
+	RECT m_rectButton;//面板中间按钮
+
+	def::EButtonState m_uBtnState;//按钮状态
+	def::EGameState	  m_uGameState;//游戏状态
+
+	bool m_bLRBtnDown;//左右键同时按下
+	bool m_bClickBtn;//已单击按钮未松开
+	bool m_bColorful;
+	bool m_bSoundful;
+	
+	TPos m_posCurBlock;//当前选中的方块
+	TPos m_posOldBlock;//上次选中的方块
+
+	void* m_pSndDead;//失败音
+	void* m_pSndVictory;//胜利音
+	void* m_pSndClock;//时钟音
+
+	CBlockArea* m_pBlockArea;//方块区域数据结构
+	CCfgMgr*    m_pCfgMgr;
 };
 
 #endif//__MINE_WND_H__

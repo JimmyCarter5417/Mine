@@ -113,25 +113,23 @@ IDR_MENU MENU
 BEGIN
     POPUP "游戏(&G)"
     BEGIN
-        MENUITEM "开局(&N)\tF2",                  IDM_START
+        MENUITEM "开局",                          IDM_START
+        MENUITEM "英雄榜",                         IDM_HERO
         MENUITEM SEPARATOR
-        MENUITEM "初级(&B)",                      IDM_PRIMARY
-        MENUITEM "中级(&I)",                      IDM_MEDIUM
-        MENUITEM "高级(&E)",                      IDM_ADVANCED
-        MENUITEM "自定义(&C)...",                  IDM_CUSTOM
+        MENUITEM "初级",                          IDM_PRIMARY
+        MENUITEM "中级",                          IDM_MEDIUM
+        MENUITEM "高级",                          IDM_ADVANCED
+        MENUITEM "自定义",                         IDM_CUSTOM
         MENUITEM SEPARATOR
-        MENUITEM "颜色(&L)",                      IDM_COLOR
-        MENUITEM "声音(&S)",                      IDM_SOUND
+        MENUITEM "颜色",                          IDM_COLOR
+        MENUITEM "声音",                          IDM_SOUND
         MENUITEM SEPARATOR
-        MENUITEM "扫雷英雄榜(&T)...",                IDM_HERO
-        MENUITEM SEPARATOR
-        MENUITEM "退出(&X)",                      IDM_EXIT
+        MENUITEM "退出",                          IDM_EXIT
     END
     POPUP "帮助(&H)"
     BEGIN
-        MENUITEM "使用帮助(&H)",                    IDM_HELP_USE
-        MENUITEM SEPARATOR
-        MENUITEM "关于扫雷(&A)...",                 IDM_ABOUT
+        MENUITEM "帮助",                          IDM_HELP
+        MENUITEM "关于",                          IDM_ABOUT
     END
 END
 
@@ -153,55 +151,64 @@ IDB_BTN_COLOR           BITMAP                  "res\\BITMAP30.BMP"
 // WAVE
 //
 
-IDR_WAVE_DEAD           WAVE                    "res\\WAV3.WAV"
-IDR_WAVE_CLOCK          WAVE                    "res\\WAV1.WAV"
-IDR_WAVE_VICTORY        WAVE                    "res\\WAV2.WAV"
+IDR_WAVE_DEAD           WAVE                    "res\\dead.wav"
+IDR_WAVE_CLOCK          WAVE                    "res\\clock.wav"
+IDR_WAVE_VICTORY        WAVE                    "res\\victory.wav"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
 
-IDD_DIALOG_NEWRECORD DIALOG 0, 0, 155, 114
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP
-FONT 9, "宋体"
+IDD_DIALOG_NEWRECORD DIALOGEX 0, 0, 155, 78
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "新纪录！"
+FONT 9, "宋体", 0, 0, 0x0
 BEGIN
-    EDITTEXT        IDC_EDIT_NAME,19,59,118,14,ES_AUTOHSCROLL
-    DEFPUSHBUTTON   "OK",IDOK,54,93,50,14
-    CTEXT           "Static",IDC_DESCRIBE,19,15,118,35
+    EDITTEXT        IDC_EDIT_NAME,19,35,118,14,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,52,57,50,14
+    CTEXT           "Static",IDC_STATIC_DESC,18,5,118,22
 END
 
-IDD_DIALOG_HERO DIALOG 0, 0, 188, 98
+IDD_DIALOG_HERO DIALOGEX 0, 0, 188, 98
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "扫雷英雄榜"
-FONT 9, "宋体"
+CAPTION "英雄榜"
+FONT 9, "宋体", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "确定",IDOK,112,77,50,14
-    PUSHBUTTON      "重新计分(&R)",IDC_RESET,25,77,50,14
+    PUSHBUTTON      "重新计分",IDC_BUTTON_RESET,25,77,50,14
     CTEXT           "初级记录：",IDC_STATIC,27,20,41,8
-    CTEXT           "Static",IDC_B_R,80,20,25,8
+    CTEXT           "Static",IDC_STATIC_PRIMARY_HOLDER,80,20,25,8
     CTEXT           "中级记录：",IDC_STATIC,27,38,41,8
-    CTEXT           "Static",IDC_I_R,80,38,25,8
+    CTEXT           "Static",IDC_STATIC_MEDIUM_HOLDER,80,38,25,8
     CTEXT           "高级记录：",IDC_STATIC,27,56,41,8
-    CTEXT           "Static",IDC_E_R,80,56,25,8
-    CTEXT           "Static",IDC_B_H,125,20,25,8
-    CTEXT           "Static",IDC_I_H,125,38,25,8
-    CTEXT           "Static",IDC_E_H,125,56,25,8
+    CTEXT           "Static",IDC_STATIC_ADVANCED_HOLDER,80,56,25,8
+    CTEXT           "Static",IDC_STATIC_PRIMARY_RECORD,125,20,25,8
+    CTEXT           "Static",IDC_STATIC_MEDIUM_RECORD,125,38,25,8
+    CTEXT           "Static",IDC_STATIC_ADVANCED_RECORD,125,56,25,8
 END
 
-IDD_DIALOG_CUSTOM DIALOG 0, 0, 179, 90
+IDD_DIALOG_CUSTOM DIALOGEX 0, 0, 179, 90
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "自定义雷区"
-FONT 9, "宋体"
+CAPTION "自定义"
+FONT 9, "宋体", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "确定",IDOK,117,27,41,14
     PUSHBUTTON      "取消",IDCANCEL,117,55,41,14
-    CTEXT           "高度(&H):",IDC_STATIC,19,16,35,14,SS_CENTERIMAGE
-    CTEXT           "宽度(&W):",IDC_STATIC,19,40,35,14,SS_CENTERIMAGE
-    CTEXT           "雷数(&N):",IDC_STATIC,19,64,35,14,SS_CENTERIMAGE
-    EDITTEXT        IDC_HEIGHT,63,16,40,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_WIDTH,63,40,40,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_NUMBER,63,64,40,14,ES_AUTOHSCROLL
+    CTEXT           "行数",IDC_STATIC,19,16,35,14,SS_CENTERIMAGE
+    CTEXT           "列数",IDC_STATIC,19,40,35,14,SS_CENTERIMAGE
+    CTEXT           "雷数",IDC_STATIC,19,64,35,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_ROW_NUM,63,16,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COL_NUM,63,40,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MINE_NUM,63,64,40,14,ES_AUTOHSCROLL
+END
+
+IDD_DIALOG_HELP DIALOGEX 0, 0, 117, 74
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Help"
+FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    LISTBOX         IDC_LIST1,7,7,103,60,LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_NOSEL | WS_DISABLED | WS_VSCROLL,WS_EX_CLIENTEDGE
 END
 
 
@@ -217,8 +224,7 @@ BEGIN
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 148
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 107
+        BOTTOMMARGIN, 71
     END
 
     IDD_DIALOG_HERO, DIALOG
@@ -236,42 +242,7 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 83
     END
-END
-#endif    // APSTUDIO_INVOKED
 
-#endif    // 中文(简体，中国) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// 英语(美国) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-#pragma code_page(1252)
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_DIALOG_HELP DIALOGEX 0, 0, 117, 74
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Help"
-FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
-BEGIN
-    LISTBOX         IDC_LIST1,7,7,103,60,LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_NOSEL | WS_DISABLED | WS_VSCROLL,WS_EX_CLIENTEDGE
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
     IDD_DIALOG_HELP, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -282,7 +253,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // 英语(美国) resources
+#endif    // 中文(简体，中国) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

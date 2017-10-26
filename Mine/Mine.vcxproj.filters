@@ -39,6 +39,9 @@
     <ClCompile Include="HelpDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CfgMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Mine.rc">
@@ -76,6 +79,9 @@
     <ClInclude Include="HelpDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CfgMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="res\BITMAP10.BMP">
@@ -100,15 +106,6 @@
       <Filter>Resource Files</Filter>
     </CustomBuild>
     <CustomBuild Include="res\Mine.rc2">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="res\WAV1.WAV">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="res\WAV2.WAV">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="res\WAV3.WAV">
       <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>

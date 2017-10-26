@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BlockArea.cpp" />
+    <ClCompile Include="CfgMgr.cpp" />
     <ClCompile Include="CustomDlg.cpp" />
     <ClCompile Include="HelpDlg.cpp" />
     <ClCompile Include="HeroDlg.cpp" />
@@ -153,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlockArea.h" />
+    <ClInclude Include="CfgMgr.h" />
     <ClInclude Include="CustomDlg.h" />
     <ClInclude Include="HelpDlg.h" />
     <ClInclude Include="HeroDlg.h" />
@@ -173,15 +175,6 @@
     <CustomBuild Include="res\Mine.ico" />
     <CustomBuild Include="res\Mine.rc2">
       <FileType>RC</FileType>
-    </CustomBuild>
-    <CustomBuild Include="res\WAV1.WAV">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="res\WAV2.WAV">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="res\WAV3.WAV">
-      <FileType>Document</FileType>
     </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -2,36 +2,73 @@
 #include "Mine.h"
 #include "NewRecordDlg.h"
 #include "Def.h"
+#include "CfgMgr.h"
+
+using namespace def;
 
 CNewRecordDlg::CNewRecordDlg(CWnd* pParent /*=nullptr*/)
-	: CDialog(CNewRecordDlg::IDD, pParent)
-{	
-	m_strName = TEXT("匿名");
-	m_strDesc = TEXT("");
+: CDialog(CNewRecordDlg::IDD, pParent)
+, m_uTime(def::g_nDefRecord)
+{
+
 }
 
 void CNewRecordDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_EDIT_NAME, m_strName);
-	DDX_Text(pDX, IDC_DESCRIBE, m_strDesc);	
 }
 
-BEGIN_MESSAGE_MAP(CNewRecordDlg, CDialog)
+bool CNewRecordDlg::IsNewRecord(uint time)
+{
+	uint row, col, mine;
+	ELevel level;
+	CCfgMgr::GetInstance()->GetMineInfo(row, col, mine, level);	
 	
+	switch (level)
+	{
+	case ELevel_Primary:
+		return time < CCfgMgr::GetInstance()->GetPrimaryRecord();
+	case ELevel_Medium:
+		return time < CCfgMgr::GetInstance()->GetMediumRecord();				
+	case ELevel_Advanced:
+		return time < CCfgMgr::GetInstance()->GetAdvancedRecord();		
+	default:
+		return false;
+	}
+}
+
+BEGIN_MESSAGE_MAP(CNewRecordDlg, CDialog)	
+	ON_BN_CLICKED(IDOK, &CNewRecordDlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-void CNewRecordDlg::SetLevel(uint level)
+void CNewRecordDlg::OnBnClickedOk()
 {
-	CString strLevel;
-	if (level == def::ELevel_Primary) strLevel = TEXT("初级");
-	else if (level == def::ELevel_Medium) strLevel = TEXT("中级");
-	else if (level == def::ELevel_Advanced) strLevel = TEXT("高级");
-	m_strDesc.Format(TEXT("已破%s记录\n\r请留尊姓大名"), strLevel);
-}
+	uint row, col, mine;
+	ELevel level;
+	CCfgMgr::GetInstance()->GetMineInfo(row, col, mine, level);
 
-CString CNewRecordDlg::GetName()
-{
-	return m_strName;
+	CString strHolder;
+	GetDlgItem(IDC_EDIT_NAME)->GetWindowTextW(strHolder);
+
+	switch (level)
+	{
+	case ELevel_Primary:
+		CCfgMgr::GetInstance()->SetPrimaryRecord(m_uTime);
+		CCfgMgr::GetInstance()->SetPrimaryHolder(strHolder);
+		break;
+	case ELevel_Medium:
+		CCfgMgr::GetInstance()->SetMediumRecord(m_uTime);
+		CCfgMgr::GetInstance()->SetMediumHolder(strHolder);
+		break;
+	case ELevel_Advanced:
+		CCfgMgr::GetInstance()->SetPrimaryRecord(m_uTime);
+		CCfgMgr::GetInstance()->SetPrimaryHolder(strHolder);
+		break;
+	case ELevel_Custom:
+		return;
+	default:
+		break;
+	}
+
+	CDialog::OnOK();
 }

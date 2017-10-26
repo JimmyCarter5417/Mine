@@ -1,79 +1,64 @@
 #include "stdafx.h"
-#include "mine.h"
+#include "Resource.h"
 #include "HeroDlg.h"
-#include "MineWnd.h"
+#include "CfgMgr.h"
 #include "Def.h"
 
 CHeroDlg::CHeroDlg(CWnd* pParent /*=nullptr*/)
 	: CDialog(CHeroDlg::IDD, pParent)
 {
-	m_strBHolder = TEXT("");
-	m_strEHolder = TEXT("");
-	m_strBRecord = TEXT("");
-	m_strERecord = TEXT("");
-	m_strIHolder = TEXT("");
-	m_strIRecord = TEXT("");
+	m_strPrimaryHolder = def::g_strDefHolder;
+	m_strMediumHolder = def::g_strDefHolder;
+	m_strAdvancedHolder = def::g_strDefHolder;
+	m_nPrimaryRecord = def::g_nDefRecord;
+	m_nMediumRecord = def::g_nDefRecord;
+	m_nAdvancedRecord = def::g_nDefRecord;
 }
 
 void CHeroDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	
-	DDX_Text(pDX, IDC_B_H, m_strBHolder);
-	DDX_Text(pDX, IDC_E_H, m_strEHolder);
-	DDX_Text(pDX, IDC_B_R, m_strBRecord);
-	DDX_Text(pDX, IDC_E_R, m_strERecord);
-	DDX_Text(pDX, IDC_I_H, m_strIHolder);
-	DDX_Text(pDX, IDC_I_R, m_strIRecord);
+
+	DDX_Text(pDX, IDC_STATIC_PRIMARY_HOLDER,  m_strPrimaryHolder);
+	DDX_Text(pDX, IDC_STATIC_MEDIUM_HOLDER,   m_strMediumHolder);
+	DDX_Text(pDX, IDC_STATIC_ADVANCED_HOLDER, m_strAdvancedHolder);
+	DDX_Text(pDX, IDC_STATIC_PRIMARY_RECORD,  m_nPrimaryRecord);
+	DDX_Text(pDX, IDC_STATIC_MEDIUM_RECORD,   m_nMediumRecord);
+	DDX_Text(pDX, IDC_STATIC_ADVANCED_RECORD, m_nAdvancedRecord);
 }
 
 BEGIN_MESSAGE_MAP(CHeroDlg, CDialog)
-	ON_BN_CLICKED(IDC_RESET, OnReset)
+	ON_BN_CLICKED(IDC_BUTTON_RESET, OnReset)
 END_MESSAGE_MAP()
 
-void CHeroDlg::SetBHolder(CString holder)
+BOOL CHeroDlg::OnInitDialog()
 {
-	m_strBHolder = holder;
-}
+	CDialog::OnInitDialog();
 
-void CHeroDlg::SetBRecord(uint record)
-{
-	m_strBRecord.Format(TEXT("%d취"), record);
-}
+	m_strPrimaryHolder = CCfgMgr::GetInstance()->GetPrimaryHolder();
+	m_strMediumHolder = CCfgMgr::GetInstance()->GetMediumHolder();
+	m_strAdvancedHolder = CCfgMgr::GetInstance()->GetAdvancedHolder();
+	m_nPrimaryRecord = CCfgMgr::GetInstance()->GetPrimaryRecord();
+	m_nMediumRecord = CCfgMgr::GetInstance()->GetMediumRecord();
+	m_nAdvancedRecord = CCfgMgr::GetInstance()->GetAdvancedRecord();
 
-void CHeroDlg::SetIHolder(CString holder)
-{
-	m_strIHolder = holder;
-}
+	UpdateData(FALSE);
 
-void CHeroDlg::SetIRecord(uint record)
-{
-	m_strIRecord.Format(TEXT("%d취"), record);
-}
-
-void CHeroDlg::SetEHolder(CString holder)
-{
-	m_strEHolder = holder;
-}
-
-void CHeroDlg::SetERecord(uint record)
-{
-	m_strERecord.Format(TEXT("%d취"), record);
+	return TRUE;
 }
 
 void CHeroDlg::OnReset() 
 {
-	CMineWnd *pMine = (CMineWnd*)AfxGetMainWnd();
-	pMine->ResetRecord();
+	/*m_strPrimaryHolder = def::g_strDefHolder;
+	m_strMediumHolder = def::g_strDefHolder;
+	m_strAdvancedHolder = def::g_strDefHolder;*/
+	m_nPrimaryRecord = def::g_nDefRecord;
+	m_nMediumRecord = def::g_nDefRecord;
+	m_nAdvancedRecord = def::g_nDefRecord;
 
-	m_strBHolder = def::g_strDefHolder;
-	m_strBRecord.Format(TEXT("%d취"), def::g_nDefRecord);
-
-	m_strIHolder = def::g_strDefHolder;
-	m_strIRecord.Format(TEXT("%d취"), def::g_nDefRecord);
-
-	m_strEHolder = def::g_strDefHolder;
-	m_strERecord.Format(TEXT("%d취"), def::g_nDefRecord);
+	CCfgMgr::GetInstance()->SetPrimaryRecord(m_nPrimaryRecord);
+	CCfgMgr::GetInstance()->SetMediumRecord(m_nMediumRecord);
+	CCfgMgr::GetInstance()->SetAdvancedRecord(m_nAdvancedRecord);
 
 	UpdateData(FALSE);
 }
