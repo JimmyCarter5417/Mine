@@ -1,18 +1,15 @@
-// HelpDlg.cpp :  µœ÷Œƒº˛
-//
-
-#include "stdafx.h"
+Ôªø#include "stdafx.h"
+#include <afxdialogex.h>
+#include "Def.h"
 #include "Mine.h"
 #include "HelpDlg.h"
-#include "afxdialogex.h"
 
 
-// CHelpDlg ∂‘ª∞øÚ
 
 IMPLEMENT_DYNAMIC(CHelpDlg, CDialog)
 
 CHelpDlg::CHelpDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CHelpDlg::IDD, pParent)
+    : CDialog(CHelpDlg::IDD, pParent)
 {
 
 }
@@ -23,26 +20,26 @@ CHelpDlg::~CHelpDlg()
 
 void CHelpDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_LIST1, m_ListBox);
+    CDialog::DoDataExchange(pDX);
+    DDX_Control(pDX, IDC_LIST1, m_ListBox);
 }
 
 
 BEGIN_MESSAGE_MAP(CHelpDlg, CDialog)
-	
+    
 END_MESSAGE_MAP()
 
 BOOL CHelpDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+    CDialog::OnInitDialog();
 
-	m_ListBox.AddString(TEXT("F1: ∞Ô÷˙"));
-	m_ListBox.AddString(TEXT("F2: πÿ”⁄"));
-	m_ListBox.AddString(TEXT("F3: ø™ º"));
-	m_ListBox.AddString(TEXT("F4: ÕÀ≥ˆ"));
-	m_ListBox.AddString(TEXT("F5: …œµ€ ”Ω«"));
-	m_ListBox.AddString(TEXT("F6: …˘“Ù"));
-	m_ListBox.AddString(TEXT("F7: —’…´"));
+    m_ListBox.AddString(TEXT("F1: Â∏ÆÂä©"));
+    m_ListBox.AddString(TEXT("F2: ÂÖ≥‰∫é"));
+    m_ListBox.AddString(TEXT("F3: ÂºÄÂßã"));
+    m_ListBox.AddString(TEXT("F4: ÈÄÄÂá∫"));
+    m_ListBox.AddString(TEXT("F5: ‰∏äÂ∏ùËßÜËßí"));
+    m_ListBox.AddString(TEXT("F6: Â£∞Èü≥"));
+    m_ListBox.AddString(TEXT("F7: È¢úËâ≤"));
 
-	return TRUE;
+    return TRUE;
 }

@@ -1,19 +1,16 @@
-#include "stdafx.h"
-
-#include "Mine.h"
-#include "MineWnd.h"
-#include "Def.h"
-#include "BlockArea.h"
-
-#include "NewRecordDlg.h"
-#include "HeroDlg.h"
-#include "CustomDlg.h"
-#include "HelpDlg.h"
-
+ï»¿#include "stdafx.h"
 #include <Mmsystem.h>
 #include <string>
+#include "Def.h"
+#include "Mine.h"
+#include "CfgMgr.h"
+#include "NewRecordDlg.h"
+#include "HelpDlg.h"
+#include "HeroDlg.h"
+#include "CustomDlg.h"
+#include "BlockArea.h"
+#include "MineWnd.h"
 
-using namespace def;
 using namespace std;
 
 #define TIMER_ID 1234
@@ -24,981 +21,1053 @@ CMineWnd::CMineWnd()
 , m_pSubMenu(nullptr)
 , m_uTimer(0)
 {
-	m_brsBG.CreateSolidBrush(g_clrGray);
+    m_brsBG.CreateSolidBrush(g_clrGray);
 
-	InitGame();	
+    InitGame(); 
 }
 
 CMineWnd::~CMineWnd()
 {
-	FreeWave();	
+    FreeWave(); 
 }
 
 BEGIN_MESSAGE_MAP(CMineWnd, CWnd)
-	ON_WM_PAINT()
-	ON_WM_SHOWWINDOW()
-	ON_WM_TIMER()
-	ON_WM_LBUTTONUP()
-	ON_WM_RBUTTONUP()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_RBUTTONDOWN()
-	ON_WM_MOUSEMOVE()
-	ON_WM_KEYDOWN()
-	ON_WM_INITMENU()
-	ON_WM_CLOSE()
-	ON_COMMAND(IDM_START, OnMenuStart)
-	ON_COMMAND(IDM_PRIMARY, OnMenuPrimary)
-	ON_COMMAND(IDM_MEDIUM, OnMenuMedium)
-	ON_COMMAND(IDM_ADVANCED, OnMenuAdvanced)
-	ON_COMMAND(IDM_CUSTOM, OnMenuCustom)
-	ON_COMMAND(IDM_COLOR, OnMenuColor)
-	ON_COMMAND(IDM_SOUND, OnMenuSound)
-	ON_COMMAND(IDM_EXIT, OnMenuExit)
-	ON_COMMAND(IDM_HELP, OnMenuHelp)
-	ON_COMMAND(IDM_ABOUT, OnMenuAbout)	
-	ON_COMMAND(IDM_HERO, OnMenuHero)
+    ON_WM_PAINT()
+    ON_WM_SHOWWINDOW()
+    ON_WM_TIMER()
+    ON_WM_LBUTTONUP()
+    ON_WM_RBUTTONUP()
+    ON_WM_LBUTTONDOWN()
+    ON_WM_RBUTTONDOWN()
+    ON_WM_MOUSEMOVE()
+    ON_WM_KEYDOWN()
+    ON_WM_INITMENU()
+    ON_WM_CLOSE()
+    ON_COMMAND(IDM_START,       OnMenuStart)
+    ON_COMMAND(IDM_PRIMARY,     OnMenuPrimary)
+    ON_COMMAND(IDM_MEDIUM,      OnMenuMedium)
+    ON_COMMAND(IDM_ADVANCED,    OnMenuAdvanced)
+    ON_COMMAND(IDM_CUSTOM,      OnMenuCustom)
+    ON_COMMAND(IDM_COLOR,       OnMenuColor)
+    ON_COMMAND(IDM_SOUND,       OnMenuSound)
+    ON_COMMAND(IDM_EXIT,        OnMenuExit)
+    ON_COMMAND(IDM_HELP,        OnMenuHelp)
+    ON_COMMAND(IDM_ABOUT,       OnMenuAbout)
+    ON_COMMAND(IDM_HERO,        OnMenuHero)
 END_MESSAGE_MAP()
 
-//ÔØÈëÅäÖÃ
+// è½½å…¥é…ç½®
 void CMineWnd::LoadConfig()
 {
-	m_pCfgMgr->GetMineInfo(m_uRowNum, m_uColNum, m_uMineNum, m_uLevel);
-
-	m_bColorful = m_pCfgMgr->GetColorful();
-	m_bSoundful = m_pCfgMgr->GetSoundful();
+    m_pCfgMgr->GetMineInfo(m_uRowNum, m_uColNum, m_uMineNum, m_uLevel);
+    m_bColorful = m_pCfgMgr->GetColorful();
+    m_bSoundful = m_pCfgMgr->GetSoundful();
 }
 
-//ÔØÈëÎ»Í¼
+// è½½å…¥ä½å›¾
 void CMineWnd::LoadBitmap()
 {
-	m_bmpMine.DeleteObject();
-	m_bmpNumber.DeleteObject();
-	m_bmpButton.DeleteObject();
+    m_bmpMine.DeleteObject();
+    m_bmpNumber.DeleteObject();
+    m_bmpButton.DeleteObject();
 
-	if (m_bColorful)
-	{
-		m_clrBg = g_clrDarkGray;
-		
-		m_bmpMine.LoadBitmap(IDB_MINE_COLOR);		
-		m_bmpNumber.LoadBitmap(IDB_NUM_COLOR);		
-		m_bmpButton.LoadBitmap(IDB_BTN_COLOR);
-	}
-	else
-	{
-		m_clrBg = g_clrGray;
-		
-		m_bmpMine.LoadBitmap(IDB_MINE_GRAY);		
-		m_bmpNumber.LoadBitmap(IDB_NUM_GRAY);		
-		m_bmpButton.LoadBitmap(IDB_BTN_GRAY);
-	}
+    if (m_bColorful)
+    {
+        m_clrBg = g_clrDarkGray;
+        
+        m_bmpMine.LoadBitmap(IDB_MINE_COLOR);
+        m_bmpNumber.LoadBitmap(IDB_NUM_COLOR);
+        m_bmpButton.LoadBitmap(IDB_BTN_COLOR);
+    }
+    else
+    {
+        m_clrBg = g_clrGray;
+        
+        m_bmpMine.LoadBitmap(IDB_MINE_GRAY);
+        m_bmpNumber.LoadBitmap(IDB_NUM_GRAY);
+        m_bmpButton.LoadBitmap(IDB_BTN_GRAY);
+    }
 }
 
-//³õÊ¼»¯
+// åˆå§‹åŒ–
 void CMineWnd::InitGame()
-{	
-	LoadWave();
-	LoadConfig();
-	LoadBitmap();	
+{   
+    LoadWave();
+    LoadConfig();
+    LoadBitmap();
 
-	m_nLeftNum = m_uMineNum;
-	m_uSpendTime = 0;
-	m_uBtnState = EBtnS_Normal;
-	m_uGameState = EGS_Wait;	
+    m_nLeftNum   = m_uMineNum;
+    m_uSpendTime = 0;
+    m_uBtnState  = BUTTON_STATE_Normal;
+    m_uGameState = GAME_STATE_Wait;
 
-	if (m_uTimer)
-	{
-		KillTimer(m_uTimer);
-		m_uTimer = 0;
-	}
+    if (m_uTimer)
+    {
+        KillTimer(m_uTimer);
+        m_uTimer = 0;
+    }
 
-	m_posCurBlock = { 0, 0 };
-	m_posOldBlock = { 0, 0 };
+    m_posCurBlock = { 0, 0 };
+    m_posOldBlock = { 0, 0 };
 
-	m_pBlockArea->Init(m_uRowNum, m_uColNum, m_uMineNum);//³õÊ¼»¯µØÍ¼	
+    m_pBlockArea->Init(m_uRowNum, m_uColNum, m_uMineNum); // åˆå§‹åŒ–åœ°å›¾
 }
 
-//Ê§°Ü´¦Àí
+// å¤±è´¥å¤„ç†
 void CMineWnd::Dead()
-{	
-	m_uBtnState = EBtnS_Dead;
-	m_uGameState = EGS_Dead;
+{   
+    m_uBtnState  = BUTTON_STATE_Dead;
+    m_uGameState = GAME_STATE_Dead;
 
-	/*InvalidateRect(&m_rectButton);
-	InvalidateRect(&m_rectBlockArea);*/
-	Invalidate();
+    /*InvalidateRect(&m_rectButton);
+    InvalidateRect(&m_rectBlockArea);*/
+    Invalidate();
 
-	if (m_uTimer != 0)//½«¶¨Ê±Æ÷È¥¼¤»î
-	{
-		KillTimer(m_uTimer);
-		m_uTimer = 0;
-	}
+    if (m_uTimer != 0) // å°†å®šæ—¶å™¨å»æ¿€æ´»
+    {
+        KillTimer(m_uTimer);
+        m_uTimer = 0;
+    }
 
-	if (m_bSoundful)
-	{
-		sndPlaySound((LPCTSTR)LockResource(m_pSndDead), SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
-	}
+    if (m_bSoundful)
+    {
+        sndPlaySound((LPCTSTR)LockResource(m_pSndDead), SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
+    }
 }
 
-//Ê¤ÀûÅĞ¶Ï²¢´¦Àí
+// èƒœåˆ©åˆ¤æ–­å¹¶å¤„ç†
 void CMineWnd::Victory()
 {
-	//ĞŞ¸Ä×´Ì¬
-	m_uBtnState = EBtnS_Victory;
-	m_uGameState = EGS_Victory;
+    // ä¿®æ”¹çŠ¶æ€
+    m_uBtnState  = BUTTON_STATE_Victory;
+    m_uGameState = GAME_STATE_Victory;
 
-	Invalidate();
-	//É¾³ıtimer
-	if (m_uTimer != 0)
-	{
-		KillTimer(m_uTimer);
-		m_uTimer = 0;
-	}
-	//Ê¤ÀûÉùÒô
-	if (m_bSoundful)
-	{
-		sndPlaySound((LPCTSTR)LockResource(m_pSndVictory), SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
-	}
+    Invalidate();
+    // åˆ é™¤timer
+    if (m_uTimer != 0)
+    {
+        KillTimer(m_uTimer);
+        m_uTimer = 0;
+    }
+    // èƒœåˆ©å£°éŸ³
+    if (m_bSoundful)
+    {
+        sndPlaySound((LPCTSTR)LockResource(m_pSndVictory), SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
+    }
 
-	if (CNewRecordDlg::IsNewRecord(m_uSpendTime))
-	{
-		CNewRecordDlg dlg;
-		dlg.Init(m_uSpendTime);
-		dlg.DoModal();
+    if (CNewRecordDlg::IsNewRecord(m_uSpendTime))
+    {
+        CNewRecordDlg dlg;
+        dlg.Init(m_uSpendTime);
+        dlg.DoModal();
 
-		//Ó¢ĞÛ°ñ
-		OnMenuHero();
-	}
+        // è‹±é›„æ¦œ
+        OnMenuHero();
+    }
 }
 
-//Éè¶¨¸÷Ïî³ß´ç
+// è®¾å®šå„é¡¹å°ºå¯¸
 void CMineWnd::CalcWindowSize()
 {
-	//¼ûÍ¼Æ¬
-	uint uWidth = g_nXOffset * 2 + m_uColNum * g_nBlockWidth + 18;
-	uint uHeight = g_nYOffset * 2 + m_uRowNum * g_nBlockHeight + g_nInnerYOffset * 2 + g_nNumHeight + g_nGap + 60;
-	SetWindowPos(&wndTopMost, 0, 0, uWidth, uHeight, SWP_NOZORDER | SWP_NOMOVE | SWP_NOCOPYBITS);
-	//¿Í»§ÇøÓò
-	GetClientRect(&m_rectClient);
-	//Ãæ°å	
-	m_rectPanel.left = m_rectClient.left + g_nXOffset;
-	m_rectPanel.top = m_rectClient.top + g_nYOffset;
-	m_rectPanel.right = m_rectClient.right - g_nXOffset;
-	m_rectPanel.bottom = m_rectPanel.top + g_nPanelHeight;
-	//·½¿éÇøÓò	
-	m_rectBlockArea.left = m_rectPanel.left;
-	m_rectBlockArea.top = m_rectPanel.bottom + g_nGap;
-	m_rectBlockArea.right = m_rectPanel.right;
-	m_rectBlockArea.bottom = m_rectClient.bottom - g_nYOffset;
-	//ÖĞ¼ä°´Å¥
-	m_rectButton.left = m_rectClient.right / 2 - g_nBtnWidth / 2;
-	m_rectButton.top = m_rectPanel.top + g_nInnerYOffset;
-	m_rectButton.right = m_rectButton.left + g_nBtnWidth;
-	m_rectButton.bottom = m_rectButton.top + g_nBtnHeight;
-	//×ó²àÊ£ÓàÀ×Êı¿ò
-	m_rectLeftMines.left = m_rectPanel.left + g_nInnerXOffset;
-	m_rectLeftMines.top = m_rectPanel.top + g_nInnerYOffset;
-	m_rectLeftMines.right = m_rectLeftMines.left + g_nNumWidth * 3;
-	m_rectLeftMines.bottom = m_rectLeftMines.top + g_nNumHeight;
-	//ÓÒ²àÊ±¼ä¿ò
-	m_rectSpendTime.left = m_rectPanel.right - g_nInnerXOffset - g_nNumWidth * 3;
-	m_rectSpendTime.top = m_rectLeftMines.top;
-	m_rectSpendTime.right = m_rectPanel.right - g_nInnerXOffset;
-	m_rectSpendTime.bottom = m_rectLeftMines.bottom;
+    // è§å›¾ç‰‡
+    uint uWidth  = g_nXOffset * 2 + m_uColNum * g_nBlockWidth + 18;
+    uint uHeight = g_nYOffset * 2 + m_uRowNum * g_nBlockHeight + g_nInnerYOffset * 2 + g_nNumHeight + g_nGap + 60;
+    SetWindowPos(&wndTopMost, 0, 0, uWidth, uHeight, SWP_NOZORDER | SWP_NOMOVE | SWP_NOCOPYBITS);
+    // å®¢æˆ·åŒºåŸŸ
+    GetClientRect(&m_rectClient);
+    // é¢æ¿
+    m_rectPanel.left   = m_rectClient.left  + g_nXOffset;
+    m_rectPanel.top    = m_rectClient.top   + g_nYOffset;
+    m_rectPanel.right  = m_rectClient.right - g_nXOffset;
+    m_rectPanel.bottom = m_rectPanel.top    + g_nPanelHeight;
+    // æ–¹å—åŒºåŸŸ  
+    m_rectBlockArea.left   = m_rectPanel.left;
+    m_rectBlockArea.top    = m_rectPanel.bottom  + g_nGap;
+    m_rectBlockArea.right  = m_rectPanel.right;
+    m_rectBlockArea.bottom = m_rectClient.bottom - g_nYOffset;
+    // ä¸­é—´æŒ‰é’®
+    m_rectButton.left   = m_rectClient.right / 2 - g_nBtnWidth / 2;
+    m_rectButton.top    = m_rectPanel.top        + g_nInnerYOffset;
+    m_rectButton.right  = m_rectButton.left      + g_nBtnWidth;
+    m_rectButton.bottom = m_rectButton.top       + g_nBtnHeight;
+    // å·¦ä¾§å‰©ä½™é›·æ•°æ¡†
+    m_rectLeftMines.left   = m_rectPanel.left     + g_nInnerXOffset;
+    m_rectLeftMines.top    = m_rectPanel.top      + g_nInnerYOffset;
+    m_rectLeftMines.right  = m_rectLeftMines.left + g_nNumWidth * 3;
+    m_rectLeftMines.bottom = m_rectLeftMines.top  + g_nNumHeight;
+    // å³ä¾§æ—¶é—´æ¡†
+    m_rectSpendTime.left   = m_rectPanel.right - g_nInnerXOffset - g_nNumWidth * 3;
+    m_rectSpendTime.top    = m_rectLeftMines.top;
+    m_rectSpendTime.right  = m_rectPanel.right - g_nInnerXOffset;
+    m_rectSpendTime.bottom = m_rectLeftMines.bottom;
 }
 
-//»æÖÆĞ¦Á³°´Å¥Í¼
+// ç»˜åˆ¶ç¬‘è„¸æŒ‰é’®å›¾
 void CMineWnd::DrawButton(CPaintDC &dc)
 {
-	CDC cdc;
-	cdc.CreateCompatibleDC(&dc);
-	cdc.SelectObject(m_bmpButton);
+    CDC cdc;
+    cdc.CreateCompatibleDC(&dc);
+    cdc.SelectObject(m_bmpButton);
 
-	dc.Draw3dRect(m_rectButton.left, m_rectButton.top, g_nBtnWidth, g_nBtnHeight, m_clrBg, m_clrBg);
-	dc.StretchBlt(m_rectButton.left, m_rectButton.top, g_nBtnWidth, g_nBtnHeight, &cdc, 
-		0, g_nBtnHeight * m_uBtnState, g_nBtnWidth, g_nBtnHeight, SRCCOPY);	
+    dc.Draw3dRect(m_rectButton.left, m_rectButton.top, g_nBtnWidth, g_nBtnHeight, m_clrBg, m_clrBg);
+    dc.StretchBlt(m_rectButton.left, m_rectButton.top, g_nBtnWidth, g_nBtnHeight, &cdc, 
+                  0, g_nBtnHeight * m_uBtnState, g_nBtnWidth, g_nBtnHeight, SRCCOPY); 
 }
 
-// »æÖÆÊı×Ö
+// ç»˜åˆ¶æ•°å­—
 void CMineWnd::DrawNumber(CPaintDC &dc)
 {
-	CDC cdc;
-	cdc.CreateCompatibleDC(&dc);
-	cdc.SelectObject(m_bmpNumber);
+    CDC cdc;
+    cdc.CreateCompatibleDC(&dc);
+    cdc.SelectObject(m_bmpNumber);
 
-	//»æÖÆ¾ØĞÎ¿ò
-	dc.Draw3dRect(m_rectLeftMines.left, m_rectLeftMines.top, g_nNumWidth * 3, g_nNumHeight, m_clrBg, g_clrWhite);
-	dc.Draw3dRect(m_rectSpendTime.left, m_rectSpendTime.top, g_nNumWidth * 3, g_nNumHeight, m_clrBg, g_clrWhite);
+    // ç»˜åˆ¶çŸ©å½¢æ¡†
+    dc.Draw3dRect(m_rectLeftMines.left, m_rectLeftMines.top, g_nNumWidth * 3, g_nNumHeight, m_clrBg, g_clrWhite);
+    dc.Draw3dRect(m_rectSpendTime.left, m_rectSpendTime.top, g_nNumWidth * 3, g_nNumHeight, m_clrBg, g_clrWhite);
 
-	//»æÖÆÊ£ÓàÀ×Êı
-	int num = (m_nLeftNum < 0) ? 11 : m_nLeftNum / 100;
-	dc.StretchBlt(m_rectLeftMines.left, m_rectLeftMines.top, g_nNumWidth, g_nNumHeight, &cdc,
-		0, g_nNumHeight * (ENum_End - 1 - num), g_nNumWidth, g_nNumHeight, SRCCOPY);
-	
-	num = (m_nLeftNum < 0) ? -(m_nLeftNum - num * 100) / 10 : (m_nLeftNum - num * 100) / 10;
-	dc.StretchBlt(m_rectLeftMines.left + g_nNumWidth, m_rectLeftMines.top, g_nNumWidth, g_nNumHeight, &cdc, 
-		0, g_nNumHeight * (ENum_End - 1 - num), g_nNumWidth, g_nNumHeight, SRCCOPY);
-	
-	num = (m_nLeftNum < 0) ? -m_nLeftNum % 10 : m_nLeftNum % 10;
-	dc.StretchBlt(m_rectLeftMines.left + g_nNumWidth * 2, m_rectLeftMines.top, g_nNumWidth, g_nNumHeight, &cdc,
-		0, g_nNumHeight * (ENum_End - 1 - num), g_nNumWidth, g_nNumHeight, SRCCOPY);
+    // ç»˜åˆ¶å‰©ä½™é›·æ•°
+    int num = (m_nLeftNum < 0) ? 11 : m_nLeftNum / 100;
+    dc.StretchBlt(m_rectLeftMines.left, 
+                  m_rectLeftMines.top, 
+                  g_nNumWidth, 
+                  g_nNumHeight, 
+                  &cdc,
+                  0, 
+                  g_nNumHeight * (NUM_End - 1 - num), 
+                  g_nNumWidth, 
+                  g_nNumHeight, 
+                  SRCCOPY);
+    
+    num = (m_nLeftNum < 0) ? -(m_nLeftNum - num * 100) / 10 : (m_nLeftNum - num * 100) / 10;
+    dc.StretchBlt(m_rectLeftMines.left + g_nNumWidth, 
+                  m_rectLeftMines.top, 
+                  g_nNumWidth, 
+                  g_nNumHeight, 
+                  &cdc, 
+                  0, 
+                  g_nNumHeight * (NUM_End - 1 - num), 
+                  g_nNumWidth, 
+                  g_nNumHeight, 
+                  SRCCOPY);
+    
+    num = (m_nLeftNum < 0) ? -m_nLeftNum % 10 : m_nLeftNum % 10;
+    dc.StretchBlt(m_rectLeftMines.left + g_nNumWidth * 2, 
+                  m_rectLeftMines.top, 
+                  g_nNumWidth, 
+                  g_nNumHeight, 
+                  &cdc,
+                  0, 
+                  g_nNumHeight * (NUM_End - 1 - num), 
+                  g_nNumWidth, 
+                  g_nNumHeight, 
+                  SRCCOPY);
 
-	//»æÖÆÊ±¼ä
-	num = m_uSpendTime / 100;
-	dc.StretchBlt(m_rectSpendTime.left, m_rectSpendTime.top, g_nNumWidth, g_nNumHeight, &cdc, 
-		0, g_nNumHeight * (ENum_End - 1 - num), g_nNumWidth, g_nNumHeight, SRCCOPY);
+    // ç»˜åˆ¶æ—¶é—´
+    num = m_uSpendTime / 100;
+    dc.StretchBlt(m_rectSpendTime.left, 
+                  m_rectSpendTime.top, 
+                  g_nNumWidth, 
+                  g_nNumHeight, 
+                  &cdc, 
+                  0, 
+                  g_nNumHeight * (NUM_End - 1 - num), 
+                  g_nNumWidth, 
+                  g_nNumHeight, 
+                  SRCCOPY);
 
-	num = (m_uSpendTime - num * 100) / 10;
-	dc.StretchBlt(m_rectSpendTime.left + g_nNumWidth, m_rectSpendTime.top, g_nNumWidth, g_nNumHeight, &cdc,
-		0, g_nNumHeight * (ENum_End - 1 - num), g_nNumWidth, g_nNumHeight, SRCCOPY);
+    num = (m_uSpendTime - num * 100) / 10;
+    dc.StretchBlt(m_rectSpendTime.left + g_nNumWidth, 
+                  m_rectSpendTime.top, 
+                  g_nNumWidth, 
+                  g_nNumHeight, 
+                  &cdc,
+                  0, 
+                  g_nNumHeight * (NUM_End - 1 - num), 
+                  g_nNumWidth, 
+                  g_nNumHeight, 
+                  SRCCOPY);
 
-	num = m_uSpendTime % 10;
-	dc.StretchBlt(m_rectSpendTime.left + g_nNumWidth * 2, m_rectSpendTime.top, g_nNumWidth, g_nNumHeight, &cdc,
-		0, g_nNumHeight * (ENum_End - 1 - num), g_nNumWidth, g_nNumHeight, SRCCOPY);
+    num = m_uSpendTime % 10;
+    dc.StretchBlt(m_rectSpendTime.left + g_nNumWidth * 2, 
+                  m_rectSpendTime.top, 
+                  g_nNumWidth, 
+                  g_nNumHeight, 
+                  &cdc,
+                  0, 
+                  g_nNumHeight * (NUM_End - 1 - num), 
+                  g_nNumWidth, 
+                  g_nNumHeight, 
+                  SRCCOPY);
 }
 
-//»æÖÆ¿ØÖÆÃæ°åºÍ·½¿éÇøÓòµÄÍâ¿ò
+// ç»˜åˆ¶æ§åˆ¶é¢æ¿å’Œæ–¹å—åŒºåŸŸçš„å¤–æ¡†
 void CMineWnd::DrawFrame(CPaintDC &dc)
 {
-	dc.Draw3dRect(m_rectPanel.left, m_rectPanel.top, m_rectPanel.right - m_rectPanel.left, m_rectPanel.bottom - m_rectPanel.top, m_clrBg, g_clrWhite);
-	dc.Draw3dRect(m_rectBlockArea.left, m_rectBlockArea.top, m_rectBlockArea.right - m_rectBlockArea.left, m_rectBlockArea.bottom - m_rectBlockArea.top, m_clrBg, g_clrWhite);
+    dc.Draw3dRect(m_rectPanel.left, 
+                  m_rectPanel.top, 
+                  m_rectPanel.right  - m_rectPanel.left, 
+                  m_rectPanel.bottom - m_rectPanel.top, 
+                  m_clrBg, 
+                  g_clrWhite);
+    dc.Draw3dRect(m_rectBlockArea.left, 
+                  m_rectBlockArea.top, 
+                  m_rectBlockArea.right  - m_rectBlockArea.left, 
+                  m_rectBlockArea.bottom - m_rectBlockArea.top, 
+                  m_clrBg, 
+                  g_clrWhite);
 }
 
-//»æÖÆ·½¿éÇøÓò
+// ç»˜åˆ¶æ–¹å—åŒºåŸŸ
 void CMineWnd::DrawBlockArea(CPaintDC &dc)
 {
-	CDC dcMemory; //ÓÃ×÷ÄÚ´æÉè±¸
-	dcMemory.CreateCompatibleDC(&dc); //Ê¹µÃÕâ¸öÉè±¸Óëdc¼æÈİ
-	dcMemory.SelectObject(m_bmpMine); //½«ÄÚ´æÉè±¸ÓëÎ»Í¼×ÊÔ´¹ØÁª
+    CDC dcMemory; // ç”¨ä½œå†…å­˜è®¾å¤‡
+    dcMemory.CreateCompatibleDC(&dc); // ä½¿å¾—è¿™ä¸ªè®¾å¤‡ä¸dcå…¼å®¹
+    dcMemory.SelectObject(m_bmpMine); // å°†å†…å­˜è®¾å¤‡ä¸ä½å›¾èµ„æºå…³è”
 
-	for (int i = 0; i < m_uRowNum; i++)
-	{
-		for (int j = 0; j < m_uColNum; j++)
-		{
-			//¸ù¾İi,jÎ»ÖÃµÄ·½¿é×´Ì¬¿½±´ÏàÓ¦µÄÍ¼Ïñµ½¶ÔÓ¦ÇøÓò
-			dc.StretchBlt(m_rectBlockArea.left + g_nBlockWidth * j, m_rectBlockArea.top + g_nBlockHeight * i, g_nBlockWidth, g_nBlockHeight, &dcMemory, 
-				0, g_nBlockHeight * m_pBlockArea->GetCurState({ i, j }), g_nBlockWidth, g_nBlockHeight, SRCCOPY);
-		}
-	}
+    for (uint i = 0; i < m_uRowNum; i++)
+    {
+        for (uint j = 0; j < m_uColNum; j++)
+        {
+            // æ ¹æ®i,jä½ç½®çš„æ–¹å—çŠ¶æ€æ‹·è´ç›¸åº”çš„å›¾åƒåˆ°å¯¹åº”åŒºåŸŸ
+            dc.StretchBlt(m_rectBlockArea.left + g_nBlockWidth * j, 
+                          m_rectBlockArea.top + g_nBlockHeight * i, 
+                          g_nBlockWidth, 
+                          g_nBlockHeight, 
+                          &dcMemory, 
+                          0, 
+                          g_nBlockHeight * m_pBlockArea->GetCurState({ i, j }), 
+                          g_nBlockWidth, 
+                          g_nBlockHeight, 
+                          SRCCOPY);
+        }
+    }
 }
 
-//»ñÈ¡×ø±ê(x,y)¶ÔÓ¦µÄ·½¿é
+// è·å–åæ ‡(x,y)å¯¹åº”çš„æ–¹å—
 bool CMineWnd::GetBlock(long x, long y, TPos& pos)
 {
-	//±£Ö¤²ÎÊıºÏ¸ñ
-	if (x < m_rectBlockArea.left  || 
-		x > m_rectBlockArea.right ||
-		y < m_rectBlockArea.top   ||
-		y > m_rectBlockArea.bottom)
-	{
-		return false;
-	}
-	
-	pos = { (y - m_rectBlockArea.top) / g_nBlockHeight, (x - m_rectBlockArea.left) / g_nBlockWidth };
-	return true;
+    // ä¿è¯å‚æ•°åˆæ³•
+    if ((x < m_rectBlockArea.left)  || 
+        (x > m_rectBlockArea.right) ||
+        (y < m_rectBlockArea.top)   ||
+        (y > m_rectBlockArea.bottom))
+    {
+        return false;
+    }
+    
+    pos = { (y - m_rectBlockArea.top) / g_nBlockHeight, (x - m_rectBlockArea.left) / g_nBlockWidth };
+    return true;
 }
 
 void CMineWnd::SetCheckedLevel()
 {
-	if (m_pSubMenu)
-	{
-		m_pSubMenu->CheckMenuItem(IDM_PRIMARY,  MF_UNCHECKED | MF_BYCOMMAND);
-		m_pSubMenu->CheckMenuItem(IDM_MEDIUM,   MF_UNCHECKED | MF_BYCOMMAND);
-		m_pSubMenu->CheckMenuItem(IDM_ADVANCED, MF_UNCHECKED | MF_BYCOMMAND);
-		m_pSubMenu->CheckMenuItem(IDM_CUSTOM,   MF_UNCHECKED | MF_BYCOMMAND);
-		switch (m_uLevel)
-		{
-		case ELevel_Primary:
-			m_pSubMenu->CheckMenuItem(IDM_PRIMARY, MF_CHECKED | MF_BYCOMMAND);
-			break;
-		case ELevel_Medium:
-			m_pSubMenu->CheckMenuItem(IDM_MEDIUM, MF_CHECKED | MF_BYCOMMAND);
-			break;
-		case ELevel_Advanced:
-			m_pSubMenu->CheckMenuItem(IDM_ADVANCED, MF_CHECKED | MF_BYCOMMAND);
-			break;
-		case ELevel_Custom:
-			m_pSubMenu->CheckMenuItem(IDM_CUSTOM, MF_CHECKED | MF_BYCOMMAND);
-			break;
-		default:
-			break;
-		}
-	}
+    if (m_pSubMenu)
+    {
+        m_pSubMenu->CheckMenuItem(IDM_PRIMARY,  MF_UNCHECKED | MF_BYCOMMAND);
+        m_pSubMenu->CheckMenuItem(IDM_MEDIUM,   MF_UNCHECKED | MF_BYCOMMAND);
+        m_pSubMenu->CheckMenuItem(IDM_ADVANCED, MF_UNCHECKED | MF_BYCOMMAND);
+        m_pSubMenu->CheckMenuItem(IDM_CUSTOM,   MF_UNCHECKED | MF_BYCOMMAND);
+        switch (m_uLevel)
+        {
+        case LEVEL_Primary:
+            m_pSubMenu->CheckMenuItem(IDM_PRIMARY, MF_CHECKED | MF_BYCOMMAND);
+            break;
+        case LEVEL_Medium:
+            m_pSubMenu->CheckMenuItem(IDM_MEDIUM, MF_CHECKED | MF_BYCOMMAND);
+            break;
+        case LEVEL_Advanced:
+            m_pSubMenu->CheckMenuItem(IDM_ADVANCED, MF_CHECKED | MF_BYCOMMAND);
+            break;
+        case LEVEL_Custom:
+            m_pSubMenu->CheckMenuItem(IDM_CUSTOM, MF_CHECKED | MF_BYCOMMAND);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 void CMineWnd::SetCheckedColor()
 {
-	if (m_pSubMenu)
-	{
-		if (m_bColorful)
-		{
-			m_pSubMenu->CheckMenuItem(IDM_COLOR, MF_CHECKED | MF_BYCOMMAND);
-		}
-		else
-		{
-			m_pSubMenu->CheckMenuItem(IDM_COLOR, MF_UNCHECKED | MF_BYCOMMAND);
-		}
-	}
+    if (m_pSubMenu)
+    {
+        if (m_bColorful)
+        {
+            m_pSubMenu->CheckMenuItem(IDM_COLOR, MF_CHECKED | MF_BYCOMMAND);
+        }
+        else
+        {
+            m_pSubMenu->CheckMenuItem(IDM_COLOR, MF_UNCHECKED | MF_BYCOMMAND);
+        }
+    }
 }
 
 void CMineWnd::SetCheckedSound()
 {
-	if (m_pSubMenu)
-	{
-		if (m_bSoundful)
-		{
-			m_pSubMenu->CheckMenuItem(IDM_SOUND, MF_CHECKED | MF_BYCOMMAND);
-		}
-		else
-		{
-			m_pSubMenu->CheckMenuItem(IDM_SOUND, MF_UNCHECKED | MF_BYCOMMAND);
-		}
-	}
+    if (m_pSubMenu)
+    {
+        if (m_bSoundful)
+        {
+            m_pSubMenu->CheckMenuItem(IDM_SOUND, MF_CHECKED | MF_BYCOMMAND);
+        }
+        else
+        {
+            m_pSubMenu->CheckMenuItem(IDM_SOUND, MF_UNCHECKED | MF_BYCOMMAND);
+        }
+    }
 }
 
 void CMineWnd::LoadWave()
 {
-	FreeWave();
+    FreeWave();
 
-	HMODULE hResource = AfxGetResourceHandle();
+    HMODULE hResource = AfxGetResourceHandle();
 
-	m_pSndDead    = LoadResource(hResource, FindResource(hResource, MAKEINTRESOURCE(IDR_WAVE_DEAD),    TEXT("WAVE")));
-	m_pSndVictory = LoadResource(hResource, FindResource(hResource, MAKEINTRESOURCE(IDR_WAVE_VICTORY), TEXT("WAVE")));
-	m_pSndClock   = LoadResource(hResource, FindResource(hResource, MAKEINTRESOURCE(IDR_WAVE_CLOCK),   TEXT("WAVE")));
+    m_pSndDead    = LoadResource(hResource, FindResource(hResource, MAKEINTRESOURCE(IDR_WAVE_DEAD),    TEXT("WAVE")));
+    m_pSndVictory = LoadResource(hResource, FindResource(hResource, MAKEINTRESOURCE(IDR_WAVE_VICTORY), TEXT("WAVE")));
+    m_pSndClock   = LoadResource(hResource, FindResource(hResource, MAKEINTRESOURCE(IDR_WAVE_CLOCK),   TEXT("WAVE")));
 }
 
 void CMineWnd::FreeWave()
 {
-	if (m_pSndDead)
-	{
-		FreeResource(m_pSndDead);
-		m_pSndDead = nullptr;
-	}
+    if (m_pSndDead)
+    {
+        FreeResource(m_pSndDead);
+        m_pSndDead = nullptr;
+    }
 
-	if (m_pSndVictory)
-	{
-		FreeResource(m_pSndVictory);
-		m_pSndVictory = nullptr;
-	}
+    if (m_pSndVictory)
+    {
+        FreeResource(m_pSndVictory);
+        m_pSndVictory = nullptr;
+    }
 
-	if (m_pSndClock)
-	{
-		FreeResource(m_pSndClock);
-		m_pSndClock = nullptr;
-	}
+    if (m_pSndClock)
+    {
+        FreeResource(m_pSndClock);
+        m_pSndClock = nullptr;
+    }
 }
 
 void CMineWnd::OnPaint()
 {
-	CPaintDC dc(this);    // ÓÃÒÔÆÁÄ»ÏÔÊ¾µÄÉè±¸
-	CDC dcMemory;  // ÄÚ´æÉè±¸
+    CPaintDC dc(this);  // ç”¨ä»¥å±å¹•æ˜¾ç¤ºçš„è®¾å¤‡
+    CDC dcMemory;       // å†…å­˜è®¾å¤‡
 
-	CBitmap bitmap;
+    CBitmap bitmap;
 
-	if (!dc.IsPrinting())
-	{
-		// ÓëdcÉè±¸¼æÈİ
-		if (dcMemory.CreateCompatibleDC(&dc))
-		{
-			// Ê¹µÃbitmapÓëÊµ¼ÊÏÔÊ¾µÄÉè±¸¼æÈİ
-			if (bitmap.CreateCompatibleBitmap(&dc, m_rectClient.right, m_rectClient.bottom))
-			{				
-				dcMemory.SelectObject(&bitmap);//Ñ¡ÔñÎ»Í¼				
-				dcMemory.FillRect(&m_rectClient, &m_brsBG);//»æÖÆ±³¾°¿ò
+    if (!dc.IsPrinting())
+    {
+        // ä¸dcè®¾å¤‡å…¼å®¹
+        if (dcMemory.CreateCompatibleDC(&dc))
+        {
+            // ä½¿å¾—bitmapä¸å®é™…æ˜¾ç¤ºçš„è®¾å¤‡å…¼å®¹
+            if (bitmap.CreateCompatibleBitmap(&dc, m_rectClient.right, m_rectClient.bottom))
+            {               
+                dcMemory.SelectObject(&bitmap);// é€‰æ‹©ä½å›¾
+                dcMemory.FillRect(&m_rectClient, &m_brsBG); //ç»˜åˆ¶èƒŒæ™¯æ¡†
 
-				DrawFrame((CPaintDC&)dcMemory);
-				DrawButton((CPaintDC&)dcMemory);
-				DrawNumber((CPaintDC&)dcMemory);				
-				DrawBlockArea((CPaintDC&)dcMemory);
+                DrawFrame((CPaintDC&)dcMemory);
+                DrawButton((CPaintDC&)dcMemory);
+                DrawNumber((CPaintDC&)dcMemory);
+                DrawBlockArea((CPaintDC&)dcMemory);
 
-				// ½«ÄÚ´æÉè±¸µÄÄÚÈİ¿½±´µ½Êµ¼ÊÆÁÄ»ÏÔÊ¾µÄÉè±¸
-				dc.BitBlt(m_rectClient.left, m_rectClient.top, m_rectClient.right, m_rectClient.bottom, &dcMemory, 0, 0, SRCCOPY);
-				bitmap.DeleteObject();
-			}
-		}
-	}
+                // å°†å†…å­˜è®¾å¤‡çš„å†…å®¹æ‹·è´åˆ°å®é™…å±å¹•æ˜¾ç¤ºçš„è®¾å¤‡
+                dc.BitBlt(m_rectClient.left, 
+                          m_rectClient.top, 
+                          m_rectClient.right, 
+                          m_rectClient.bottom, 
+                          &dcMemory, 
+                          0, 
+                          0, 
+                          SRCCOPY);
+                bitmap.DeleteObject();
+            }
+        }
+    }
 }
 
 void CMineWnd::OnShowWindow(BOOL bShow, uint nStatus)
 {
-	CalcWindowSize();
+    CalcWindowSize();
 
-	CWnd::OnShowWindow(bShow, nStatus);
+    CWnd::OnShowWindow(bShow, nStatus);
 }
 
 void CMineWnd::OnTimer(uint nIDEvent)
 {
-	if (nIDEvent == TIMER_ID)
-	{		
-		if (m_bSoundful)//²¥·ÅÉùÒô
-		{
-			sndPlaySound((LPCTSTR)LockResource(m_pSndClock), SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
-		}
+    if (nIDEvent == TIMER_ID)
+    {       
+        if (m_bSoundful) // æ’­æ”¾å£°éŸ³
+        {
+            sndPlaySound((LPCTSTR)LockResource(m_pSndClock), SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
+        }
 
-		if (++m_uSpendTime >= g_nDefRecord)//×î´ó999
-		{
-			KillTimer(m_uTimer);
-			m_uTimer = 0;
-		}
+        if (++m_uSpendTime >= g_nDefRecord) // æœ€å¤§999
+        {
+            KillTimer(m_uTimer);
+            m_uTimer = 0;
+        }
 
-		InvalidateRect(CRect(m_rectSpendTime));//ÖØ»æÊ±¼ä
-	}
+        InvalidateRect(CRect(m_rectSpendTime)); // é‡ç»˜æ—¶é—´
+    }
 
-	CWnd::OnTimer(nIDEvent);
+    CWnd::OnTimer(nIDEvent);
 }
 
 void CMineWnd::OnLButtonDown(uint nFlags, CPoint pt)
-{	
-	SetCapture();//Êó±êÒÆ³ö½çÃæÒ²²¶»ñÆäÏûÏ¢
+{   
+    SetCapture(); // é¼ æ ‡ç§»å‡ºç•Œé¢ä¹Ÿæ•è·å…¶æ¶ˆæ¯
 
-	m_bClickBtn = FALSE;
-	m_bLRBtnDown = FALSE;
+    m_bClickBtn  = FALSE;
+    m_bLRBtnDown = FALSE;
 
-	if (IsInBtn(pt))//µã»÷°´Å¥
-	{
-		m_bClickBtn = TRUE;
-		m_uBtnState = EBtnS_Down;
-	}
-	else if (IsInBlockArea(pt))//µã»÷·½¿éÇøÓò
-	{		
-		GetBlock(pt.x, pt.y, m_posCurBlock);//»ñÈ¡·½¿éÂß¼­×ø±ê
+    if (IsInBtn(pt)) // ç‚¹å‡»æŒ‰é’®
+    {
+        m_bClickBtn = TRUE;
+        m_uBtnState = BUTTON_STATE_Down;
+    }
+    else if (IsInBlockArea(pt)) // ç‚¹å‡»æ–¹å—åŒºåŸŸ
+    {       
+        GetBlock(pt.x, pt.y, m_posCurBlock); // è·å–æ–¹å—é€»è¾‘åæ ‡
 
-		switch (m_uGameState)
-		{
-		case EGS_Wait://µÈ´ı»òÓÎÏ·ÖĞ£¬Õı³£ĞŞ¸Äm_posCurBlock·½¿é×´Ì¬
-		case EGS_Run:			
-		   {
-				m_pBlockArea->LBtnDown(m_posCurBlock);//ĞŞ¸Ä·½¿é×´Ì¬
-				
-				m_posOldBlock = m_posCurBlock;//±£´æµ±Ç°Î»ÖÃ
-				m_uBtnState = EBtnS_Click;
+        switch (m_uGameState)
+        {
+        case GAME_STATE_Wait: //ç­‰å¾…æˆ–æ¸¸æˆä¸­ï¼Œæ­£å¸¸ä¿®æ”¹m_posCurBlockæ–¹å—çŠ¶æ€
+        case GAME_STATE_Run:
+           {
+                m_pBlockArea->LBtnDown(m_posCurBlock); // ä¿®æ”¹æ–¹å—çŠ¶æ€
+                
+                m_posOldBlock = m_posCurBlock; // ä¿å­˜å½“å‰ä½ç½®
+                m_uBtnState = BUTTON_STATE_Click;
 
-				if (nFlags == (MK_LBUTTON | MK_RBUTTON))//×óÓÒ¼üÍ¬Ê±°´ÏÂ
-				{
-					m_bLRBtnDown = TRUE;
-					m_pBlockArea->LRBtnDown(m_posCurBlock);
-				}				
-			}
-			break;
-		case EGS_Dead: //gg£¬Ö±½Ó·µ»Ø
-		case EGS_Victory:
-			return;
-			break;
-		default:
-			break;
-		}		
-	}
-	else//·Ç½»»¥ÇøÓò
-	{
-		if (m_uGameState == EGS_Wait || m_uGameState == EGS_Run)
-		{
-			m_uBtnState = EBtnS_Click;			
-		}
-	}
+                if (nFlags == (MK_LBUTTON | MK_RBUTTON)) // å·¦å³é”®åŒæ—¶æŒ‰ä¸‹
+                {
+                    m_bLRBtnDown = TRUE;
+                    m_pBlockArea->LRBtnDown(m_posCurBlock);
+                }               
+            }
+            break;
+        case GAME_STATE_Dead:  //ggï¼Œç›´æ¥è¿”å›
+        case GAME_STATE_Victory:
+            return;
+            break;
+        default:
+            break;
+        }       
+    }
+    else // éäº¤äº’åŒºåŸŸ
+    {
+        if ((m_uGameState == GAME_STATE_Wait) || (m_uGameState == GAME_STATE_Run))
+        {
+            m_uBtnState = BUTTON_STATE_Click;
+        }
+    }
 
-	Invalidate();
-	CWnd::OnLButtonDown(nFlags, pt);
+    Invalidate();
+    CWnd::OnLButtonDown(nFlags, pt);
 }
 
 void CMineWnd::OnLButtonUp(uint nFlags, CPoint pt)
 {
-	class CAutoReleaseCapture
-	{
-	public:
-		CAutoReleaseCapture(){}
-		~CAutoReleaseCapture()
-		{
-			ReleaseCapture();
-		}
+    class CAutoReleaseCapture
+    {
+    public:
+        CAutoReleaseCapture(){}
+        ~CAutoReleaseCapture()
+        {
+            ReleaseCapture();
+        }
 
-		/*CAutoReleaseCapture(const CAutoReleaseCapture&) = delete;
-		CAutoReleaseCapture& operator=(const CAutoReleaseCapture&) = delete;*/
-	};
+        /*CAutoReleaseCapture(const CAutoReleaseCapture&) = delete;
+        CAutoReleaseCapture& operator=(const CAutoReleaseCapture&) = delete;*/
+    };
 
-	CAutoReleaseCapture obj;//×Ô¶¯ÊÍ·Å	
+    CAutoReleaseCapture obj; // è‡ªåŠ¨é‡Šæ”¾  
 
-	if (IsInBtn(pt))//µã»÷°´Å¥
-	{		
-		InitGame();//ÖØĞÂ¿ªÊ¼
-	}
-	else if (IsInBlockArea(pt))//µã»÷·½¿éÇøÓò
-	{		
-		switch (m_uGameState)
-		{
-		case EGS_Wait://µÈ´ı
-		{						  
-						  m_uBtnState = EBtnS_Normal;//°´Å¥×´Ì¬	
-						  m_uGameState = EGS_Run;//¿ªÊ¼ÓÎÏ· 
-						  m_uSpendTime = 0;	  
+    if (IsInBtn(pt)) // ç‚¹å‡»æŒ‰é’®
+    {       
+        InitGame(); // é‡æ–°å¼€å§‹
+    }
+    else if (IsInBlockArea(pt)) // ç‚¹å‡»æ–¹å—åŒºåŸŸ
+    {       
+        switch (m_uGameState)
+        {
+        case GAME_STATE_Wait: // ç­‰å¾…
+        {
+              m_uBtnState = BUTTON_STATE_Normal; // æŒ‰é’®çŠ¶æ€ 
+              m_uGameState = GAME_STATE_Run; // å¼€å§‹æ¸¸æˆ 
+              m_uSpendTime = 0;   
 
-						  if (m_uTimer)
-						  {
-							  KillTimer(m_uTimer);							  
-						  }		
-						  m_uTimer = SetTimer(TIMER_ID, 1000, nullptr);//Æô¶¯¶¨Ê±Æ÷							  
-						
-						  GetBlock(pt.x, pt.y, m_posCurBlock);
+              if (m_uTimer)
+              {
+                  KillTimer(m_uTimer);
+              }     
+              m_uTimer = SetTimer(TIMER_ID, 1000, nullptr); // å¯åŠ¨å®šæ—¶å™¨
+            
+              GetBlock(pt.x, pt.y, m_posCurBlock);
 
-						  m_pBlockArea->LayMines(m_posCurBlock);//²¼À×						  
-						  
-						  if (m_bLRBtnDown)//×óÓÒÊó±êÍ¬Ê±°´ÏÂ
-						  {
-							  m_bLRBtnDown = FALSE;	
-							  
-							  m_pBlockArea->LRBtnUp(m_posCurBlock);//ĞŞ¸ÄÖÜÎ§×´Ì¬ 
-						  }	
-						  else
-						  {
-							  if (m_pBlockArea->GetOldState(m_posCurBlock) == EBS_Mine)//µãÖĞÀ×
-							  {
-								  m_pBlockArea->DeadAt(m_posCurBlock);
-								  Dead();
-							  }
-							  else
-							  {
-								  if (m_pBlockArea->GetOldState(m_posCurBlock) == EBS_Normal)//¿É´ò¿ª
-								  {
-									  m_pBlockArea->Open(m_posCurBlock);
+              m_pBlockArea->LayMines(m_posCurBlock); // å¸ƒé›·
+              
+              if (m_bLRBtnDown) // å·¦å³é¼ æ ‡åŒæ—¶æŒ‰ä¸‹
+              {
+                  m_bLRBtnDown = FALSE; 
+                  
+                  m_pBlockArea->LRBtnUp(m_posCurBlock); // ä¿®æ”¹å‘¨å›´çŠ¶æ€ 
+              } 
+              else
+              {
+                  if (m_pBlockArea->GetOldState(m_posCurBlock) == BLOCK_STATE_Mine) // ç‚¹ä¸­é›·
+                  {
+                      m_pBlockArea->DeadAt(m_posCurBlock);
+                      Dead();
+                  }
+                  else
+                  {
+                      if (m_pBlockArea->GetOldState(m_posCurBlock) == BLOCK_STATE_Normal) // å¯æ‰“å¼€
+                      {
+                          m_pBlockArea->Open(m_posCurBlock);
 
-									  //ÅĞ¶ÏÊÇ·ñÎªÊ¤Àû
-									  if (m_pBlockArea->IsVictory())
-									  {
-										  Victory();
-									  }
-								  }
-							  }
-						  }
-		}
-			break;
-		case EGS_Run://ÓÎÏ·ÖĞ
-		{
-						m_uBtnState = EBtnS_Normal;
+                          // åˆ¤æ–­æ˜¯å¦ä¸ºèƒœåˆ©
+                          if (m_pBlockArea->IsVictory())
+                          {
+                              Victory();
+                          }
+                      }
+                  }
+              }
+        }
+            break;
+        case GAME_STATE_Run: // æ¸¸æˆä¸­
+        {
+            m_uBtnState = BUTTON_STATE_Normal;
 
-						GetBlock(pt.x, pt.y, m_posCurBlock);
+            GetBlock(pt.x, pt.y, m_posCurBlock);
 
-						if (m_bLRBtnDown)//×óÓÒÊó±êÍ¬Ê±°´ÏÂ
-						{
-							m_bLRBtnDown = FALSE;
+            if (m_bLRBtnDown) // å·¦å³é¼ æ ‡åŒæ—¶æŒ‰ä¸‹
+            {
+                m_bLRBtnDown = FALSE;
 
-							m_pBlockArea->LRBtnUp(m_posCurBlock);//ĞŞ¸ÄÖÜÎ§×´Ì¬									
+                m_pBlockArea->LRBtnUp(m_posCurBlock); // ä¿®æ”¹å‘¨å›´çŠ¶æ€
 
-							if ((m_pBlockArea->GetAroundMineNum(m_posCurBlock) == m_pBlockArea->GetAroundFlagNum(m_posCurBlock)) &&//ÖÜÎ§µÄ±ê¼ÇÊıµÈÓÚÀ×Êı
-								(m_pBlockArea->GetCurState(m_posCurBlock) >= EBS_Num8))//·½¿é±ØĞëÒÑ´ò¿ª
-							{
-								if (m_pBlockArea->HasCorrectFlags(m_posCurBlock))//±ê¼Ç×¼È·
-								{
-									m_pBlockArea->OpenAround(m_posCurBlock);//´ò¿ªÖÜÎ§·½¿é
+                if ((m_pBlockArea->GetAroundMineNum(m_posCurBlock) == m_pBlockArea->GetAroundFlagNum(m_posCurBlock)) && // å‘¨å›´çš„æ ‡è®°æ•°ç­‰äºé›·æ•°
+                    (m_pBlockArea->GetCurState(m_posCurBlock) >= BLOCK_STATE_Num8)) // æ–¹å—å¿…é¡»å·²æ‰“å¼€
+                {
+                    if (m_pBlockArea->HasCorrectFlags(m_posCurBlock)) // æ ‡è®°å‡†ç¡®
+                    {
+                        m_pBlockArea->OpenAround(m_posCurBlock); // æ‰“å¼€å‘¨å›´æ–¹å—
 
-									//ÅĞ¶ÏÊÇ·ñÎªÊ¤Àû
-									if (m_pBlockArea->IsVictory())
-									{
-										Victory();
-									}
-								}
-								else
-								{
-									m_pBlockArea->DeadAt(m_posCurBlock);//gg
-									Dead();
-								}							
-							}
-						}
-						else//½öµ¥»÷×ó¼ü
-						{								
-							if (m_pBlockArea->GetOldState(m_posCurBlock) == EBS_Normal)//µã»÷×ó¼üÖ®Ç°¸Ã·½¿éÎ´×÷ÈÎºÎ±ê¼Ç
-							{
-								if (m_pBlockArea->IsMine(m_posCurBlock))//ÈôÎªÀ×£¬Ö±½Ógg
-								{
-									m_pBlockArea->DeadAt(m_posCurBlock);
-									Dead();
-								}
-								else
-								{
-									m_pBlockArea->Open(m_posCurBlock);//²»ÊÇÀ×£¬´ò¿ª									
-								}								
-							}
-							else if (m_pBlockArea->GetOldState(m_posCurBlock) == EBS_Dicey)//¸Ã·½¿é±ê¼ÇÎªÎÊºÅ
-							{
-								m_pBlockArea->SetCurState(m_posCurBlock, EBS_Dicey);
-							}
+                        // åˆ¤æ–­æ˜¯å¦ä¸ºèƒœåˆ©
+                        if (m_pBlockArea->IsVictory())
+                        {
+                            Victory();
+                        }
+                    }
+                    else
+                    {
+                        m_pBlockArea->DeadAt(m_posCurBlock); // gg
+                        Dead();
+                    }                           
+                }
+            }
+            else // ä»…å•å‡»å·¦é”®
+            {                               
+                if (m_pBlockArea->GetOldState(m_posCurBlock) == BLOCK_STATE_Normal) // ç‚¹å‡»å·¦é”®ä¹‹å‰è¯¥æ–¹å—æœªä½œä»»ä½•æ ‡è®°
+                {
+                    if (m_pBlockArea->IsMine(m_posCurBlock)) // è‹¥ä¸ºé›·ï¼Œç›´æ¥gg
+                    {
+                        m_pBlockArea->DeadAt(m_posCurBlock);
+                        Dead();
+                    }
+                    else
+                    {
+                        m_pBlockArea->Open(m_posCurBlock); // ä¸æ˜¯é›·ï¼Œæ‰“å¼€
+                    }                               
+                }
+                else if (m_pBlockArea->GetOldState(m_posCurBlock) == BLOCK_STATE_Dicey) // è¯¥æ–¹å—æ ‡è®°ä¸ºé—®å·
+                {
+                    m_pBlockArea->SetCurState(m_posCurBlock, BLOCK_STATE_Dicey);
+                }
 
-							//ÅĞ¶ÏÊÇ·ñÎªÊ¤Àû
-							if (m_pBlockArea->IsVictory())
-							{
-								Victory();								
-							}
-						}
-		}
-			break;
-		case EGS_Victory:
-		case EGS_Dead:
-			return;
-		default:
-			break;
-		}
-	}
-	else//·Ç½»»¥ÇøÓò
-	{
-		if (m_uGameState == EGS_Wait || m_uGameState == EGS_Run)
-		{
-			m_uBtnState = EBtnS_Normal;
-			//InvalidateRect(&m_rectButton);
-		}
-	}
+                // åˆ¤æ–­æ˜¯å¦ä¸ºèƒœåˆ©
+                if (m_pBlockArea->IsVictory())
+                {
+                    Victory();
+                }
+            }
+        }
+            break;
+        case GAME_STATE_Victory:
+        case GAME_STATE_Dead:
+            return;
+        default:
+            break;
+        }
+    }
+    else // éäº¤äº’åŒºåŸŸ
+    {
+        if (m_uGameState == GAME_STATE_Wait || m_uGameState == GAME_STATE_Run)
+        {
+            m_uBtnState = BUTTON_STATE_Normal;
+            // InvalidateRect(&m_rectButton);
+        }
+    }
 
-	Invalidate();//¼òµ¥Æğ¼û£¬ÍêÈ«ÖØ»æ
-	CWnd::OnLButtonUp(nFlags, pt);
+    Invalidate(); // ç®€å•èµ·è§ï¼Œå®Œå…¨é‡ç»˜
+    CWnd::OnLButtonUp(nFlags, pt);
 }
 
 void CMineWnd::OnRButtonDown(uint nFlags, CPoint pt)
 {
-	m_bLRBtnDown = FALSE;
+    m_bLRBtnDown = FALSE;
 
-	if (IsInBlockArea(pt))//µã»÷·½¿éÇøÓò	
-	{
-		if (m_uGameState == EGS_Wait || m_uGameState == EGS_Run)
-		{
-			GetBlock(pt.x, pt.y, m_posCurBlock);//²»»áÊ§°Ü
+    if (IsInBlockArea(pt)) // ç‚¹å‡»æ–¹å—åŒºåŸŸ  
+    {
+        if (m_uGameState == GAME_STATE_Wait || m_uGameState == GAME_STATE_Run)
+        {
+            GetBlock(pt.x, pt.y, m_posCurBlock); // ä¸ä¼šå¤±è´¥
 
-			if ((nFlags & MK_LBUTTON) && (nFlags & MK_RBUTTON))//×óÓÒ¼üÍ¬Ê±°´ÏÂ
-			{
-				m_bLRBtnDown = TRUE;
-				m_pBlockArea->LRBtnDown(m_posCurBlock);//ĞŞ¸ÄÖÜÎ§×´Ì¬					
-			}
-			else
-			{
-				//EBS_Normal -> EBS_Flag -> EBS_Dicey -> EBS_Normal
-				switch (m_pBlockArea->GetCurState(m_posCurBlock))
-				{
-				case EBS_Normal:
-				{
-								   m_pBlockArea->SetCurState(m_posCurBlock, EBS_Flag);
-								   m_pBlockArea->SetOldState(m_posCurBlock, EBS_Flag);
+            if ((nFlags & MK_LBUTTON) && (nFlags & MK_RBUTTON)) // å·¦å³é”®åŒæ—¶æŒ‰ä¸‹
+            {
+                m_bLRBtnDown = TRUE;
+                m_pBlockArea->LRBtnDown(m_posCurBlock); // ä¿®æ”¹å‘¨å›´çŠ¶æ€ 
+            }
+            else
+            {
+                // BLOCK_STATE_Normal -> BLOCK_STATE_Flag -> BLOCK_STATE_Dicey -> BLOCK_STATE_Normal
+                switch (m_pBlockArea->GetCurState(m_posCurBlock))
+                {
+                case BLOCK_STATE_Normal:
+                {
+                    m_pBlockArea->SetCurState(m_posCurBlock, BLOCK_STATE_Flag);
+                    m_pBlockArea->SetOldState(m_posCurBlock, BLOCK_STATE_Flag);
+     
+                    m_nLeftNum--;
+                }
+                    break;
+                case BLOCK_STATE_Flag:
+                {
+                    m_pBlockArea->SetCurState(m_posCurBlock, BLOCK_STATE_Dicey);
+                    m_pBlockArea->SetOldState(m_posCurBlock, BLOCK_STATE_Dicey);
+       
+                    m_nLeftNum++;
+                }
+                    break;
+                case BLOCK_STATE_Dicey:
+                {
+                    m_pBlockArea->SetCurState(m_posCurBlock, BLOCK_STATE_Normal);
+                    m_pBlockArea->SetOldState(m_posCurBlock, BLOCK_STATE_Normal);
+                }
+                    break;
+                default:
+                    break;
+                }
+            }
 
-								   m_nLeftNum--;
-				}
-					break;
-				case EBS_Flag:
-				{
-								 m_pBlockArea->SetCurState(m_posCurBlock, EBS_Dicey);
-								 m_pBlockArea->SetOldState(m_posCurBlock, EBS_Dicey);
+            Invalidate();
+        }
+    }
 
-								 m_nLeftNum++;
-				}
-					break;
-				case EBS_Dicey:
-				{
-								  m_pBlockArea->SetCurState(m_posCurBlock, EBS_Normal);
-								  m_pBlockArea->SetOldState(m_posCurBlock, EBS_Normal);
-				}
-					break;
-				default:
-					break;
-				}
-			}
-
-			Invalidate();
-		}
-	}
-
-	CWnd::OnRButtonDown(nFlags, pt);
+    CWnd::OnRButtonDown(nFlags, pt);
 }
 
 void CMineWnd::OnRButtonUp(uint nFlags, CPoint pt)
 {
-	if (m_bLRBtnDown)//×óÓÒ¼üÍ¬Ê±°´ÏÂ
-	{
-		m_bLRBtnDown = FALSE;
+    if (m_bLRBtnDown) // å·¦å³é”®åŒæ—¶æŒ‰ä¸‹
+    {
+        m_bLRBtnDown = FALSE;
 
-		if (GetBlock(pt.x, pt.y, m_posCurBlock))
-		{
-			m_pBlockArea->LRBtnUp(m_posCurBlock);
-		}				
+        if (GetBlock(pt.x, pt.y, m_posCurBlock))
+        {
+            m_pBlockArea->LRBtnUp(m_posCurBlock);
+        }               
 
-		//ÒÔÏÂÓë×ó¼üËÉ¿ªÊ±µÄ´¦ÀíÏàÍ¬
-		if ((m_pBlockArea->GetAroundMineNum(m_posCurBlock) == m_pBlockArea->GetAroundFlagNum(m_posCurBlock)) &&//ÖÜÎ§µÄ±ê¼ÇÊıµÈÓÚÀ×Êı
-			(m_pBlockArea->GetCurState(m_posCurBlock) >= EBS_Num8))//·½¿é±ØĞëÒÑ´ò¿ª
-		{
-			if (m_pBlockArea->HasCorrectFlags(m_posCurBlock))//±ê¼Ç×¼È·
-			{
-				m_pBlockArea->OpenAround(m_posCurBlock);//´ò¿ªÖÜÎ§·½¿é
+        // ä»¥ä¸‹ä¸å·¦é”®æ¾å¼€æ—¶çš„å¤„ç†ç›¸åŒ
+        if ((m_pBlockArea->GetAroundMineNum(m_posCurBlock) == m_pBlockArea->GetAroundFlagNum(m_posCurBlock)) && // å‘¨å›´çš„æ ‡è®°æ•°ç­‰äºé›·æ•°
+            (m_pBlockArea->GetCurState(m_posCurBlock) >= BLOCK_STATE_Num8)) // æ–¹å—å¿…é¡»å·²æ‰“å¼€
+        {
+            if (m_pBlockArea->HasCorrectFlags(m_posCurBlock)) // æ ‡è®°å‡†ç¡®
+            {
+                m_pBlockArea->OpenAround(m_posCurBlock); // æ‰“å¼€å‘¨å›´æ–¹å—
 
-				//ÅĞ¶ÏÊÇ·ñÎªÊ¤Àû
-				if (m_pBlockArea->IsVictory())
-				{
-					Victory();
-				}
-			}
-			else
-			{
-				m_pBlockArea->DeadAt(m_posCurBlock);//gg
-				Dead();
-			}
-		}
-	}
+                // åˆ¤æ–­æ˜¯å¦ä¸ºèƒœåˆ©
+                if (m_pBlockArea->IsVictory())
+                {
+                    Victory();
+                }
+            }
+            else
+            {
+                m_pBlockArea->DeadAt(m_posCurBlock); // gg
+                Dead();
+            }
+        }
+    }
 
-	CWnd::OnRButtonUp(nFlags, pt);
+    CWnd::OnRButtonUp(nFlags, pt);
 }
 
 void CMineWnd::OnMouseMove(uint nFlags, CPoint pt)
 {
-	if (nFlags & MK_LBUTTON)
-	{
-		if (IsInBtn(pt))//°´Å¥ÇøÓò
-		{
-			m_uBtnState = EBtnS_Down;
-			//InvalidateRect(&m_rectButton);
-		}
-		else if (IsInBlockArea(pt))//·½¿éÇøÓò
-		{
-			switch (m_uGameState)
-			{
-			case EGS_Wait:
-			case EGS_Run:
-			{
-							GetBlock(pt.x, pt.y, m_posCurBlock);
+    if (nFlags & MK_LBUTTON)
+    {
+        if (IsInBtn(pt)) // æŒ‰é’®åŒºåŸŸ
+        {
+            m_uBtnState = BUTTON_STATE_Down;
+            // InvalidateRect(&m_rectButton);
+        }
+        else if (IsInBlockArea(pt)) // æ–¹å—åŒºåŸŸ
+        {
+            switch (m_uGameState)
+            {
+            case GAME_STATE_Wait:
+            case GAME_STATE_Run:
+            {
+                GetBlock(pt.x, pt.y, m_posCurBlock);
 
-							if (m_posCurBlock.x != m_posOldBlock.x || m_posCurBlock.y != m_posOldBlock.y)//ÒÆ¶¯µ½ĞÂ·½¿é
-							{
-								//ÉèÖÃĞÂ·½¿é×´Ì¬
-								switch (m_pBlockArea->GetCurState(m_posCurBlock))
-								{
-								case EBS_Normal:
-									m_pBlockArea->SetCurState(m_posCurBlock, EBS_Empty);
-									break;
-								case EBS_Dicey:
-									m_pBlockArea->SetCurState(m_posCurBlock, EBS_DiceyDown);
-									break;
-								default:
-									break;
-								}
-								//»Ö¸´ÀÏ·½¿é±£´æµÄÀÏµÄ×´Ì¬
-								switch (m_pBlockArea->GetOldState(m_posOldBlock))
-								{
-								case EBS_Normal:
-									m_pBlockArea->SetOldState(m_posOldBlock, EBS_Normal);
-									break;
-								case EBS_Dicey:
-									m_pBlockArea->SetOldState(m_posOldBlock, EBS_Dicey);
-									break;
-								default:
-									break;
-								}
+                if ((m_posCurBlock.x != m_posOldBlock.x) || (m_posCurBlock.y != m_posOldBlock.y)) // ç§»åŠ¨åˆ°æ–°æ–¹å—
+                {
+                    // è®¾ç½®æ–°æ–¹å—çŠ¶æ€
+                    switch (m_pBlockArea->GetCurState(m_posCurBlock))
+                    {
+                    case BLOCK_STATE_Normal:
+                        m_pBlockArea->SetCurState(m_posCurBlock, BLOCK_STATE_Empty);
+                        break;
+                    case BLOCK_STATE_Dicey:
+                        m_pBlockArea->SetCurState(m_posCurBlock, BLOCK_STATE_DiceyDown);
+                        break;
+                    default:
+                        break;
+                    }
+                    // æ¢å¤è€æ–¹å—ä¿å­˜çš„è€çš„çŠ¶æ€
+                    switch (m_pBlockArea->GetOldState(m_posOldBlock))
+                    {
+                    case BLOCK_STATE_Normal:
+                        m_pBlockArea->SetOldState(m_posOldBlock, BLOCK_STATE_Normal);
+                        break;
+                    case BLOCK_STATE_Dicey:
+                        m_pBlockArea->SetOldState(m_posOldBlock, BLOCK_STATE_Dicey);
+                        break;
+                    default:
+                        break;
+                    }
 
-								if (m_bLRBtnDown)
-								{
-									m_pBlockArea->LRBtnUp(m_posOldBlock);//µ¯Æğ
-									m_pBlockArea->LRBtnDown(m_posCurBlock);//°´ÏÂ				
-								}
-								else
-								{
-									m_pBlockArea->LBtnUp(m_posOldBlock);//µ¯Æğ
-									m_pBlockArea->LBtnDown(m_posCurBlock);//°´ÏÂ	
-								}
+                    if (m_bLRBtnDown)
+                    {
+                        m_pBlockArea->LRBtnUp(m_posOldBlock); // å¼¹èµ·
+                        m_pBlockArea->LRBtnDown(m_posCurBlock); // æŒ‰ä¸‹
+                    }
+                    else
+                    {
+                        m_pBlockArea->LBtnUp(m_posOldBlock); // å¼¹èµ·
+                        m_pBlockArea->LBtnDown(m_posCurBlock); // æŒ‰ä¸‹
+                    }
 
-								m_posOldBlock = m_posCurBlock;//±£´æµ±Ç°Î»ÖÃ
-							}
-			}
-				break;
-			case EGS_Victory: 
-			case EGS_Dead:				
-			default:
-				break;
-			}
-		}
-		else//·Ç½»»¥ÇøÓò
-		{		
-			switch (m_uGameState)
-			{
-			case EGS_Run:
-				m_uBtnState = m_bClickBtn ? EBtnS_Normal: EBtnS_Click;				
-				break;
-			case EGS_Dead:
-				m_uBtnState = EBtnS_Dead;
-				break;
-			case EGS_Victory:
-				m_uBtnState = EBtnS_Victory;
-				break;
-			default:
-				break;
-			}
-		}
+                    m_posOldBlock = m_posCurBlock; // ä¿å­˜å½“å‰ä½ç½®
+                }
+            }
+                break;
+            case GAME_STATE_Victory: 
+            case GAME_STATE_Dead:              
+            default:
+                break;
+            }
+        }
+        else // éäº¤äº’åŒºåŸŸ
+        {       
+            switch (m_uGameState)
+            {
+            case GAME_STATE_Run:
+                m_uBtnState = m_bClickBtn ? BUTTON_STATE_Normal: BUTTON_STATE_Click;
+                break;
+            case GAME_STATE_Dead:
+                m_uBtnState = BUTTON_STATE_Dead;
+                break;
+            case GAME_STATE_Victory:
+                m_uBtnState = BUTTON_STATE_Victory;
+                break;
+            default:
+                break;
+            }
+        }
 
-		Invalidate();
-	}	
+        Invalidate();
+    }   
 
-	CWnd::OnMouseMove(nFlags, pt);
+    CWnd::OnMouseMove(nFlags, pt);
 }
 
 void CMineWnd::OnMenuStart()
 {
-	InitGame();
-	Invalidate();
+    InitGame();
+    Invalidate();
 }
 
 void CMineWnd::OnMenuPrimary()
 {
-	SetCheckedLevel();
+    SetCheckedLevel();
 
-	m_pCfgMgr->SetMineInfo(g_nDefPrimaryRowNum, g_nDefPrimaryColNum, g_nDefPrimaryMineNum, ELevel_Primary);	
+    m_pCfgMgr->SetMineInfo(g_nDefPrimaryRowNum, g_nDefPrimaryColNum, g_nDefPrimaryMineNum, LEVEL_Primary);  
 
-	InitGame();	
-	CalcWindowSize();
+    InitGame(); 
+    CalcWindowSize();
 
-	Invalidate();
+    Invalidate();
 }
 
 void CMineWnd::OnMenuMedium()
 {
-	SetCheckedLevel();
+    SetCheckedLevel();
 
-	m_pCfgMgr->SetMineInfo(g_nDefMediumRowNum, g_nDefMediumColNum, g_nDefMediumMineNum, ELevel_Medium);
+    m_pCfgMgr->SetMineInfo(g_nDefMediumRowNum, g_nDefMediumColNum, g_nDefMediumMineNum, LEVEL_Medium);
 
-	InitGame();
-	CalcWindowSize();
+    InitGame();
+    CalcWindowSize();
 
-	Invalidate();
+    Invalidate();
 }
 
 void CMineWnd::OnMenuAdvanced()
 {
-	SetCheckedLevel();
+    SetCheckedLevel();
 
-	m_pCfgMgr->SetMineInfo(g_nDefAdvancedRowNum, g_nDefAdvancedColNum, g_nDefAdvancedMineNum, ELevel_Advanced);
+    m_pCfgMgr->SetMineInfo(g_nDefAdvancedRowNum, g_nDefAdvancedColNum, g_nDefAdvancedMineNum, LEVEL_Advanced);
 
-	InitGame();
-	CalcWindowSize();
+    InitGame();
+    CalcWindowSize();
 
-	Invalidate();
+    Invalidate();
 }
 
 void CMineWnd::OnMenuCustom()
 {
-	SetCheckedLevel();
+    SetCheckedLevel();
 
-	CCustomDlg dlg;
-	dlg.DoModal();
+    CCustomDlg dlg;
+    dlg.DoModal();
 
-	InitGame();	
-	CalcWindowSize();
-	
-	Invalidate();
+    InitGame(); 
+    CalcWindowSize();
+    
+    Invalidate();
 }
 
 void CMineWnd::OnMenuColor()
 {
-	m_bColorful = !m_bColorful;
-	SetCheckedColor();//²Ëµ¥
-	m_pCfgMgr->SetColorful(m_bColorful);//¸üĞÂÅäÖÃÎÄ¼ş
+    m_bColorful = !m_bColorful;
+    SetCheckedColor(); // èœå•
+    m_pCfgMgr->SetColorful(m_bColorful); // æ›´æ–°é…ç½®æ–‡ä»¶
 
-	LoadBitmap();
-	Invalidate();
+    LoadBitmap();
+    Invalidate();
 }
 
 void CMineWnd::OnMenuSound()
 {
-	m_bSoundful = !m_bSoundful;
-	SetCheckedSound();
-	m_pCfgMgr->SetSoundful(m_bColorful);//¸üĞÂÅäÖÃÎÄ¼ş
+    m_bSoundful = !m_bSoundful;
+    SetCheckedSound();
+    m_pCfgMgr->SetSoundful(m_bColorful); // æ›´æ–°é…ç½®æ–‡ä»¶
 
-	if (m_bSoundful)
-	{
-		LoadWave();
-	}
-	else
-	{
-		FreeWave();
-	}
+    if (m_bSoundful)
+    {
+        LoadWave();
+    }
+    else
+    {
+        FreeWave();
+    }
 }
 
 void CMineWnd::OnMenuHero()
 {
-	CHeroDlg dlg;	
-	dlg.DoModal();
+    CHeroDlg dlg;   
+    dlg.DoModal();
 }
 
 void CMineWnd::OnMenuExit()
 {
-	PostQuitMessage(0);
+    PostQuitMessage(0);
 }
 
 void CMineWnd::OnMenuHelp()
 {
-	CHelpDlg dlg;
-	dlg.DoModal();
+    CHelpDlg dlg;
+    dlg.DoModal();
 }
 
 void CMineWnd::OnMenuAbout()
 {
-	ShellAbout(this->m_hWnd, TEXT("É¨À×"), TEXT("my mine game"), nullptr);
+    ShellAbout(this->m_hWnd, TEXT("æ‰«é›·"), TEXT("my mine game"), nullptr);
 }
 
 void CMineWnd::OnKeyDown(uint nChar, uint nRepCnt, uint nFlags)
 {
-	switch (nChar)
-	{
-	case VK_F1:
-	case 'H':
-		OnMenuHelp();
-		break;
-	case VK_F2:
-		OnMenuAbout();
-		break;
-	case VK_F3:
-		OnMenuStart();
-		break;
-	case VK_F4:
-		OnMenuExit();
-		break;
-	case VK_F5:
-		GodView();
-		break;
-	case VK_F6:
-	case 'C':
-		OnMenuColor();
-		break;
-	case VK_F7:
-	case 'S':
-		OnMenuSound();
-		break;
-	default:
-		break;
-	}
+    switch (nChar)
+    {
+    case VK_F1:
+    case 'H':
+        OnMenuHelp();
+        break;
+    case VK_F2:
+        OnMenuAbout();
+        break;
+    case VK_F3:
+        OnMenuStart();
+        break;
+    case VK_F4:
+        OnMenuExit();
+        break;
+    case VK_F5:
+        GodView();
+        break;
+    case VK_F6:
+    case 'C':
+        OnMenuColor();
+        break;
+    case VK_F7:
+    case 'S':
+        OnMenuSound();
+        break;
+    default:
+        break;
+    }
 
-	CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
+    CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 void CMineWnd::GodView()
 {
-	static bool show = false;
-	show = !show;	
+    static bool show = false;
+    show = !show;   
 
-	m_pBlockArea->ShowMines(show);
-	Invalidate();
+    m_pBlockArea->ShowMines(show);
+    Invalidate();
 }
 
 void CMineWnd::OnInitMenu(CMenu* pMenu)
 {
-	CWnd::OnInitMenu(pMenu);
-	if ((m_pSubMenu = pMenu->GetSubMenu(0)) == 0)
-	{
-		AfxMessageBox(TEXT("³õÊ¼»¯²Ëµ¥Ê§°Ü£¡"));
-		PostQuitMessage(0);
-	}
-	else
-	{
-		SetCheckedLevel();
-		SetCheckedColor();
-		SetCheckedSound();
-	}
+    CWnd::OnInitMenu(pMenu);
+    if ((m_pSubMenu = pMenu->GetSubMenu(0)) == 0)
+    {
+        AfxMessageBox(TEXT("åˆå§‹åŒ–èœå•å¤±è´¥ï¼"));
+        PostQuitMessage(0);
+    }
+    else
+    {
+        SetCheckedLevel();
+        SetCheckedColor();
+        SetCheckedSound();
+    }
 }
 
-//°´Å¥ÇøÓò
+// æŒ‰é’®åŒºåŸŸ
 bool CMineWnd::IsInBtn(CPoint pt)
 {
-	return CRect(m_rectButton).PtInRect(pt);
+    return TRUE == CRect(m_rectButton).PtInRect(pt);
 }
 
-//°´Å¥ÇøÓò
+// æŒ‰é’®åŒºåŸŸ
 bool CMineWnd::IsInBlockArea(CPoint pt)
 {
-	return CRect(m_rectBlockArea).PtInRect(pt);
+    return TRUE == CRect(m_rectBlockArea).PtInRect(pt);
 }

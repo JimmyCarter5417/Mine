@@ -34,10 +34,10 @@
 # my definition
 *.ncb
 *.opensdf
+*.opendb
 *.suo
 *.aps
 *.user
 *.sdf
 ipch
 Bin
-123

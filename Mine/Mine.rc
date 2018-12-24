@@ -66,14 +66,15 @@ END
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\Mine.ico"
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -86,15 +87,16 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "080404B0"
+        BLOCK "080404b0"
         BEGIN
+            VALUE "CompanyName", "wangqiang5417@gmail.com"
             VALUE "FileDescription", "Mine Microsoft 基础类应用程序"
-            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "FileVersion", "1.0.0.0"
             VALUE "InternalName", "Mine"
-            VALUE "LegalCopyright", "版权所有 (C) 2004"
+            VALUE "LegalCopyright", "2018"
             VALUE "OriginalFilename", "Mine.EXE"
-            VALUE "ProductName", "Mine 应用程序"
-            VALUE "ProductVersion", "1, 0, 0, 1"
+            VALUE "ProductName", "扫雷"
+            VALUE "ProductVersion", "1.0.0.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -140,11 +142,17 @@ END
 //
 
 IDB_MINE_COLOR          BITMAP                  "res\\BITMAP10.BMP"
+
 IDB_BTN_GRAY            BITMAP                  "res\\BITMAP31.BMP"
+
 IDB_MINE_GRAY           BITMAP                  "res\\BITMAP11.BMP"
+
 IDB_NUM_COLOR           BITMAP                  "res\\BITMAP20.BMP"
+
 IDB_NUM_GRAY            BITMAP                  "res\\BITMAP21.BMP"
+
 IDB_BTN_COLOR           BITMAP                  "res\\BITMAP30.BMP"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -152,8 +160,11 @@ IDB_BTN_COLOR           BITMAP                  "res\\BITMAP30.BMP"
 //
 
 IDR_WAVE_DEAD           WAVE                    "res\\dead.wav"
+
 IDR_WAVE_CLOCK          WAVE                    "res\\clock.wav"
+
 IDR_WAVE_VICTORY        WAVE                    "res\\victory.wav"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

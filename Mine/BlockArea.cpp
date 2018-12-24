@@ -1,6 +1,7 @@
-#include "StdAfx.h"
-#include "BlockArea.h"
+ï»¿#include "StdAfx.h"
 #include <time.h>
+#include "Def.h"
+#include "BlockArea.h"
 
 CBlockArea::CBlockArea()
 : m_uMineNum(0)
@@ -10,414 +11,460 @@ CBlockArea::CBlockArea()
 
 CBlockArea* CBlockArea::GetInstance()
 {
-	static CBlockArea obj;
-	return &obj;
+    static CBlockArea obj;
+    return &obj;
 }
 
-//ÐÂ½¨È«¿ÕÇøÓò£¬Éè¶¨À×Êý£¨Î´²¼À×£©
+// æ–°å»ºå…¨ç©ºåŒºåŸŸï¼Œè®¾å®šé›·æ•°ï¼ˆæœªå¸ƒé›·ï¼‰
 bool CBlockArea::Init(uint rows, uint cols, uint mines)
 {
-	if (rows == 0 || cols == 0 || mines == 0)
-		return false;
+    if (rows == 0 || cols == 0 || mines == 0)
+        return false;
 
-	m_uMineNum = mines;
-	m_vBlockArea.assign(rows, vector<TBlock>(cols));
+    m_uMineNum = mines;
+    m_vBlockArea.assign(rows, vector<TBlock>(cols));
 
-	for (int i = 0; i < rows; ++i)
-	{
-		for (int j = 0; j < cols; ++j)
-		{
-			m_vBlockArea[i][j].pos.x = i;
-			m_vBlockArea[i][j].pos.y = j;
-			m_vBlockArea[i][j].attr = def::EBA_Empty;
-			m_vBlockArea[i][j].cur_state = def::EBS_Normal;
-			m_vBlockArea[i][j].old_state = def::EBS_Normal;
-		}
-	}
+    for (uint i = 0; i < rows; ++i)
+    {
+        for (uint j = 0; j < cols; ++j)
+        {
+            m_vBlockArea[i][j].pos.x = i;
+            m_vBlockArea[i][j].pos.y = j;
+            m_vBlockArea[i][j].attr      = BLOCK_ATTR_Empty;
+            m_vBlockArea[i][j].cur_state = BLOCK_STATE_Normal;
+            m_vBlockArea[i][j].old_state = BLOCK_STATE_Normal;
+        }
+    }
 
-	return true;
+    return true;
 }
 
-//ÒÔx,yÎªÖÐÐÄ²¼À×
+// ä»¥x,yä¸ºä¸­å¿ƒå¸ƒé›·
 bool CBlockArea::LayMines(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return false;
+    if (!IsValidPos(pos))
+    {
+        return false;
+    }
 
-	srand((uint)time(nullptr));
+    srand((uint)time(nullptr));
 
-	uint left = m_uMineNum;
-	uint rows = m_vBlockArea.size();
-	uint cols = m_vBlockArea.front().size();
+    uint left = m_uMineNum;
+    uint rows = m_vBlockArea.size();
+    uint cols = m_vBlockArea.front().size();
 
-	//²¼m_uMineNum¸öÀ×
-	while (left > 0)
-	{
-		//È¡Ëæ»úÊý
-		uint i = rand() % rows;
-		uint j = rand() % cols;
+    // å¸ƒm_uMineNumä¸ªé›·
+    while (left > 0)
+    {
+        // å–éšæœºæ•°
+        uint i = rand() % rows;
+        uint j = rand() % cols;
 
-		if (!(i == pos.x && j == pos.y) && m_vBlockArea[i][j].attr != def::EBA_Mine)
-		{
-			m_vBlockArea[i][j].attr = def::EBA_Mine;//ÐÞ¸ÄÊôÐÔÎªÀ×
-			left--;//´ý²¼µÄÀ×¼õÒ»		
-		}
-	}	
+        if (!(i == pos.x && j == pos.y) && 
+            (m_vBlockArea[i][j].attr != BLOCK_ATTR_Mine))
+        {
+            m_vBlockArea[i][j].attr = BLOCK_ATTR_Mine; // ä¿®æ”¹å±žæ€§ä¸ºé›·
+            left--; // å¾…å¸ƒçš„é›·å‡ä¸€     
+        }
+    }   
 
-	return true;
+    return true;
 }
 
 bool CBlockArea::IsValidPos(TPos pos)
 {
-	return pos.x >= 0 && pos.x < m_vBlockArea.size() && pos.y >= 0 && pos.y < m_vBlockArea.front().size();
+    return (pos.x >= 0) && 
+           (pos.x < m_vBlockArea.size()) && 
+           (pos.y >= 0) && 
+           (pos.y < m_vBlockArea.front().size());
 }
 
-//¼ÆËãÖÜÎ§µÄÀ×Êý
+// è®¡ç®—å‘¨å›´çš„é›·æ•°
 int CBlockArea::GetAroundMineNum(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return -1;
+    if (!IsValidPos(pos))
+    {
+        return -1;
+    }
 
-	int res = 0;
+    int res = 0;
 
-	for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
-	{
-		for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
-		{
-			if (!(i == pos.x && j == pos.y) && IsValidPos({ i, j }))
-			{
-				if (m_vBlockArea[i][j].attr == def::EBA_Mine)
-				{
-					res++;
-				}
-			}
-		}
-	}
+    for (uint i = pos.x - 1; i <= pos.x + 1; i++)
+    {
+        for (uint j = pos.y - 1; j <= pos.y + 1; j++)
+        {
+            if (!(i == pos.x && j == pos.y) && IsValidPos({ i, j }))
+            {
+                if (m_vBlockArea[i][j].attr == BLOCK_ATTR_Mine)
+                {
+                    res++;
+                }
+            }
+        }
+    }
 
-	return res;
+    return res;
 }
 
-//¼ÆËãÖÜÎ§µÄflagÊý
+// è®¡ç®—å‘¨å›´çš„flagæ•°
 int CBlockArea::GetAroundFlagNum(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return -1;
+    if (!IsValidPos(pos))
+    {
+        return -1;
+    }
 
-	int res = 0;
+    int res = 0;
 
-	for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
-	{
-		for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
-		{
-			if (!(i == pos.x && j == pos.y) && IsValidPos({ i, j }))
-			{
-				if (m_vBlockArea[i][j].cur_state == def::EBS_Flag)
-				{
-					res++;
-				}
-			}
-		}
-	}
+    for (uint i = pos.x - 1; i <= pos.x + 1; i++)
+    {
+        for (uint j = pos.y - 1; j <= pos.y + 1; j++)
+        {
+            if (!(i == pos.x && j == pos.y) && IsValidPos({ i, j }))
+            {
+                if (m_vBlockArea[i][j].cur_state == BLOCK_STATE_Flag)
+                {
+                    res++;
+                }
+            }
+        }
+    }
 
-	return res;
+    return res;
 }
 
 bool CBlockArea::IsMine(TPos pos)
 {
-	return m_vBlockArea[pos.x][pos.y].attr == def::EBA_Mine;
+    return m_vBlockArea[pos.x][pos.y].attr == BLOCK_ATTR_Mine;
 }
 
-//´ò¿ªÖÜÎ§ÇøÓò
+// æ‰“å¼€å‘¨å›´åŒºåŸŸ
 bool CBlockArea::OpenAround(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return false;
+    if (!IsValidPos(pos))
+    {
+        return false;
+    }
 
-	//±ê¼ÇµÄÀ×Êý²»µÈÓÚÖÜÎ§µÄÀ×Êý£¬²»´ò¿ª
-	if (GetAroundFlagNum(pos) != GetAroundMineNum(pos))
-		return true;
+    // æ ‡è®°çš„é›·æ•°ä¸ç­‰äºŽå‘¨å›´çš„é›·æ•°ï¼Œä¸æ‰“å¼€
+    if (GetAroundFlagNum(pos) != GetAroundMineNum(pos))
+    {
+        return true;
+    }
 
-	for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
-	{
-		for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
-		{
-			if (IsValidPos({ i, j }))
-			{				
-				if (m_vBlockArea[i][j].cur_state == def::EBS_Normal)//Õý³£ÇøÓò
-				{
-					Open({ i, j });//´ò¿ª¸Ã·½¿é²¢³¢ÊÔÀ©Õ¹ÆäÖÜÎ§ÇøÓò				
-				}
-			}
-		}
-	}
+    for (uint i = pos.x - 1; i <= pos.x + 1; i++)
+    {
+        for (uint j = pos.y - 1; j <= pos.y + 1; j++)
+        {
+            if (IsValidPos({ i, j }))
+            {               
+                if (m_vBlockArea[i][j].cur_state == BLOCK_STATE_Normal) // æ­£å¸¸åŒºåŸŸ
+                {
+                    Open({ i, j }); // æ‰“å¼€è¯¥æ–¹å—å¹¶å°è¯•æ‰©å±•å…¶å‘¨å›´åŒºåŸŸ
+                }
+            }
+        }
+    }
 
-	return true;
+    return true;
 }
 
-//´ò¿ª¸Ã·½¿é²¢³¢ÊÔÀ©Õ¹ÆäÖÜÎ§ÇøÓò£¬dfs
+// æ‰“å¼€è¯¥æ–¹å—å¹¶å°è¯•æ‰©å±•å…¶å‘¨å›´åŒºåŸŸï¼Œdfs
 bool CBlockArea::Open(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return false;
+    if (!IsValidPos(pos))
+    {
+        return false;
+    }
 
-	//ÏÈ´ò¿ª¸Ã·½¿é
-	uint mines = GetAroundMineNum(pos);
-	m_vBlockArea[pos.x][pos.y].cur_state = (def::EBlockState)(def::EBS_Empty - mines);//ÉèÖÃ¸Ã·½¿é×´Ì¬
-	m_vBlockArea[pos.x][pos.y].old_state = m_vBlockArea[pos.x][pos.y].cur_state;
+    // å…ˆæ‰“å¼€è¯¥æ–¹å—
+    uint mines = GetAroundMineNum(pos);
+    m_vBlockArea[pos.x][pos.y].cur_state = (BLOCK_STATE_E)(BLOCK_STATE_Empty - mines); // è®¾ç½®è¯¥æ–¹å—çŠ¶æ€
+    m_vBlockArea[pos.x][pos.y].old_state = m_vBlockArea[pos.x][pos.y].cur_state;
 
-	//ÖÜÎ§ÎÞÀ×¼´¿ÉÀ©Õ¹
-	if (mines == 0)
-	{
-		for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
-		{
-			for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
-			{
-				if (IsValidPos({ i, j }))
-				{
-					if (!(i == pos.x && j == pos.y) &&
-						m_vBlockArea[i][j].attr != def::EBA_Mine &&
-						m_vBlockArea[i][j].cur_state == def::EBS_Normal) 
-					{
-						Open({ i, j });//µÝ¹é
-					}
-				}
-			}
-		}
-	}
+    //å‘¨å›´æ— é›·å³å¯æ‰©å±•
+    if (mines == 0)
+    {
+        for (uint i = pos.x - 1; i <= pos.x + 1; i++)
+        {
+            for (uint j = pos.y - 1; j <= pos.y + 1; j++)
+            {
+                if (IsValidPos({ i, j }))
+                {
+                    if (!(i == pos.x && j == pos.y) &&
+                        (m_vBlockArea[i][j].attr != BLOCK_ATTR_Mine) &&
+                        (m_vBlockArea[i][j].cur_state == BLOCK_STATE_Normal)) 
+                    {
+                        Open({ i, j }); // é€’å½’
+                    }
+                }
+            }
+        }
+    }
 
-	return true;
+    return true;
 }
 
-//µã¿ªËùÓÐ·ÇÀ×·½¿é¼´Ê¤Àû
+// ç‚¹å¼€æ‰€æœ‰éžé›·æ–¹å—å³èƒœåˆ©
 bool CBlockArea::IsVictory()
 {
-	uint rows = m_vBlockArea.size();
-	uint cols = m_vBlockArea.front().size();
+    uint rows = m_vBlockArea.size();
+    uint cols = m_vBlockArea.front().size();
 
-	for (int i = 0; i < rows; ++i)
-	{
-		for (int j = 0; j < cols; ++j)
-		{
-			if (m_vBlockArea[i][j].attr == def::EBA_Empty &&//¿Õ¸ñ
-				m_vBlockArea[i][j].cur_state < def::EBS_Num8)//Î´´ò¿ª
-				return false;
-		}
-	}
+    for (uint i = 0; i < rows; ++i)
+    {
+        for (uint j = 0; j < cols; ++j)
+        {
+            if (m_vBlockArea[i][j].attr == BLOCK_ATTR_Empty &&   // ç©ºæ ¼
+                m_vBlockArea[i][j].cur_state < BLOCK_STATE_Num8) // æœªæ‰“å¼€
+                return false;
+        }
+    }
 
-	return true;
+    return true;
 }
 
-//ÔÚÄ³Î»ÖÃÊ§°Ü
+// åœ¨æŸä½ç½®å¤±è´¥
 bool CBlockArea::DeadAt(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return false;
+    if (!IsValidPos(pos))
+    {
+        return false;
+    }
 
-	uint rows = m_vBlockArea.size();
-	uint cols = m_vBlockArea.front().size();
-	for (int i = 0; i < rows; i++)
-	{
-		for (int j = 0; j < cols; j++)
-		{
-			if (m_vBlockArea[i][j].attr == def::EBA_Mine)//ÏÔÊ¾ËùÓÐÀ×
-			{
-				m_vBlockArea[i][j].cur_state = def::EBS_Mine;
-				m_vBlockArea[i][j].old_state = m_vBlockArea[i][j].cur_state;
-			}
-		}
-	}
+    uint rows = m_vBlockArea.size();
+    uint cols = m_vBlockArea.front().size();
+    for (uint i = 0; i < rows; i++)
+    {
+        for (uint j = 0; j < cols; j++)
+        {
+            if (m_vBlockArea[i][j].attr == BLOCK_ATTR_Mine) // æ˜¾ç¤ºæ‰€æœ‰é›·
+            {
+                m_vBlockArea[i][j].cur_state = BLOCK_STATE_Mine;
+                m_vBlockArea[i][j].old_state = m_vBlockArea[i][j].cur_state;
+            }
+        }
+    }
 
-	if (m_vBlockArea[pos.x][pos.y].attr == def::EBA_Mine)//µãÖÐÀ×
-	{
-		m_vBlockArea[pos.x][pos.y].cur_state = def::EBS_Blast;//±¬Õ¨Í¼±ê
-		m_vBlockArea[pos.x][pos.y].old_state = m_vBlockArea[pos.x][pos.y].cur_state;
+    if (m_vBlockArea[pos.x][pos.y].attr == BLOCK_ATTR_Mine) // ç‚¹ä¸­é›·
+    {
+        m_vBlockArea[pos.x][pos.y].cur_state = BLOCK_STATE_Blast; // çˆ†ç‚¸å›¾æ ‡
+        m_vBlockArea[pos.x][pos.y].old_state = m_vBlockArea[pos.x][pos.y].cur_state;
 
-	}
-	else//Í¬Ê±µã»÷×óÓÒ¼üÕ¹¿ªµ¼ÖÂÊ§°Ü
-	{
-		m_vBlockArea[pos.x][pos.y].cur_state = def::EBS_Error;//´íÎóÍ¼±ê
-		m_vBlockArea[pos.x][pos.y].old_state = m_vBlockArea[pos.x][pos.y].cur_state;
-	}
+    }
+    else // åŒæ—¶ç‚¹å‡»å·¦å³é”®å±•å¼€å¯¼è‡´å¤±è´¥
+    {
+        m_vBlockArea[pos.x][pos.y].cur_state = BLOCK_STATE_Error; // é”™è¯¯å›¾æ ‡
+        m_vBlockArea[pos.x][pos.y].old_state = m_vBlockArea[pos.x][pos.y].cur_state;
+    }
 
-	return true;
+    return true;
 }
 
-def::EBlockState CBlockArea::GetCurState(TPos pos)
+BLOCK_STATE_E CBlockArea::GetCurState(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return def::EBS_End;
+    if (!IsValidPos(pos))
+    {
+        return BLOCK_STATE_End;
+    }
 
-	return m_vBlockArea[pos.x][pos.y].cur_state;
+    return m_vBlockArea[pos.x][pos.y].cur_state;
 }
 
-bool CBlockArea::SetCurState(TPos pos, def::EBlockState state)
+bool CBlockArea::SetCurState(TPos pos, BLOCK_STATE_E state)
 {
-	if (!IsValidPos(pos))
-		return false;
+    if (!IsValidPos(pos))
+    {
+        return false;
+    }
 
-	m_vBlockArea[pos.x][pos.y].cur_state = state;
+    m_vBlockArea[pos.x][pos.y].cur_state = state;
 
-	return true;
+    return true;
 }
 
-def::EBlockState CBlockArea::GetOldState(TPos pos)
+BLOCK_STATE_E CBlockArea::GetOldState(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return def::EBS_End;
+    if (!IsValidPos(pos))
+    {
+        return BLOCK_STATE_End;
+    }
 
-	return m_vBlockArea[pos.x][pos.y].old_state;
+    return m_vBlockArea[pos.x][pos.y].old_state;
 }
 
-bool CBlockArea::SetOldState(TPos pos, def::EBlockState state)
+bool CBlockArea::SetOldState(TPos pos, BLOCK_STATE_E state)
 {
-	if (!IsValidPos(pos))
-		return false;
+    if (!IsValidPos(pos))
+    {
+        return false;
+    }
 
-	m_vBlockArea[pos.x][pos.y].old_state = state;
+    m_vBlockArea[pos.x][pos.y].old_state = state;
 
-	return true;
+    return true;
 }
 
-def::EBlockAttr CBlockArea::GetAttr(TPos pos)
+BLOCK_ATTR_E CBlockArea::GetAttr(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return def::EBA_End;
+    if (!IsValidPos(pos))
+    {
+        return BLOCK_ATTR_End;
+    }
 
-	return m_vBlockArea[pos.x][pos.y].attr;
+    return m_vBlockArea[pos.x][pos.y].attr;
 }
 
-//×óÓÒ¼üÍ¬Ê±°´ÏÂ
+// å·¦å³é”®åŒæ—¶æŒ‰ä¸‹
 bool CBlockArea::LRBtnDown(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return false;
+    if (!IsValidPos(pos))
+    {
+        return false;
+    }
 
-	for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
-	{
-		for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
-		{
-			if (IsValidPos({ i, j }))
-			{
-				//½öÐÞ¸ÄÆÕÍ¨ºÍÎ´Öª×´Ì¬
-				if (m_vBlockArea[i][j].cur_state == def::EBS_Normal)
-				{
-					m_vBlockArea[i][j].cur_state = def::EBS_Empty;
-				}
-				else if (m_vBlockArea[i][j].cur_state == def::EBS_Dicey)
-				{
-					m_vBlockArea[i][j].cur_state = def::EBS_DiceyDown;
-				}
-			}
-		}
-	}
+    for (uint i = pos.x - 1; i <= pos.x + 1; i++)
+    {
+        for (uint j = pos.y - 1; j <= pos.y + 1; j++)
+        {
+            if (IsValidPos({ i, j }))
+            {
+                // ä»…ä¿®æ”¹æ™®é€šå’ŒæœªçŸ¥çŠ¶æ€
+                if (m_vBlockArea[i][j].cur_state == BLOCK_STATE_Normal)
+                {
+                    m_vBlockArea[i][j].cur_state = BLOCK_STATE_Empty;
+                }
+                else if (m_vBlockArea[i][j].cur_state == BLOCK_STATE_Dicey)
+                {
+                    m_vBlockArea[i][j].cur_state = BLOCK_STATE_DiceyDown;
+                }
+            }
+        }
+    }
 
-	return true;
+    return true;
 }
 
-//×óÓÒ¼üÍ¬Ê±ËÉ¿ª
+// å·¦å³é”®åŒæ—¶æ¾å¼€
 bool CBlockArea::LRBtnUp(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return false;
+    if (!IsValidPos(pos))
+    {
+        return false;
+    }
 
-	for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
-	{
-		for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
-		{
-			if (IsValidPos({ i, j }))
-			{
-				//½ö»Ö¸´ÀÏµÄÆÕÍ¨ºÍÎ´Öª×´Ì¬
-				if (m_vBlockArea[i][j].old_state == def::EBS_Normal ||
-					m_vBlockArea[i][j].old_state == def::EBS_Dicey)
-				{
-					m_vBlockArea[i][j].cur_state = m_vBlockArea[i][j].old_state;
-				}				
-			}
-		}
-	}
+    for (uint i = pos.x - 1; i <= pos.x + 1; i++)
+    {
+        for (uint j = pos.y - 1; j <= pos.y + 1; j++)
+        {
+            if (IsValidPos({ i, j }))
+            {
+                // ä»…æ¢å¤è€çš„æ™®é€šå’ŒæœªçŸ¥çŠ¶æ€
+                if ((m_vBlockArea[i][j].old_state == BLOCK_STATE_Normal) ||
+                    (m_vBlockArea[i][j].old_state == BLOCK_STATE_Dicey))
+                {
+                    m_vBlockArea[i][j].cur_state = m_vBlockArea[i][j].old_state;
+                }               
+            }
+        }
+    }
 
-	return true;
+    return true;
 }
 
 bool CBlockArea::LBtnDown(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return false;
+    if (!IsValidPos(pos))
+    {
+        return false;
+    }
 
-	//½öÐÞ¸ÄÆÕÍ¨ºÍÎ´Öª×´Ì¬
-	if (m_vBlockArea[pos.x][pos.y].cur_state == def::EBS_Normal)
-	{
-		m_vBlockArea[pos.x][pos.y].cur_state = def::EBS_Empty;
-	}
-	else if (m_vBlockArea[pos.x][pos.y].cur_state == def::EBS_Dicey)
-	{
-		m_vBlockArea[pos.x][pos.y].cur_state = def::EBS_DiceyDown;
-	}
+    // ä»…ä¿®æ”¹æ™®é€šå’ŒæœªçŸ¥çŠ¶æ€
+    if (m_vBlockArea[pos.x][pos.y].cur_state == BLOCK_STATE_Normal)
+    {
+        m_vBlockArea[pos.x][pos.y].cur_state = BLOCK_STATE_Empty;
+    }
+    else if (m_vBlockArea[pos.x][pos.y].cur_state == BLOCK_STATE_Dicey)
+    {
+        m_vBlockArea[pos.x][pos.y].cur_state = BLOCK_STATE_DiceyDown;
+    }
 
-	return true;
+    return true;
 }
 
 bool CBlockArea::LBtnUp(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return false;
+    if (!IsValidPos(pos))
+    {
+        return false;
+    }
 
-	//½ö»Ö¸´ÀÏµÄÆÕÍ¨ºÍÎ´Öª×´Ì¬
-	if (m_vBlockArea[pos.x][pos.y].old_state == def::EBS_Normal ||
-		m_vBlockArea[pos.x][pos.y].old_state == def::EBS_Dicey)
-	{
-		m_vBlockArea[pos.x][pos.y].cur_state = m_vBlockArea[pos.x][pos.y].old_state;
-	}
+    // ä»…æ¢å¤è€çš„æ™®é€šå’ŒæœªçŸ¥çŠ¶æ€
+    if (m_vBlockArea[pos.x][pos.y].old_state == BLOCK_STATE_Normal ||
+        m_vBlockArea[pos.x][pos.y].old_state == BLOCK_STATE_Dicey)
+    {
+        m_vBlockArea[pos.x][pos.y].cur_state = m_vBlockArea[pos.x][pos.y].old_state;
+    }
 
-	return true;
+    return true;
 }
 
-//ÊÇ·ñÕýÈ·±ê¼ÇÖÜÎ§ËùÓÐµÄÀ×
+// æ˜¯å¦æ­£ç¡®æ ‡è®°å‘¨å›´æ‰€æœ‰çš„é›·
 bool CBlockArea::HasCorrectFlags(TPos pos)
 {
-	if (!IsValidPos(pos))
-		return true;
+    if (!IsValidPos(pos))
+    {
+        return true;
+    }
 
-	for (int i = pos.x - 1; i <= (int)pos.x + 1; i++)
-	{
-		for (int j = pos.y - 1; j <= (int)pos.y + 1; j++)
-		{
-			if (IsValidPos({ i, j }))
-			{
-				if ((m_vBlockArea[i][j].cur_state == def::EBS_Flag && m_vBlockArea[i][j].attr != def::EBA_Mine) ||//·ÇÀ×±ê¼ÇÎªÀ×
-					(m_vBlockArea[i][j].cur_state != def::EBS_Flag && m_vBlockArea[i][j].attr == def::EBA_Mine))//À×Î´±ê¼Ç³öÀ´
-				{
-					return false;
-				}
-			}
-		}
-	}
+    for (uint i = pos.x - 1; i <= pos.x + 1; i++)
+    {
+        for (uint j = pos.y - 1; j <= pos.y + 1; j++)
+        {
+            if (IsValidPos({ i, j }))
+            {
+                // éžé›·æ ‡è®°ä¸ºé›·
+                if ((m_vBlockArea[i][j].cur_state == BLOCK_STATE_Flag) && 
+                    (m_vBlockArea[i][j].attr      != BLOCK_ATTR_Mine))
+                {
+                    return false;
+                }
+                // é›·æœªæ ‡è®°å‡ºæ¥
+                if ((m_vBlockArea[i][j].cur_state != BLOCK_STATE_Flag) && 
+                    (m_vBlockArea[i][j].attr      == BLOCK_ATTR_Mine))
+                {
+                    return false;
+                }
+            }
+        }
+    }
 
-	return true;
+    return true;
 }
 
 bool CBlockArea::ShowMines(bool show)
 {
-	uint rows = m_vBlockArea.size();
-	uint cols = m_vBlockArea.front().size();
-	for (int i = 0; i < rows; i++)
-	{
-		for (int j = 0; j < cols; j++)
-		{
-			if (m_vBlockArea[i][j].attr == def::EBA_Mine)
-			{
-				if (show)//ÏÔÊ¾
-				{
-					m_vBlockArea[i][j].cur_state = def::EBS_Mine;
-					//m_vBlockArea[i][j].old_state = m_vBlockArea[i][j].cur_state;
-				}
-				else//»¹Ô­
-				{
-					m_vBlockArea[i][j].cur_state = m_vBlockArea[i][j].old_state;
-				}
-			}
-		}
-	}
+    uint rows = m_vBlockArea.size();
+    uint cols = m_vBlockArea.front().size();
+    
+    for (uint i = 0; i < rows; i++)
+    {
+        for (uint j = 0; j < cols; j++)
+        {
+            if (m_vBlockArea[i][j].attr == BLOCK_ATTR_Mine)
+            {
+                if (show) // æ˜¾ç¤º
+                {
+                    m_vBlockArea[i][j].cur_state = BLOCK_STATE_Mine;
+                    // m_vBlockArea[i][j].old_state = m_vBlockArea[i][j].cur_state;
+                }
+                else // è¿˜åŽŸ
+                {
+                    m_vBlockArea[i][j].cur_state = m_vBlockArea[i][j].old_state;
+                }
+            }
+        }
+    }
 
-	return true;
+    return true;
 }

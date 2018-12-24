@@ -1,125 +1,120 @@
-#ifndef __MINE_WND_H__
+ï»¿#ifndef __MINE_WND_H__
 #define __MINE_WND_H__
 
-#include "def.h"
-#include "BlockArea.h"
-#include "CfgMgr.h"
-
-using def::uint;
+using namespace def;
 
 class CBlockArea;
 
 class CMineWnd : public CWnd
 {
 public:
-	CMineWnd();
-	 ~CMineWnd();
-	
-protected:	
-	afx_msg void OnInitMenu(CMenu* pMenu);
+    CMineWnd();
+     ~CMineWnd();
+    
+protected:  
+    afx_msg void OnInitMenu(CMenu* pMenu);
 
-	afx_msg void OnPaint();
-	afx_msg void OnShowWindow(BOOL bShow, uint nStatus);
-	afx_msg void OnTimer(uint nIDEvent);
+    afx_msg void OnPaint();
+    afx_msg void OnShowWindow(BOOL bShow, uint nStatus);
+    afx_msg void OnTimer(uint nIDEvent);
 
-	afx_msg void OnLButtonUp(uint nFlags, CPoint pt);
-	afx_msg void OnRButtonUp(uint nFlags, CPoint pt);
-	afx_msg void OnLButtonDown(uint nFlags, CPoint pt);
-	afx_msg void OnRButtonDown(uint nFlags, CPoint pt);
-	afx_msg void OnMouseMove(uint nFlags, CPoint pt);	
-	afx_msg void OnKeyDown(uint nChar, uint nRepCnt, uint nFlags);
+    afx_msg void OnLButtonUp(uint nFlags, CPoint pt);
+    afx_msg void OnRButtonUp(uint nFlags, CPoint pt);
+    afx_msg void OnLButtonDown(uint nFlags, CPoint pt);
+    afx_msg void OnRButtonDown(uint nFlags, CPoint pt);
+    afx_msg void OnMouseMove(uint nFlags, CPoint pt);   
+    afx_msg void OnKeyDown(uint nChar, uint nRepCnt, uint nFlags);
 
-	afx_msg void OnMenuStart();
-	afx_msg void OnMenuHero();
-	afx_msg void OnMenuPrimary();
-	afx_msg void OnMenuMedium();
-	afx_msg void OnMenuAdvanced();
-	afx_msg void OnMenuCustom();
-	afx_msg void OnMenuColor();
-	afx_msg void OnMenuSound();
-	afx_msg void OnMenuExit();
+    afx_msg void OnMenuStart();
+    afx_msg void OnMenuHero();
+    afx_msg void OnMenuPrimary();
+    afx_msg void OnMenuMedium();
+    afx_msg void OnMenuAdvanced();
+    afx_msg void OnMenuCustom();
+    afx_msg void OnMenuColor();
+    afx_msg void OnMenuSound();
+    afx_msg void OnMenuExit();
 
-	afx_msg void OnMenuHelp();
-	afx_msg void OnMenuAbout();
+    afx_msg void OnMenuHelp();
+    afx_msg void OnMenuAbout();
 
-	DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 
 protected:
-	void LoadConfig();
-	void LoadBitmap();
-	void LoadWave();	
-	void FreeWave();	
+    void LoadConfig();
+    void LoadBitmap();
+    void LoadWave();    
+    void FreeWave();    
 
-	void InitGame();	
+    void InitGame();    
 
-	void CalcWindowSize();
-	
-	// draw functions
-	void DrawFrame(CPaintDC &dc);
-	void DrawButton(CPaintDC &dc);
-	void DrawNumber(CPaintDC &dc);
-	void DrawBlockArea(CPaintDC &dc);
+    void CalcWindowSize();
+    
+    // draw functions
+    void DrawFrame(CPaintDC &dc);
+    void DrawButton(CPaintDC &dc);
+    void DrawNumber(CPaintDC &dc);
+    void DrawBlockArea(CPaintDC &dc);
 
-	// change menu check state funtions
-	void SetCheckedSound();
-	void SetCheckedColor();
-	void SetCheckedLevel();
-	void SetCheckedCheat();
+    // change menu check state funtions
+    void SetCheckedSound();
+    void SetCheckedColor();
+    void SetCheckedLevel();
+    void SetCheckedCheat();
 
-	bool GetBlock(long x, long y, TPos& pos);
-	
-	bool IsInBtn(CPoint pt);
-	bool IsInBlockArea(CPoint pt);
+    bool GetBlock(long x, long y, TPos& pos);
+    
+    bool IsInBtn(CPoint pt);
+    bool IsInBlockArea(CPoint pt);
 
-	void Victory();
-	void Dead();
+    void Victory();
+    void Dead();
 
-	void GodView();
+    void GodView();
 
 private:
-	def::ELevel m_uLevel;
-	uint m_uRowNum;
-	uint m_uColNum;	
-	uint m_uMineNum;
+    LEVEL_E m_uLevel;
+    uint m_uRowNum;
+    uint m_uColNum; 
+    uint m_uMineNum;
 
-	int  m_nLeftNum;//Ê£ÓàµÄÀ×¸öÊı
-	uint m_uSpendTime;//ÓÎÏ·¿ªÊ¼µ½Ä¿Ç°Ëù»¨·ÑµÄÊ±¼ä
-	
-	uint m_uTimer;//¶¨Ê±Æ÷
-	
-	CMenu* m_pSubMenu;
+    int  m_nLeftNum;   // å‰©ä½™çš„é›·ä¸ªæ•°
+    uint m_uSpendTime; // æ¸¸æˆå¼€å§‹åˆ°ç›®å‰æ‰€èŠ±è´¹çš„æ—¶é—´    
+    uint m_uTimer;     // å®šæ—¶å™¨
+    
+    CMenu* m_pSubMenu;
 
-	CBitmap	m_bmpMine;
-	CBitmap	m_bmpNumber;
-	CBitmap	m_bmpButton;
+    CBitmap m_bmpMine;
+    CBitmap m_bmpNumber;
+    CBitmap m_bmpButton;
 
-	CBrush	 m_brsBG;//clientÇøÓò»­Ë¢
-	COLORREF m_clrBg;//¸÷¿Ø¼ş±³¾°ÑÕÉ«
+    CBrush   m_brsBG; // clientåŒºåŸŸç”»åˆ·
+    COLORREF m_clrBg; // å„æ§ä»¶èƒŒæ™¯é¢œè‰²
 
-	RECT m_rectClient;//Õû¸ö¿Í»§ÇøÓò
-	RECT m_rectPanel;//ÉÏ²¿Ãæ°åÇøÓò
-	RECT m_rectBlockArea;//ÏÂ²¿·½¿éÇøÓò
-	RECT m_rectLeftMines;//Ãæ°å×ó²àÊ£ÓàÀ×Êı
-	RECT m_rectSpendTime;//Ãæ°åÓÒ²àÊ±¼ä
-	RECT m_rectButton;//Ãæ°åÖĞ¼ä°´Å¥
+    RECT m_rectClient;    // æ•´ä¸ªå®¢æˆ·åŒºåŸŸ
+    RECT m_rectPanel;     // ä¸Šéƒ¨é¢æ¿åŒºåŸŸ
+    RECT m_rectBlockArea; // ä¸‹éƒ¨æ–¹å—åŒºåŸŸ
+    RECT m_rectLeftMines; // é¢æ¿å·¦ä¾§å‰©ä½™é›·æ•°
+    RECT m_rectSpendTime; // é¢æ¿å³ä¾§æ—¶é—´
+    RECT m_rectButton;    // é¢æ¿ä¸­é—´æŒ‰é’®
 
-	def::EButtonState m_uBtnState;//°´Å¥×´Ì¬
-	def::EGameState	  m_uGameState;//ÓÎÏ·×´Ì¬
+    BUTTON_STATE_E m_uBtnState;  // æŒ‰é’®çŠ¶æ€
+    GAME_STATE_E   m_uGameState; // æ¸¸æˆçŠ¶æ€
 
-	bool m_bLRBtnDown;//×óÓÒ¼üÍ¬Ê±°´ÏÂ
-	bool m_bClickBtn;//ÒÑµ¥»÷°´Å¥Î´ËÉ¿ª
-	bool m_bColorful;
-	bool m_bSoundful;
-	
-	TPos m_posCurBlock;//µ±Ç°Ñ¡ÖĞµÄ·½¿é
-	TPos m_posOldBlock;//ÉÏ´ÎÑ¡ÖĞµÄ·½¿é
+    bool m_bLRBtnDown; // å·¦å³é”®åŒæ—¶æŒ‰ä¸‹
+    bool m_bClickBtn;  // å·²å•å‡»æŒ‰é’®æœªæ¾å¼€
+    bool m_bColorful;
+    bool m_bSoundful;
+    
+    TPos m_posCurBlock; // å½“å‰é€‰ä¸­çš„æ–¹å—
+    TPos m_posOldBlock; // ä¸Šæ¬¡é€‰ä¸­çš„æ–¹å—
 
-	void* m_pSndDead;//Ê§°ÜÒô
-	void* m_pSndVictory;//Ê¤ÀûÒô
-	void* m_pSndClock;//Ê±ÖÓÒô
+    void* m_pSndDead;    // å¤±è´¥éŸ³
+    void* m_pSndVictory; // èƒœåˆ©éŸ³
+    void* m_pSndClock;   // æ—¶é’ŸéŸ³
 
-	CBlockArea* m_pBlockArea;//·½¿éÇøÓòÊı¾İ½á¹¹
-	CCfgMgr*    m_pCfgMgr;
+    CBlockArea* m_pBlockArea; // æ–¹å—åŒºåŸŸæ•°æ®ç»“æ„
+    CCfgMgr*    m_pCfgMgr;
 };
 
-#endif//__MINE_WND_H__
+#endif // __MINE_WND_H__

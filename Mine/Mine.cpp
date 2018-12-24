@@ -1,9 +1,15 @@
-#include "stdafx.h"
-#include "Mine.h"
+ï»¿#include "stdafx.h"
 #include "Def.h"
+#include "CfgMgr.h"
+#include "HelpDlg.h"
+#include "HeroDlg.h"
+#include "CustomDlg.h"
+#include "BlockArea.h"
+#include "MineWnd.h"
+#include "Mine.h"
 
 BEGIN_MESSAGE_MAP(CMineApp, CWinApp)
-	
+    
 END_MESSAGE_MAP()
 
 CMineApp::CMineApp()
@@ -16,49 +22,49 @@ const CString className = TEXT("MineClass");
 
 BOOL CMineApp::InitInstance()
 {
-	SetRegistryKey(TEXT("CSER_513_2"));	
+    SetRegistryKey(TEXT("CSER_513_2")); 
 
-	//´´½¨´°¿ÚÀà
-	WNDCLASS wc;
-	ZeroMemory(&wc, sizeof(wc));
-	wc.hInstance = AfxGetInstanceHandle();
-	wc.lpfnWndProc = ::DefWindowProc;
-	wc.hbrBackground = nullptr;
-	wc.hCursor = LoadCursor(IDC_ARROW);
-	wc.hIcon = LoadIcon(IDR_MAINFRAME);
-	wc.lpszClassName = className;
-	wc.lpszMenuName = MAKEINTRESOURCE(IDR_MENU);
+    //åˆ›å»ºçª—å£ç±»
+    WNDCLASS wc;
+    ZeroMemory(&wc, sizeof(wc));
+    wc.hInstance = AfxGetInstanceHandle();
+    wc.lpfnWndProc = ::DefWindowProc;
+    wc.hbrBackground = nullptr;
+    wc.hCursor = LoadCursor(IDC_ARROW);
+    wc.hIcon = LoadIcon(IDR_MAINFRAME);
+    wc.lpszClassName = className;
+    wc.lpszMenuName = MAKEINTRESOURCE(IDR_MENU);
 
-	//×¢²á´°¿ÚÀà
-	if (!AfxRegisterClass(&wc)) 
-	{
-		AfxMessageBox(TEXT("×¢²áÀàÊ§°Ü£¡"));
-		return FALSE;
-	}
+    //æ³¨å†Œçª—å£ç±»
+    if (!AfxRegisterClass(&wc)) 
+    {
+        AfxMessageBox(TEXT("æ³¨å†Œç±»å¤±è´¥ï¼"));
+        return FALSE;
+    }
 
-	//´´½¨´°¿Ú
-	m_pMineWnd = new CMineWnd();
-	if (nullptr == m_pMineWnd || 
-		!m_pMineWnd->CreateEx(0, className, TEXT("É¨À×"), WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX,
-			GetSystemMetrics(SM_CXSCREEN) / 2, GetSystemMetrics(SM_CYSCREEN) / 2, 0, 0, nullptr, nullptr))
-			//Êµ¼Ê´°¿Ú´óÐ¡ÔÚCMineWndÄÚ²¿ÉèÖÃ
-	{
-		AfxMessageBox(TEXT("´´½¨Ö÷´°¿ÚÊ§°Ü£¡"));
-		return FALSE;
-	}
+    //åˆ›å»ºçª—å£
+    m_pMineWnd = new CMineWnd();
+    if (nullptr == m_pMineWnd || 
+        !m_pMineWnd->CreateEx(0, className, TEXT("æ‰«é›·"), WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX,
+            GetSystemMetrics(SM_CXSCREEN) / 2, GetSystemMetrics(SM_CYSCREEN) / 2, 0, 0, nullptr, nullptr))
+            //å®žé™…çª—å£å¤§å°åœ¨CMineWndå†…éƒ¨è®¾ç½®
+    {
+        AfxMessageBox(TEXT("åˆ›å»ºä¸»çª—å£å¤±è´¥ï¼"));
+        return FALSE;
+    }
 
-	//SetWindowLong(m_pMineWnd->m_hWnd, GWL_STYLE, GetWindowLong(m_pMineWnd->m_hWnd, GWL_STYLE) & ~WS_MAXIMIZEBOX);
+    //SetWindowLong(m_pMineWnd->m_hWnd, GWL_STYLE, GetWindowLong(m_pMineWnd->m_hWnd, GWL_STYLE) & ~WS_MAXIMIZEBOX);
 
-	//°ó¶¨ÎªÖ÷´°¿Ú
-	m_pMainWnd = m_pMineWnd;
-	m_pMineWnd->ShowWindow(SW_NORMAL);
+    //ç»‘å®šä¸ºä¸»çª—å£
+    m_pMainWnd = m_pMineWnd;
+    m_pMineWnd->ShowWindow(SW_NORMAL);
 
-	return TRUE;
+    return TRUE;
 }
 
 int CMineApp::ExitInstance() 
 {
-	delete m_pMineWnd;
-	
-	return CWinApp::ExitInstance();
+    delete m_pMineWnd;
+    
+    return CWinApp::ExitInstance();
 }

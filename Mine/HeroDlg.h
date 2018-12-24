@@ -1,6 +1,8 @@
 #ifndef __HERO_DLG_H__
 #define __HERO_DLG_H__
 
+using namespace def;
+
 class CHeroDlg : public CDialog
 {
 public:	

@@ -3,23 +3,24 @@
 #include "resource.h"
 #include "afxwin.h"
 
+using namespace def;
+
 class CHelpDlg : public CDialog
 {
-	DECLARE_DYNAMIC(CHelpDlg)
+    DECLARE_DYNAMIC(CHelpDlg)
 
 public:
-	CHelpDlg(CWnd* pParent = NULL);   // 标准构造函数
-	virtual ~CHelpDlg();
+    CHelpDlg(CWnd* pParent = NULL);
+    virtual ~CHelpDlg();
 
-// 对话框数据
-	enum { IDD = IDD_DIALOG_HELP };
+    enum { IDD = IDD_DIALOG_HELP };
 
-	BOOL OnInitDialog();
+    BOOL OnInitDialog();
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
+    virtual void DoDataExchange(CDataExchange* pDX);
 
-	DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 public:
-	CListBox m_ListBox;
+    CListBox m_ListBox;
 };

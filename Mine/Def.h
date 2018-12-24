@@ -1,164 +1,178 @@
-#ifndef __DEF_H__
+ï»¿#ifndef __DEF_H__
 #define __DEF_H__
 
 #include <windef.h>
 
 namespace def
 {
-	typedef unsigned int uint;
+    typedef unsigned int uint;
 
-	//ÓÎÏ·µÈ¼¶
-	enum ELevel
-	{
-		ELevel_Primary,
-		ELevel_Medium,
-		ELevel_Advanced,
-		ELevel_Custom
-	};
+    // æ¸¸æˆç­‰çº§
+    enum LEVEL_E
+    {
+        LEVEL_Primary,
+        LEVEL_Medium,
+        LEVEL_Advanced,
+        LEVEL_Custom
+    };
 
-	//ÓÎÏ·×´Ì¬
-	enum EGameState
-	{
-		EGS_Wait,
-		EGS_Run,
-		EGS_Dead,
-		EGS_Victory
-	};
+    // æ¸¸æˆçŠ¶æ€
+    enum GAME_STATE_E
+    {
+        GAME_STATE_Wait,
+        GAME_STATE_Run,
+        GAME_STATE_Dead,
+        GAME_STATE_Victory
+    };
 
-	//·½¿éÊôĞÔ
-	enum EBlockAttr
-	{
-		EBA_Empty,
-		EBA_Mine,
+    // æ–¹å—å±æ€§
+    enum BLOCK_ATTR_E
+    {
+        BLOCK_ATTR_Empty,
+        BLOCK_ATTR_Mine,
 
-		EBA_End
-	};
+        BLOCK_ATTR_End
+    };
 
-	//·½¿é×´Ì¬
-	enum EBlockState
-	{
-		EBS_Normal,//Õı³£
-		EBS_Flag,//±êÖ¾ÎªÀ×
-		EBS_Dicey,//Î´Öª×´Ì¬0
-		EBS_Blast,//±¬Õ¨×´Ì¬
-		EBS_Error,//´íÎó×´Ì¬
-		EBS_Mine,//À××´Ì¬
-		EBS_DiceyDown,//Î´Öª×´Ì¬1
-		EBS_Num8,
-		EBS_Num7,
-		EBS_Num6,
-		EBS_Num5,
-		EBS_Num4,
-		EBS_Num3,
-		EBS_Num2,
-		EBS_Num1,		
-		EBS_Empty,//ÎŞÀ×
+    // æ–¹å—çŠ¶æ€
+    enum BLOCK_STATE_E
+    {
+        BLOCK_STATE_Normal = 0,     // æ­£å¸¸
+        BLOCK_STATE_Flag,           // æ ‡å¿—ä¸ºé›·
+        BLOCK_STATE_Dicey,          // æœªçŸ¥çŠ¶æ€0
+        BLOCK_STATE_Blast,          // çˆ†ç‚¸çŠ¶æ€
+        BLOCK_STATE_Error,          // é”™è¯¯çŠ¶æ€
+        BLOCK_STATE_Mine,           // é›·çŠ¶æ€
+        BLOCK_STATE_DiceyDown,      // æœªçŸ¥çŠ¶æ€1
+        BLOCK_STATE_Num8,
+        BLOCK_STATE_Num7,
+        BLOCK_STATE_Num6,
+        BLOCK_STATE_Num5,
+        BLOCK_STATE_Num4,
+        BLOCK_STATE_Num3,
+        BLOCK_STATE_Num2,
+        BLOCK_STATE_Num1,
+        BLOCK_STATE_Empty,          // æ— é›·
 
-		EBS_End//16
-	};
+        BLOCK_STATE_End = 16        // 16
+    };
 
-	//°´Å¥×´Ì¬
-	enum EButtonState
-	{
-		EBtnS_Down,
-		EBtnS_Victory,
-		EBtnS_Dead,
-		EBtnS_Click,
-		EBtnS_Normal,
-		
-		EBtnS_End//5
-	};
+    // æŒ‰é’®çŠ¶æ€
+    enum BUTTON_STATE_E
+    {
+        BUTTON_STATE_Down,
+        BUTTON_STATE_Victory,
+        BUTTON_STATE_Dead,
+        BUTTON_STATE_Click,
+        BUTTON_STATE_Normal,
+        
+        BUTTON_STATE_End // 5
+    };
 
-	//Êı×Ö
-	enum ENum
-	{
-		ENum_Null,
-		ENum_Empty,
-		ENum_9,
-		ENum_8,
-		ENum_7,
-		ENum_6,
-		ENum_5,
-		ENum_4,
-		ENum_3,
-		ENum_2,
-		ENum_1,
-		ENum_0,
-		
-		ENum_End//12
-	};
+    // æ•°å­—
+    enum NUM_E
+    {
+        NUM_Null,
+        NUM_Empty,
+        NUM_9,
+        NUM_8,
+        NUM_7,
+        NUM_6,
+        NUM_5,
+        NUM_4,
+        NUM_3,
+        NUM_2,
+        NUM_1,
+        NUM_0,
+        
+        NUM_End // 12
+    };
 
-	//·½¿é£¬16 * 16
-	//Î»Í¼£¬16 * (16 * 16)
-	static uint g_nBlockWidth = 16;
-	static uint g_nBlockHeight = 16;
-	//°´Å¥£¬24 * 24
-	//Î»Í¼£¬24 * (24 * 5)
-	static uint g_nBtnWidth = 24;
-	static uint g_nBtnHeight = 24;
-	//Êı×Ö£¬13 * 23
-	//Î»Í¼£¬13 * (23 * 12)
-	static uint g_nNumWidth = 13;
-	static uint g_nNumHeight = 23;
+    struct TPos
+    {
+        uint x; // è¡Œ
+        uint y; // åˆ—
+    };
 
-	//Æ«ÒÆÁ¿£¬¼ûÍ¼Æ¬
-	static uint g_nXOffset = 5;
-	static uint g_nYOffset = 5;
-	static uint g_nInnerXOffset = 5;
-	static uint g_nInnerYOffset = 8;
-	static uint g_nGap = 5;
+    struct TBlock
+    {
+        TPos          pos;       // åæ ‡
+        BLOCK_ATTR_E  attr;      // é›·ã€ç©º
+        BLOCK_STATE_E cur_state; // å½“å‰çŠ¶æ€
+        BLOCK_STATE_E old_state; // ç”¨ä»¥æ¢å¤ä»¥å‰çš„çŠ¶æ€
+    };
 
-	//Ãæ°å¸ß¶È
-	static uint g_nPanelHeight = g_nInnerYOffset * 2 + g_nNumHeight;
+    // æ–¹å—ï¼Œ16 * 16
+    // ä½å›¾ï¼Œ16 * (16 * 16)
+    static uint g_nBlockWidth  = 16;
+    static uint g_nBlockHeight = 16;
+    // æŒ‰é’®ï¼Œ24 * 24
+    // ä½å›¾ï¼Œ24 * (24 * 5)
+    static uint g_nBtnWidth  = 24;
+    static uint g_nBtnHeight = 24;
+    // æ•°å­—ï¼Œ13 * 23
+    // ä½å›¾ï¼Œ13 * (23 * 12)
+    static uint g_nNumWidth  = 13;
+    static uint g_nNumHeight = 23;
 
-	//ÅäÖÃÎÄ¼şÄ¬ÈÏÅäÖÃ
-	static ELevel  g_uDefLevel     = ELevel_Primary;
-	static CString g_strDefHolder = TEXT("ÄäÃû");
-	static uint    g_nDefRecord   = 999;
-	static uint    g_nDefColorful = 1;
-	static uint    g_nDefSoundful = 0;
+    // åç§»é‡ï¼Œè§å›¾ç‰‡
+    static uint g_nXOffset      = 5;
+    static uint g_nYOffset      = 5;
+    static uint g_nInnerXOffset = 5;
+    static uint g_nInnerYOffset = 8;
+    static uint g_nGap          = 5;
 
-	//¸÷µÈ¼¶Ä¬ÈÏ²ÎÊı
-	static uint g_nDefPrimaryRowNum = 10;
-	static uint g_nDefPrimaryColNum = 15;
-	static uint g_nDefPrimaryMineNum = 30;
+    // é¢æ¿é«˜åº¦
+    static uint g_nPanelHeight = g_nInnerYOffset * 2 + g_nNumHeight;
 
-	static uint g_nDefMediumRowNum = 20;
-	static uint g_nDefMediumColNum = 30;
-	static uint g_nDefMediumMineNum = 120;
+    // é…ç½®æ–‡ä»¶é»˜è®¤é…ç½®
+    static LEVEL_E g_eDefLevel    = LEVEL_Primary;
+    static CString g_strDefHolder = TEXT("åŒ¿å");
+    static uint    g_nDefRecord   = 999;
+    static uint    g_nDefColorful = 1;
+    static uint    g_nDefSoundful = 0;
 
-	static uint g_nDefAdvancedRowNum = 30;
-	static uint g_nDefAdvancedColNum = 45;
-	static uint g_nDefAdvancedMineNum = 480;
+    // å„ç­‰çº§é»˜è®¤å‚æ•°
+    static uint g_nDefPrimaryRowNum   = 10;
+    static uint g_nDefPrimaryColNum   = 15;
+    static uint g_nDefPrimaryMineNum  = 30;
 
-	//ÑÕÉ«¶¨Òå
-	static COLORREF g_clrBlack = RGB(0, 0, 0);
-	static COLORREF g_clrWhite = RGB(255, 255, 255);
-	static COLORREF g_clrGray = RGB(192, 192, 192);
-	static COLORREF g_clrDarkGray = RGB(128, 128, 128);
+    static uint g_nDefMediumRowNum    = 20;
+    static uint g_nDefMediumColNum    = 30;
+    static uint g_nDefMediumMineNum   = 120;
 
-	//ÅäÖÃÎÄ¼şÃû×Ö
-	static CString g_strCfgName = TEXT("Config.ini");
-	//ÅäÖÃÎÄ¼şsection¡¢key
-	static CString g_strMine = TEXT("Mine");
-	static CString g_strRowNum = TEXT("RowNum");
-	static CString g_strColNum = TEXT("ColNum");
-	static CString g_strMineNum = TEXT("MineNum");
-	static CString g_strLevel = TEXT("Level");
-	
-	static CString g_strRecord = TEXT("Record");
-	static CString g_strPrimary = TEXT("Primary");
-	static CString g_strMedium = TEXT("Medium");
-	static CString g_strAdvanced = TEXT("Advanced");
+    static uint g_nDefAdvancedRowNum  = 30;
+    static uint g_nDefAdvancedColNum  = 45;
+    static uint g_nDefAdvancedMineNum = 480;
 
-	static CString g_strHolder = TEXT("Holder");
-	/*static CString g_strPrimary = TEXT("Primary");
-	static CString g_strMedium = TEXT("Medium");
-	static CString g_strAdvanced = TEXT("Advanced");*/
+    // é¢œè‰²å®šä¹‰
+    static COLORREF g_clrBlack    = RGB(  0,   0,   0);
+    static COLORREF g_clrWhite    = RGB(255, 255, 255);
+    static COLORREF g_clrGray     = RGB(192, 192, 192);
+    static COLORREF g_clrDarkGray = RGB(128, 128, 128);
 
-	static CString g_strConfig = TEXT("Config");
-	static CString g_strColorful = TEXT("Colorful");
-	static CString g_strSoundful = TEXT("Soundful");
+    // é…ç½®æ–‡ä»¶åå­—
+    static CString g_strCfgName  = TEXT("Config.ini");
+    // é…ç½®æ–‡ä»¶sectionã€key
+    static CString g_strMine     = TEXT("Mine");
+    static CString g_strRowNum   = TEXT("RowNum");
+    static CString g_strColNum   = TEXT("ColNum");
+    static CString g_strMineNum  = TEXT("MineNum");
+    static CString g_strLevel    = TEXT("Level");
+    
+    static CString g_strRecord   = TEXT("Record");
+    static CString g_strPrimary  = TEXT("Primary");
+    static CString g_strMedium   = TEXT("Medium");
+    static CString g_strAdvanced = TEXT("Advanced");
+
+    static CString g_strHolder   = TEXT("Holder");
+    /*static CString g_strPrimary = TEXT("Primary");
+    static CString g_strMedium = TEXT("Medium");
+    static CString g_strAdvanced = TEXT("Advanced");*/
+
+    static CString g_strConfig   = TEXT("Config");
+    static CString g_strColorful = TEXT("Colorful");
+    static CString g_strSoundful = TEXT("Soundful");
 }
 
-#endif//__DEF_H__
+#endif // __DEF_H__
