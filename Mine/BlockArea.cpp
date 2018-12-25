@@ -19,7 +19,9 @@ CBlockArea* CBlockArea::GetInstance()
 bool CBlockArea::Init(uint rows, uint cols, uint mines)
 {
     if (rows == 0 || cols == 0 || mines == 0)
+    {
         return false;
+    }
 
     m_uMineNum = mines;
     m_vBlockArea.assign(rows, vector<TBlock>(cols));

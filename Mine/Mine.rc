@@ -93,8 +93,8 @@ BEGIN
             VALUE "FileDescription", "Mine Microsoft 基础类应用程序"
             VALUE "FileVersion", "1.0.0.0"
             VALUE "InternalName", "Mine"
-            VALUE "LegalCopyright", "2018"
-            VALUE "OriginalFilename", "Mine.EXE"
+            VALUE "LegalCopyright", "wangqiang5417@gmail.com"
+            VALUE "OriginalFilename", "Mine"
             VALUE "ProductName", "扫雷"
             VALUE "ProductVersion", "1.0.0.0"
         END

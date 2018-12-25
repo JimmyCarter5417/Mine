@@ -4,8 +4,6 @@
 #include "CfgMgr.h"
 #include "NewRecordDlg.h"
 
-
-
 using namespace def;
 
 CNewRecordDlg::CNewRecordDlg(CWnd* pParent /*=nullptr*/)

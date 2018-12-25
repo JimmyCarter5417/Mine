@@ -4,8 +4,6 @@
 #include "Mine.h"
 #include "HelpDlg.h"
 
-
-
 IMPLEMENT_DYNAMIC(CHelpDlg, CDialog)
 
 CHelpDlg::CHelpDlg(CWnd* pParent /*=NULL*/)

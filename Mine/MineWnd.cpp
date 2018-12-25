@@ -209,9 +209,22 @@ void CMineWnd::DrawButton(CPaintDC &dc)
     cdc.CreateCompatibleDC(&dc);
     cdc.SelectObject(m_bmpButton);
 
-    dc.Draw3dRect(m_rectButton.left, m_rectButton.top, g_nBtnWidth, g_nBtnHeight, m_clrBg, m_clrBg);
-    dc.StretchBlt(m_rectButton.left, m_rectButton.top, g_nBtnWidth, g_nBtnHeight, &cdc, 
-                  0, g_nBtnHeight * m_uBtnState, g_nBtnWidth, g_nBtnHeight, SRCCOPY); 
+    dc.Draw3dRect(m_rectButton.left, 
+                  m_rectButton.top, 
+                  g_nBtnWidth, 
+                  g_nBtnHeight, 
+                  m_clrBg, 
+                  m_clrBg);
+    dc.StretchBlt(m_rectButton.left, 
+                  m_rectButton.top, 
+                  g_nBtnWidth, 
+                  g_nBtnHeight, 
+                  &cdc, 
+                  0, 
+                  g_nBtnHeight * m_uBtnState, 
+                  g_nBtnWidth, 
+                  g_nBtnHeight, 
+                  SRCCOPY); 
 }
 
 // 绘制数字
@@ -222,11 +235,21 @@ void CMineWnd::DrawNumber(CPaintDC &dc)
     cdc.SelectObject(m_bmpNumber);
 
     // 绘制矩形框
-    dc.Draw3dRect(m_rectLeftMines.left, m_rectLeftMines.top, g_nNumWidth * 3, g_nNumHeight, m_clrBg, g_clrWhite);
-    dc.Draw3dRect(m_rectSpendTime.left, m_rectSpendTime.top, g_nNumWidth * 3, g_nNumHeight, m_clrBg, g_clrWhite);
+    dc.Draw3dRect(m_rectLeftMines.left, 
+                  m_rectLeftMines.top, 
+                  g_nNumWidth * 3, 
+                  g_nNumHeight, 
+                  m_clrBg, 
+                  g_clrWhite);
+    dc.Draw3dRect(m_rectSpendTime.left, 
+                  m_rectSpendTime.top, 
+                  g_nNumWidth * 3, 
+                  g_nNumHeight, 
+                  m_clrBg, 
+                  g_clrWhite);
 
     // 绘制剩余雷数
-    int num = (m_nLeftNum < 0) ? 11 : m_nLeftNum / 100;
+    int num = (m_nLeftNum < 0) ? 11 : m_nLeftNum / 100; // TODO: 此处的负数处理有问题
     dc.StretchBlt(m_rectLeftMines.left, 
                   m_rectLeftMines.top, 
                   g_nNumWidth, 
@@ -238,7 +261,7 @@ void CMineWnd::DrawNumber(CPaintDC &dc)
                   g_nNumHeight, 
                   SRCCOPY);
     
-    num = (m_nLeftNum < 0) ? -(m_nLeftNum - num * 100) / 10 : (m_nLeftNum - num * 100) / 10;
+    num = (m_nLeftNum < 0) ? (num * 100 - m_nLeftNum) / 10 : (m_nLeftNum - num * 100) / 10;
     dc.StretchBlt(m_rectLeftMines.left + g_nNumWidth, 
                   m_rectLeftMines.top, 
                   g_nNumWidth, 
@@ -250,7 +273,7 @@ void CMineWnd::DrawNumber(CPaintDC &dc)
                   g_nNumHeight, 
                   SRCCOPY);
     
-    num = (m_nLeftNum < 0) ? -m_nLeftNum % 10 : m_nLeftNum % 10;
+    num = (m_nLeftNum < 0) ? -(m_nLeftNum % 10) : m_nLeftNum % 10;
     dc.StretchBlt(m_rectLeftMines.left + g_nNumWidth * 2, 
                   m_rectLeftMines.top, 
                   g_nNumWidth, 
@@ -548,7 +571,7 @@ void CMineWnd::OnLButtonDown(uint nFlags, CPoint pt)
                 }               
             }
             break;
-        case GAME_STATE_Dead:  //gg，直接返回
+        case GAME_STATE_Dead:  // gg，直接返回
         case GAME_STATE_Victory:
             return;
             break;

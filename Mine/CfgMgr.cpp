@@ -30,9 +30,9 @@ void CCfgMgr::GetMineInfo(uint& row, uint& col, uint& mine, LEVEL_E& level)
 }
 void CCfgMgr::SetMineInfo(uint row, uint col, uint mine, LEVEL_E level)
 {
-    WritePrivateProfileString(g_strMine, g_strRowNum,  to_wstring(row).c_str(),  m_strCfgPath);
-    WritePrivateProfileString(g_strMine, g_strColNum,  to_wstring(col).c_str(),  m_strCfgPath);
-    WritePrivateProfileString(g_strMine, g_strMineNum, to_wstring(mine).c_str(), m_strCfgPath);
+    WritePrivateProfileString(g_strMine, g_strRowNum,  to_wstring(row).c_str(),   m_strCfgPath);
+    WritePrivateProfileString(g_strMine, g_strColNum,  to_wstring(col).c_str(),   m_strCfgPath);
+    WritePrivateProfileString(g_strMine, g_strMineNum, to_wstring(mine).c_str(),  m_strCfgPath);
     WritePrivateProfileString(g_strMine, g_strLevel,   to_wstring(level).c_str(), m_strCfgPath);
 }
 
