@@ -1,2 +1,2 @@
 # Mine
-a mine game based on mfc
+my mine game based on mfc
